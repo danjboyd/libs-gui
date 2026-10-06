@@ -333,6 +333,148 @@ GSStringFromImageFrameStyle(NSImageFrameStyle type)
 @implementation	GSThemeMethod
 @end
 
+/* The path of the theme bundle `theme` (a file name with the .theme
+ * extension, or an absolute path): as given, or in the Themes subdirectory
+ * of one of the standard Library directories. nil when there is none.
+ */
+static NSString *
+GSThemePathForFileName(NSString *theme)
+{
+  NSFileManager	*mgr = [NSFileManager defaultManager];
+  NSString	*path = nil;
+  BOOL		isDir;
+
+  if ([theme isAbsolutePath] == YES)
+    {
+      if ([mgr fileExistsAtPath: theme isDirectory: &isDir] == YES
+	&& isDir == YES)
+	{
+	  path = theme;
+	}
+    }
+  else
+    {
+      NSEnumerator	*enumerator;
+
+      enumerator = [NSSearchPathForDirectoriesInDomains
+	(NSAllLibrariesDirectory, NSAllDomainsMask, YES) objectEnumerator];
+      while ((path = [enumerator nextObject]) != nil)
+	{
+	  path = [path stringByAppendingPathComponent: @"Themes"];
+	  path = [path stringByAppendingPathComponent: theme];
+	  if ([mgr fileExistsAtPath: path isDirectory: &isDir])
+	    {
+	      break;
+	    }
+	}
+    }
+  return path;
+}
+
+/* Whether a domain of the search list other than the registration domain
+ * (and GSThemeDomain, which a theme fills) sets the default `key': a choice
+ * made by the user, on the command line or in the defaults, as opposed to
+ * one an application or library registered.
+ */
+static BOOL
+GSDefaultSetAboveRegistration(NSUserDefaults *defs, NSString *key)
+{
+  NSEnumerator	*enumerator = [[defs searchList] objectEnumerator];
+  NSString	*name;
+
+  while ((name = [enumerator nextObject]) != nil)
+    {
+      NSDictionary	*domain;
+
+      if ([name isEqual: NSRegistrationDomain]
+	|| [name isEqual: @"GSThemeDomain"])
+	{
+	  continue;
+	}
+      domain = [defs volatileDomainForName: name];
+      if (domain == nil)
+	{
+	  domain = [defs persistentDomainForName: name];
+	}
+      if ([domain objectForKey: key] != nil)
+	{
+	  return YES;
+	}
+    }
+  return NO;
+}
+
+void
+GSThemeInstallBackendDefaults(void)
+{
+  NSUserDefaults	*defs = [NSUserDefaults standardUserDefaults];
+  NSString		*name = [defs stringForKey: @"GSTheme"];
+  NSString		*path;
+  NSDictionary		*domain;
+  id			value;
+  NSMutableArray	*searchList;
+  NSUInteger		index;
+
+  /* An explicit choice by the user stands. The backend reads
+   * GSBackHandlesWindowDecorations before GSX11HandlesWindowDecorations,
+   * so a theme value must not hide either.
+   */
+  if (GSDefaultSetAboveRegistration(defs, @"GSBackHandlesWindowDecorations")
+    || GSDefaultSetAboveRegistration(defs, @"GSX11HandlesWindowDecorations"))
+    {
+      return;
+    }
+  /* A theme already activated has put its whole domain in place. */
+  if ([defs volatileDomainForName: @"GSThemeDomain"] != nil)
+    {
+      return;
+    }
+  if ([[name pathExtension] isEqual: @"theme"])
+    {
+      name = [name stringByDeletingPathExtension];
+    }
+  if ([name length] == 0 || [[name lastPathComponent] isEqual: @"GNUstep"])
+    {
+      return;
+    }
+  if ([name isAbsolutePath] == NO)
+    {
+      name = [name lastPathComponent];
+    }
+  path = GSThemePathForFileName([name stringByAppendingPathExtension: @"theme"]);
+  domain = [[[NSBundle bundleWithPath: path] infoDictionary]
+    objectForKey: @"GSThemeDomain"];
+  if ([domain isKindOfClass: [NSDictionary class]] == NO)
+    {
+      return;
+    }
+  value = [domain objectForKey: @"GSBackHandlesWindowDecorations"];
+  if (value == nil)
+    {
+      return;
+    }
+
+  /* Where -activate puts the theme's whole domain, which replaces this.
+   */
+  [defs setVolatileDomain: [NSDictionary dictionaryWithObject: value
+    forKey: @"GSBackHandlesWindowDecorations"] forName: @"GSThemeDomain"];
+  searchList = AUTORELEASE([[defs searchList] mutableCopy]);
+  if ([searchList containsObject: @"GSThemeDomain"] == NO)
+    {
+      index = [searchList indexOfObject: GSConfigDomain];
+      if (index == NSNotFound)
+	{
+	  index = [searchList indexOfObject: NSRegistrationDomain];
+	  if (index == NSNotFound)
+	    {
+	      index = [searchList count];
+	    }
+	}
+      [searchList insertObject: @"GSThemeDomain" atIndex: index];
+      [defs setSearchList: searchList];
+    }
+}
+
 @implementation GSTheme
 
 static GSTheme			*defaultTheme = nil;
@@ -450,37 +592,7 @@ typedef	struct {
   bundle = [themes objectForKey: theme];
   if (bundle == nil)
     {
-      NSString		*path = nil;
-      NSFileManager	*mgr = [NSFileManager defaultManager];
-      BOOL 		isDir;
-
-      /* A theme may be either an absolute path or a filename to be located
-       * in the Themes subdirectory of one of the standard Library directories.
-       */
-      if ([theme isAbsolutePath] == YES)
-        {
-	  if ([mgr fileExistsAtPath: theme isDirectory: &isDir] == YES
-	    && isDir == YES)
-	    {
-	      path = theme;
-	    }
-	}
-      else
-        {
-	  NSEnumerator	*enumerator;
-
-	  enumerator = [NSSearchPathForDirectoriesInDomains
-	    (NSAllLibrariesDirectory, NSAllDomainsMask, YES) objectEnumerator];
-	  while ((path = [enumerator nextObject]) != nil)
-	    {
-	      path = [path stringByAppendingPathComponent: @"Themes"];
-	      path = [path stringByAppendingPathComponent: theme];
-	      if ([mgr fileExistsAtPath: path isDirectory: &isDir])
-		{
-		  break;
-		}
-	    }
-	}
+      NSString		*path = GSThemePathForFileName(theme);
 
       if (path == nil)
 	{

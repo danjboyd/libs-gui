@@ -84,6 +84,7 @@
 
 #import "GSIconManager.h"
 #import "GNUstepGUI/GSDisplayServer.h"
+#import "GSThemePrivate.h"
 #import "GNUstepGUI/GSServicesManager.h"
 #import "GSGuiPrivate.h"
 #import "GNUstepGUI/GSInfoPanel.h"
@@ -889,6 +890,10 @@ static BOOL _isAutolaunchChecked = NO;
 
   /* Load user-defined bundles */
   gsapp_user_bundles();
+
+  /* Defaults the theme sets for the backend, which reads them when the
+     server is created.  */
+  GSThemeInstallBackendDefaults();
 
   /* Connect to our window server.  */
   srv = [GSDisplayServer serverWithAttributes: nil];
