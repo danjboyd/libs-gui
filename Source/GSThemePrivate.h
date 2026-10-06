@@ -42,6 +42,17 @@ NSString *GSStringFromBorderType(NSBorderType borderType);
 NSString *GSStringFromTabViewType(NSTabViewType type);
 NSString *GSStringFromImageFrameStyle(NSImageFrameStyle type);
 
+/* Before the display server is created (-[NSApplication _init]): a theme
+ * that draws the window decorations itself sets
+ * GSBackHandlesWindowDecorations to NO in the GSThemeDomain of its
+ * Info.plist. The backend reads that default when the display server is
+ * created, before the theme is loaded, so this installs it from the
+ * theme named by the GSTheme default, without loading the theme, unless
+ * the user has set GSBackHandlesWindowDecorations or
+ * GSX11HandlesWindowDecorations.
+ */
+void GSThemeInstallBackendDefaults(void);
+
 /** These are the nine types of tile used to draw a rectangular object.
  */
 typedef enum {
