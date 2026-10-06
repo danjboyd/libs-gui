@@ -93,6 +93,25 @@
 	* Source/NSTableView.m,
 	* Source/NSWindow.m,
 	* Source/NSView.m: Fix some compiler warnings.
+2026-10-06 Daniel Boyd <danieljboyd@icloud.com>
+
+	* Source/GSTheme.m (GSThemePathForFileName): New function, the
+	lookup of a theme bundle's path from +loadThemeNamed:.
+	(GSDefaultSetAboveRegistration): New function.  Whether a domain
+	other than the registration domain sets a default.
+	(GSThemeInstallBackendDefaults): New function.  Install the
+	GSBackHandlesWindowDecorations default from the GSThemeDomain of the
+	theme named by the GSTheme default, without loading the theme,
+	unless the user has set GSBackHandlesWindowDecorations or
+	GSX11HandlesWindowDecorations (a registered default doesn't count),
+	or a theme has already installed its domain.  A theme that draws the window decorations itself can then
+	turn GNUstep-drawn decorations on: the backend reads that default
+	when the display server is created, before the theme is loaded.
+	(+loadThemeNamed:): Use GSThemePathForFileName().
+	* Source/GSThemePrivate.h: Declare GSThemeInstallBackendDefaults().
+	* Source/NSApplication.m (-_init): Call it before creating the
+	display server.
+	* Tests/gui/GSTheme/backendDefaults.m: New test.
 
 2026-09-20 Simon Peter <probonopd@users.noreply.github.com>
 
