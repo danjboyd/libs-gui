@@ -200,6 +200,9 @@
  * by delegates of NSMenu objects.
  */
 @protocol NSMenuDelegate <NSObject>
+#if GS_PROTOCOLS_HAVE_OPTIONAL
+@optional
+#endif
 
 /**
  * Allows the delegate to return the target and action for a key-down event.
@@ -761,7 +764,10 @@ APPKIT_EXPORT_CLASS
 - (BOOL) validateMenuItem: (id<NSMenuItem>)menuItem;
 @end
 
-#if OS_API_VERSION(MAC_OS_X_VERSION_10_3, GS_API_LATEST)
+#if OS_API_VERSION(MAC_OS_X_VERSION_10_3, GS_API_LATEST) && !GS_PROTOCOLS_HAVE_OPTIONAL
+/* Without @optional the NSMenuDelegate methods are required; declaring
+ * these on NSObject lets a delegate adopt the protocol anyway.
+ */
 @interface NSObject (NSMenuDelegate)
 - (void) menuNeedsUpdate: (NSMenu *)menu;
 - (NSInteger) numberOfItemsInMenu: (NSMenu *)menu;

@@ -1074,7 +1074,7 @@ willPositionSheet: (NSWindow *)sheet
 @end
 #endif
 
-@interface NSObject (NSWindowDelegateAdditions) <NSWindowDelegate>
+@interface NSObject (NSWindowDelegateAdditions)
 #if OS_API_VERSION(MAC_OS_X_VERSION_10_1, GS_API_LATEST)
 - (NSWindow *) attachedSheet;
 #endif

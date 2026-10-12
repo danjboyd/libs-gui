@@ -652,14 +652,6 @@ APPKIT_EXPORT NSString *NSControlTextDidChangeNotification;
   indexOfSelectedItem: (int *)index;
 #endif
 
-@end
-
-/**
- * This category provides methods that objects can implement to receive
- * notifications about text editing events in NSControl objects.
- */
-@interface NSObject (NSControlDelegate)
-
 /**
  * Called when text editing begins in a control.
  * aNotification: Notification containing the NSControl object

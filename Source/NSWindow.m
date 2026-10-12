@@ -122,6 +122,12 @@ BOOL GSViewAcceptsDrag(NSView *v, id<NSDraggingInfo> dragInfo);
 - (void) postDragEvent: (NSEvent*)event;
 @end
 
+/* A window subclass may implement the delegate methods itself, so the
+ * window asks itself when it has no delegate that responds.
+ */
+@interface NSWindow (SelfDelegate) <NSWindowDelegate>
+@end
+
 @interface NSView (MoveToWindow)
 // Normally this method is only used internally.
 - (void) _viewWillMoveToWindow: (NSWindow*)newWindow;
