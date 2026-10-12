@@ -1,0 +1,80 @@
+# MSYS2's mingw-w64-gnustep-gui (msys2/MINGW-packages 9f888f32ed, 0.32.0-3),
+# built from this checkout: the 0.32.0 release with the changes the carry
+# branch adds (packaging/README.md). MSYS2 applies no patches of its own to
+# 0.32.0. It replaces the stock package's files, and its version (0.32.0.N)
+# is newer than the stock 0.32.0 so pacman keeps it.
+#
+#   cd packaging/msys2 && MINGW_ARCH=clang64 makepkg-mingw -sCf
+
+_realname=gnustep-gui
+pkgbase=mingw-w64-${_realname}
+pkgname=("${MINGW_PACKAGE_PREFIX}-${_realname}")
+pkgver=0.32.0.1
+pkgrel=1
+pkgdesc="GNUstep GUI Library, with danjboyd/libs-gui's carried changes (mingw-w64)"
+arch=('any')
+mingw_arch=('clang64')
+url='https://github.com/danjboyd/libs-gui'
+license=('spdx:LGPL-2.1-or-later')
+depends=("${MINGW_PACKAGE_PREFIX}-cc-libs"
+         "${MINGW_PACKAGE_PREFIX}-gnustep-base"
+         "${MINGW_PACKAGE_PREFIX}-libffi"
+         "${MINGW_PACKAGE_PREFIX}-giflib"
+         "${MINGW_PACKAGE_PREFIX}-icu"
+         "${MINGW_PACKAGE_PREFIX}-libjpeg-turbo"
+         "${MINGW_PACKAGE_PREFIX}-libpng"
+         "${MINGW_PACKAGE_PREFIX}-libtiff")
+makedepends=("${MINGW_PACKAGE_PREFIX}-autotools"
+             "${MINGW_PACKAGE_PREFIX}-clang"
+             "${MINGW_PACKAGE_PREFIX}-lld"
+             "${MINGW_PACKAGE_PREFIX}-gnustep-make"
+             rsync)
+provides=("${MINGW_PACKAGE_PREFIX}-${_realname}=0.32.0")
+source=()
+sha256sums=()
+
+prepare() {
+  # The checkout this PKGBUILD is in, without its packaging and git data.
+  rsync --recursive --times --links --delete \
+    --exclude=/packaging --exclude=/.git --exclude=/.github \
+    "${startdir}/../../" "${srcdir}/build-${MSYSTEM}/"
+}
+
+build() {
+  cd "${srcdir}/build-${MSYSTEM}"
+
+  # MSYS2's build environment and configure flags, unchanged.
+  case ${MSYSTEM} in
+    MINGW*|UCRT*)
+      export LDFLAGS="-fuse-ld=lld -lstdc++ -lgcc_s"
+      ;;
+    CLANG*)
+      export LDFLAGS="-lc++"
+      ;;
+  esac
+
+  CC="$MINGW_PREFIX/bin/clang" \
+  CXX="$MINGW_PREFIX/bin/clang++" \
+  ./configure \
+    --prefix="${MINGW_PREFIX}"
+
+  # Clang 23 rejects gnustep-base's __block ivar (BLOCK_SCOPE in
+  # NSBackgroundActivityScheduler.h), as in libs-back's carry. libs-gui's
+  # only __block variables (NSDocumentController's
+  # beginOpenPanelWithCompletionHandler:) are never assigned after the block
+  # captures them, so __block can mean nothing (gnustep-make adds -fblocks
+  # after these flags).
+  CC="$MINGW_PREFIX/bin/clang" \
+  CXX="$MINGW_PREFIX/bin/clang++" \
+  make \
+    OBJCFLAGS="-U__block -D__block= -Wno-error=incompatible-pointer-types -Wno-int-to-pointer-cast -Wno-pointer-to-int-cast -Wno-format"
+}
+
+package() {
+  cd "${srcdir}/build-${MSYSTEM}"
+
+  make install DESTDIR="${pkgdir}"
+
+  install -Dm644 "${srcdir}/build-${MSYSTEM}/COPYING.LIB" \
+    "${pkgdir}${MINGW_PREFIX}/share/licenses/${_realname}/COPYING.LIB"
+}
