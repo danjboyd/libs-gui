@@ -50,6 +50,41 @@
  */
 @protocol NSMenuItem <NSValidatedUserInterfaceItem, NSCopying, NSCoding, NSObject>
 
+#if GS_HAS_DECLARED_PROPERTIES
+/*
+ * Declared properties for accessors that are also declared as methods
+ * below.  Clients compiled without declared property support use the
+ * method declarations; property syntax (and Swift) use these.
+ */
+@property SEL action;
+@property (readonly) BOOL hasSubmenu;
+@property (retain) NSImage *image;
+@property (getter=isEnabled) BOOL enabled;
+@property (readonly, getter=isSeparatorItem) BOOL separatorItem;
+@property (copy) NSString *keyEquivalent;
+@property NSUInteger keyEquivalentModifierMask;
+@property (assign) NSMenu *menu;
+@property (retain) NSImage *mixedStateImage;
+@property (readonly) NSString *mnemonic;
+@property NSUInteger mnemonicLocation;
+@property (retain) NSImage *offStateImage;
+@property (retain) NSImage *onStateImage;
+@property (retain) id representedObject;
+@property NSInteger state;
+@property (retain) NSMenu *submenu;
+@property NSInteger tag;
+@property (assign) id target;
+@property (copy) NSString *title;
+@property (readonly) NSUInteger userKeyEquivalentModifierMask;
+@property (readonly) NSString *userKeyEquivalent;
+#if OS_API_VERSION(MAC_OS_X_VERSION_10_3, GS_API_LATEST)
+@property (copy) NSAttributedString *attributedTitle;
+@property NSInteger indentationLevel;
+@property (getter=isAlternate) BOOL alternate;
+@property (copy) NSString *toolTip;
+#endif
+#endif
+
 /**
    <p> Returns a seperator.   This is just a blank menu item which serves 
    to divide the menu into seperate parts.

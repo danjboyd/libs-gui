@@ -418,6 +418,29 @@ APPKIT_EXPORT_CLASS
   NSString *_name;
 }
 
+#if GS_HAS_DECLARED_PROPERTIES
+/*
+ * Declared properties for accessors that are also declared as methods
+ * below.  Clients compiled without declared property support use the
+ * method declarations; property syntax (and Swift) use these.
+ */
+@property (readonly) NSMenu *attachedMenu;
+@property BOOL autoenablesItems;
+@property (readonly, getter=isAttached) BOOL attached;
+@property (readonly, getter=isTornOff) BOOL tornOff;
+@property (readonly) NSArray *itemArray;
+@property BOOL menuChangedMessagesEnabled;
+@property (readonly) NSInteger numberOfItems;
+@property (assign) NSMenu *supermenu;
+@property (copy) NSString *title;
+#if OS_API_VERSION(MAC_OS_X_VERSION_10_3, GS_API_LATEST)
+@property (assign) id delegate;
+#endif
+#if OS_API_VERSION(MAC_OS_X_VERSION_10_4, GS_API_LATEST)
+@property (readonly) float menuBarHeight;
+#endif
+#endif
+
 /** Returns the memory allocation zone used to create instances of this class.
  */
 + (NSZone*) menuZone;

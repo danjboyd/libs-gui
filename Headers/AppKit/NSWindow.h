@@ -341,6 +341,92 @@ PACKAGE_SCOPE
   void          *_reserved_1;
 }
 
+#if GS_HAS_DECLARED_PROPERTIES
+/*
+ * Declared properties for accessors that are also declared as methods
+ * below.  Clients compiled without declared property support use the
+ * method declarations; property syntax (and Swift) use these.
+ */
+@property (readonly) NSRect frame;
+@property NSSize minSize;
+@property NSSize maxSize;
+@property (readonly) NSString *frameAutosaveName;
+@property (readonly, getter=isVisible) BOOL visible;
+@property NSInteger level;
+@property (readonly) BOOL canBecomeKeyWindow;
+@property (readonly) BOOL canBecomeMainWindow;
+@property (readonly, getter=isKeyWindow) BOOL keyWindow;
+@property (readonly, getter=isMainWindow) BOOL mainWindow;
+@property (getter=isAutodisplay) BOOL autodisplay;
+@property BOOL viewsNeedDisplay;
+@property (readonly, getter=isFlushWindowDisabled) BOOL flushWindowDisabled;
+@property (readonly) NSInteger windowNumber;
+@property (readonly) NSDictionary *deviceDescription;
+@property NSBackingStoreType backingType;
+@property (getter=isOneShot) BOOL oneShot;
+@property (readonly) BOOL canStoreColor;
+@property NSWindowDepth depthLimit;
+@property (readonly) NSScreen *deepestScreen;
+@property (readonly) NSScreen *screen;
+@property (readonly) NSResponder *firstResponder;
+@property (readonly) NSEvent *currentEvent;
+@property BOOL acceptsMouseMovedEvents;
+@property (copy) NSString *representedFilename;
+@property (copy) NSString *title;
+@property (getter=isDocumentEdited) BOOL documentEdited;
+@property (getter=isReleasedWhenClosed) BOOL releasedWhenClosed;
+@property (readonly, getter=isMiniaturized) BOOL miniaturized;
+@property (retain) NSImage *miniwindowImage;
+@property (copy) NSString *miniwindowTitle;
+@property (getter=isExcludedFromWindowsMenu) BOOL excludedFromWindowsMenu;
+@property (readonly) BOOL areCursorRectsEnabled;
+@property BOOL hidesOnDeactivate;
+@property (readonly) BOOL worksWhenModal;
+@property (retain) NSView *contentView;
+@property (copy) NSColor *backgroundColor;
+@property (readonly) NSUInteger styleMask;
+@property (assign) id delegate;
+@property (assign) NSWindowController *windowController;
+#if OS_API_VERSION(GS_API_MACOSX, GS_API_LATEST)
+@property (readonly, getter=isZoomed) BOOL zoomed;
+@property BOOL showsResizeIndicator;
+@property NSSize aspectRatio;
+@property NSSize resizeIncrements;
+@property (retain) NSButtonCell *defaultButtonCell;
+@property (retain) NSView *initialFirstResponder;
+@property (readonly) NSSelectionDirection keyViewSelectionDirection;
+@property BOOL canHide;
+@property BOOL hasShadow;
+@property CGFloat alphaValue;
+@property (getter=isOpaque) BOOL opaque;
+@property (readonly) NSArray *drawers;
+#endif
+#if OS_API_VERSION(MAC_OS_X_VERSION_10_2, GS_API_LATEST)
+@property BOOL ignoresMouseEvents;
+@property (readonly) NSArray *childWindows;
+@property (assign) NSWindow *parentWindow;
+@property (getter=isMovableByWindowBackground) BOOL movableByWindowBackground;
+#endif
+#if OS_API_VERSION(MAC_OS_X_VERSION_10_3, GS_API_LATEST)
+@property NSSize contentMaxSize;
+@property NSSize contentMinSize;
+@property NSSize contentAspectRatio;
+@property NSSize contentResizeIncrements;
+@property BOOL allowsToolTipsWhenApplicationIsInactive;
+#endif
+#if OS_API_VERSION(MAC_OS_X_VERSION_10_4, GS_API_LATEST)
+@property BOOL preservesContentDuringLiveResize;
+@property (readonly) NSGraphicsContext *graphicsContext;
+@property (readonly) CGFloat userSpaceScaleFactor;
+@property BOOL autorecalculatesKeyViewLoop;
+@property BOOL showsToolbarButton;
+@property BOOL displaysWhenScreenProfileChanges;
+#endif
+#if OS_API_VERSION(MAC_OS_X_VERSION_10_5, GS_API_LATEST)
+@property NSWindowCollectionBehavior collectionBehavior;
+#endif
+#endif
+
 /*
  * Class methods
  */

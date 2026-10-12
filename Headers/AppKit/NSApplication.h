@@ -240,6 +240,40 @@ APPKIT_EXPORT_CLASS
   id             _runLoopPool;
 }
 
+#if GS_HAS_DECLARED_PROPERTIES
+/*
+ * Declared properties for accessors that are also declared as methods
+ * below.  Clients compiled without declared property support use the
+ * method declarations; property syntax (and Swift) use these.
+ */
+#if __has_feature(objc_class_property)
+@property (class, readonly) NSApplication *sharedApplication;
+#endif
+@property (readonly, getter=isActive) BOOL active;
+@property (readonly, getter=isRunning) BOOL running;
+@property (readonly) NSWindow *modalWindow;
+@property (readonly) NSEvent *currentEvent;
+@property (retain) NSImage *applicationIconImage;
+@property (readonly, getter=isHidden) BOOL hidden;
+@property (readonly) NSWindow *keyWindow;
+@property (readonly) NSWindow *mainWindow;
+@property (readonly) NSArray *windows;
+@property (retain) NSMenu *mainMenu;
+@property (retain) NSMenu *windowsMenu;
+@property (retain) NSMenu *servicesMenu;
+@property (retain) id servicesProvider;
+@property (assign) id delegate;
+#if OS_API_VERSION(GS_API_MACOSX, GS_API_LATEST)
+@property (readonly) NSArray *orderedDocuments;
+@property (readonly) NSArray *orderedWindows;
+#endif
+#if OS_API_VERSION(MAC_OS_X_VERSION_10_6, GS_API_LATEST)
+@property (readonly)
+  NSApplicationPresentationOptions currentPresentationOptions;
+@property NSApplicationPresentationOptions presentationOptions;
+#endif
+#endif
+
 /*
  * Class methods
  */

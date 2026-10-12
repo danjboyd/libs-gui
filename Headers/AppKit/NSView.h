@@ -204,6 +204,70 @@ PACKAGE_SCOPE
 
 }
 
+#if GS_HAS_DECLARED_PROPERTIES
+/*
+ * Declared properties for accessors that are also declared as methods
+ * below.  Clients compiled without declared property support use the
+ * method declarations; property syntax (and Swift) use these.
+ */
+@property (readonly, assign) NSView *superview;
+@property (readonly, assign) NSWindow *window;
+@property (readonly) NSInteger tag;
+@property NSRect frame;
+@property CGFloat frameRotation;
+@property NSRect bounds;
+@property CGFloat boundsRotation;
+@property (readonly, getter=isFlipped) BOOL flipped;
+@property (readonly, getter=isRotatedFromBase) BOOL rotatedFromBase;
+@property (readonly, getter=isRotatedOrScaledFromBase)
+  BOOL rotatedOrScaledFromBase;
+@property BOOL postsFrameChangedNotifications;
+@property BOOL postsBoundsChangedNotifications;
+@property BOOL autoresizesSubviews;
+@property NSUInteger autoresizingMask;
+@property BOOL needsDisplay;
+@property (readonly, getter=isOpaque) BOOL opaque;
+@property (readonly) NSRect visibleRect;
+@property (readonly) BOOL canDraw;
+@property (readonly) BOOL shouldDrawColor;
+@property (readonly) NSScrollView *enclosingScrollView;
+@property (readonly) BOOL needsPanelToBecomeKey;
+@property (assign) NSView *nextKeyView;
+@property (readonly) NSView *nextValidKeyView;
+@property (assign) NSView *previousKeyView;
+@property (readonly) NSView *previousValidKeyView;
+@property (readonly) CGFloat heightAdjustLimit;
+@property (readonly) CGFloat widthAdjustLimit;
+#if OS_API_VERSION(GS_API_MACOSX, GS_API_LATEST)
+@property (readonly) BOOL mouseDownCanMoveWindow;
+@property (copy) NSString *toolTip;
+@property (readonly) NSString *printJobTitle;
+#endif
+#if OS_API_VERSION(MAC_OS_X_VERSION_10_3, GS_API_LATEST)
+@property NSFocusRingType focusRingType;
+@property (getter=isHidden) BOOL hidden;
+@property (readonly, getter=isHiddenOrHasHiddenAncestor)
+  BOOL hiddenOrHasHiddenAncestor;
+@property (readonly) BOOL wantsDefaultClipping;
+@property (readonly) BOOL inLiveResize;
+@property (readonly) BOOL canBecomeKeyView;
+#endif
+#if OS_API_VERSION(MAC_OS_X_VERSION_10_4, GS_API_LATEST)
+@property (readonly) BOOL preservesContentDuringLiveResize;
+@property (readonly) NSRect rectPreservedDuringLiveResize;
+@property (readonly) NSArray *registeredDraggedTypes;
+@property (readonly) NSAttributedString *pageFooter;
+@property (readonly) NSAttributedString *pageHeader;
+#endif
+#if OS_API_VERSION(MAC_OS_X_VERSION_10_5, GS_API_LATEST)
+@property (copy) NSArray *subviews;
+@property CGFloat alphaValue;
+@property CGFloat frameCenterRotation;
+#else
+@property (readonly) NSArray *subviews;
+#endif
+#endif
+
 /*
  * Initializing NSView Objects
  */

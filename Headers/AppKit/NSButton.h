@@ -45,6 +45,36 @@ APPKIT_EXPORT_CLASS
   // Attributes
 }
 
+#if GS_HAS_DECLARED_PROPERTIES
+/*
+ * Declared properties for accessors that are also declared as methods
+ * below.  Clients compiled without declared property support use the
+ * method declarations; property syntax (and Swift) use these.
+ */
+@property NSInteger state;
+@property BOOL allowsMixedState;
+@property (copy) NSString *title;
+@property (copy) NSString *alternateTitle;
+@property (retain) NSImage *image;
+@property (retain) NSImage *alternateImage;
+@property NSCellImagePosition imagePosition;
+@property (getter=isBordered) BOOL bordered;
+@property (getter=isTransparent) BOOL transparent;
+@property (copy) NSString *keyEquivalent;
+@property NSUInteger keyEquivalentModifierMask;
+#if OS_API_VERSION(GS_API_MACOSX, GS_API_LATEST)
+@property (copy) NSAttributedString *attributedTitle;
+@property (copy) NSAttributedString *attributedAlternateTitle;
+@property NSBezelStyle bezelStyle;
+@property BOOL showsBorderOnlyWhileMouseInside;
+@property (retain) NSSound *sound;
+#endif
+#if OS_API_VERSION(MAC_OS_X_VERSION_10_12, GS_API_LATEST)
+@property (copy) NSColor *bezelColor;
+@property (copy) NSColor *contentTintColor;
+#endif
+#endif
+
 #if OS_API_VERSION(MAC_OS_X_VERSION_10_12, GS_API_LATEST)
 //
 // Creating Buttons

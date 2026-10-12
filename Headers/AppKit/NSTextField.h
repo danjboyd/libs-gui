@@ -52,6 +52,32 @@ APPKIT_EXPORT_CLASS
   NSText *_text_object;
 }
 
+#if GS_HAS_DECLARED_PROPERTIES
+/*
+ * Declared properties for accessors that are also declared as methods
+ * below.  Clients compiled without declared property support use the
+ * method declarations; property syntax (and Swift) use these.
+ */
+@property (getter=isEditable) BOOL editable;
+@property (getter=isSelectable) BOOL selectable;
+@property (assign) id<NSTextFieldDelegate> delegate;
+@property (copy) NSColor *backgroundColor;
+@property BOOL drawsBackground;
+@property (getter=isBezeled) BOOL bezeled;
+@property (getter=isBordered) BOOL bordered;
+@property (copy) NSColor *textColor;
+@property (copy) NSString *placeholderString;
+@property (copy) NSAttributedString *placeholderAttributedString;
+@property SEL errorAction;
+#if OS_API_VERSION(GS_API_MACOSX, GS_API_LATEST)
+@property BOOL allowsEditingTextAttributes;
+@property BOOL importsGraphics;
+#endif
+#if OS_API_VERSION(MAC_OS_X_VERSION_10_2, GS_API_LATEST)
+@property NSTextFieldBezelStyle bezelStyle;
+#endif
+#endif
+
 #if OS_API_VERSION(MAC_OS_X_VERSION_10_12, GS_API_LATEST)
 //
 // Creating Text Fields

@@ -72,6 +72,40 @@ APPKIT_EXPORT_CLASS
   BOOL _ignoresMultiClick;
 }
 
+#if GS_HAS_DECLARED_PROPERTIES
+/*
+ * Declared properties for accessors that are also declared as methods
+ * below.  Clients compiled without declared property support use the
+ * method declarations; property syntax (and Swift) use these.
+ */
+@property (getter=isEnabled) BOOL enabled;
+@property (readonly) id selectedCell;
+@property (readonly) NSInteger selectedTag;
+@property double doubleValue;
+@property float floatValue;
+@property int intValue;
+@property (copy) NSString *stringValue;
+@property (copy) id objectValue;
+@property NSTextAlignment alignment;
+@property (retain) NSFont *font;
+@property (readonly) NSText *currentEditor;
+@property SEL action;
+@property (getter=isContinuous) BOOL continuous;
+@property (assign) id target;
+@property NSInteger tag;
+@property BOOL ignoresMultiClick;
+#if OS_API_VERSION(GS_API_MACOSX, GS_API_LATEST)
+@property (copy) NSAttributedString *attributedStringValue;
+@property BOOL refusesFirstResponder;
+#endif
+#if OS_API_VERSION(MAC_OS_X_VERSION_10_4, GS_API_LATEST)
+@property NSWritingDirection baseWritingDirection;
+#endif
+#if OS_API_VERSION(MAC_OS_X_VERSION_10_5, GS_API_LATEST)
+@property NSInteger integerValue;
+#endif
+#endif
+
 //
 // Setting the Control's Cell
 //
