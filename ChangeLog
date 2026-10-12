@@ -1,3 +1,13 @@
+2026-10-12 Daniel Boyd <danieljboyd@icloud.com>
+
+	* Source/NSKeyValueBinding.m (+unbind:forObject:): Remove the
+	object from the table of bound objects when its last binding is
+	removed.  The table does not retain the object, so after the object
+	was unbound and deallocated, later lookups and growth of the table
+	sent -hash and -isEqual: to freed memory and crashed.
+	* Tests/gui/NSKeyValueBinding/TestInfo,
+	* Tests/gui/NSKeyValueBinding/unbind.m: New test.
+
 2026-09-22 Simon Peter <probonopd@users.noreply.github.com>
 
 	* Source/NSBitmapImageRep+JPEG.m (gs_init_destination,

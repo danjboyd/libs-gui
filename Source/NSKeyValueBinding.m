@@ -252,6 +252,13 @@ void GSBindingInvokeAction(NSString *targetKey, NSString *argumentKey,
           keyPath = [theBinding->info objectForKey: NSObservedKeyPathKey];
           [observedObject removeObserver: theBinding forKeyPath: keyPath];
           [bindings setValue: nil forKey: binding];
+          /* The table does not retain anObject, which may be deallocated
+           * once it is unbound, so drop its entry with its last binding.
+           */
+          if ([bindings count] == 0)
+            {
+              NSMapRemove(objectTable, (void *)anObject);
+            }
         }
     }
   [bindingLock unlock];
