@@ -401,12 +401,13 @@
     {
       if([o tag] == tag)
         {
-          break;
+          // Select the first segment with the tag.
+          [self setSelected: YES forSegment: segment];
+          return;
         }
       segment++;
     }
-  
-  [self setSelected: YES forSegment: segment];
+  // No segment has the tag: leave the selection unchanged.
 }
 
 - (void) makeNextSegmentKey
