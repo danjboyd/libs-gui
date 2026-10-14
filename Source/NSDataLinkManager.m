@@ -37,6 +37,7 @@
 #import "AppKit/NSPanel.h"
 #import "AppKit/NSDataLinkManager.h"
 #import "AppKit/NSDataLink.h"
+#import <Foundation/NSProcessInfo.h>
 #import "AppKit/NSPasteboard.h"
 #import "AppKit/NSSelection.h"
 
@@ -66,6 +67,8 @@
 - (void) setDestinationSelection: (id)dst;
 - (void) setLinkNumber: (NSDataLinkNumber)number;
 - (void) setDisposition: (NSDataLinkDisposition)disposition;
+- (void) setSourceApplicationName: (NSString *)name;
+- (void) setDestinationApplicationName: (NSString *)name;
 @end
 
 @implementation NSDataLink (Private)
@@ -117,6 +120,16 @@
 - (void) setDisposition: (NSDataLinkDisposition)disposition
 {
   _disposition = disposition;
+}
+
+- (void) setSourceApplicationName: (NSString *)name
+{
+  ASSIGN(_sourceApplicationName, name);
+}
+
+- (void) setDestinationApplicationName: (NSString *)name
+{
+  ASSIGN(_destinationApplicationName, name);
 }
 @end
 
@@ -351,6 +364,9 @@
   [link setDestinationSelection: selection];
   [link setDestinationManager: self];
   [link setDisposition: NSLinkInDestination];
+  [link setDestinationFilename: _filename];
+  [link setDestinationApplicationName:
+    [[NSProcessInfo processInfo] processName]];
   if ([link linkNumber] == 0)
     {
       [link setLinkNumber: _nextLinkNumber++];
@@ -458,6 +474,11 @@
 
   [link setSourceManager: self];
   [link setDisposition: NSLinkInSource];
+  if ([link sourceFilename] == nil)
+    {
+      [link setSourceFilename: _filename];
+    }
+  [link setSourceApplicationName: [[NSProcessInfo processInfo] processName]];
   if ([link linkNumber] == 0)
     {
       [link setLinkNumber: _nextLinkNumber++];
@@ -533,7 +554,25 @@
 
 - (void) noteDocumentSavedAs:(NSString *)path
 {
+  NSString *old = AUTORELEASE(RETAIN(_filename));
+
   ASSIGN(_filename, path);
+  /* The document holding the links has a new name: move the destination
+   * links, and the source links that named the document, to it.
+   */
+  FOR_IN(NSDataLink*, link, _destinationLinks)
+    {
+      [link setDestinationFilename: path];
+    }
+  END_FOR_IN(_destinationLinks);
+  FOR_IN(NSDataLink*, link, _sourceLinks)
+    {
+      if (old != nil && [[link sourceFilename] isEqualToString: old])
+	{
+	  [link setSourceFilename: path];
+	}
+    }
+  END_FOR_IN(_sourceLinks);
   [self noteDocumentSaved];
 }
 
