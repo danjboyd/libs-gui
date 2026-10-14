@@ -180,9 +180,10 @@ APPKIT_EXPORT_CLASS
  * override this method to perform document-specific initialization while
  * ensuring proper super class initialization. This method is typically used
  * when creating new documents through menu actions or programmatic document
- * creation workflows.
+ * creation workflows.  It is the designated initializer: the other
+ * initializers call it through self.
  */
-- (id)init;
+- (id)init NS_DESIGNATED_INITIALIZER;
 /**
  * Initializes a new document instance by loading content from the specified
  * file path with the given file type. The fileName parameter specifies the
