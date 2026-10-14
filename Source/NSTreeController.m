@@ -37,6 +37,7 @@
 #import <Foundation/NSNotification.h>
 #import <Foundation/NSString.h>
 #import <Foundation/NSSortDescriptor.h>
+#import <Foundation/NSValue.h>
 
 #import "AppKit/NSOutlineView.h"
 #import "AppKit/NSKeyValueBinding.h"
@@ -532,14 +533,115 @@
   return _leafKeyPath;
 }
 
+/* Answers the mutable array of the content tree, searched depth first
+ * from children, that holds object, or nil if no such array holds it.
+ */
+- (NSMutableArray *) _childrenHoldingObject: (id)object
+				    inArray: (NSArray *)children
+{
+  if ([children indexOfObjectIdenticalTo: object] != NSNotFound)
+    {
+      if ([children isKindOfClass: [NSMutableArray class]])
+	{
+	  return (NSMutableArray *)children;
+	}
+      return nil;
+    }
+  if (_childrenKeyPath == nil)
+    {
+      return nil;
+    }
+
+  FOR_IN(id, child, children)
+    {
+      id grandChildren = [child valueForKeyPath: _childrenKeyPath];
+
+      if ([grandChildren isKindOfClass: [NSArray class]])
+	{
+	  NSMutableArray *found = [self _childrenHoldingObject: object
+						       inArray: grandChildren];
+
+	  if (found != nil)
+	    {
+	      return found;
+	    }
+	}
+    }
+  END_FOR_IN(children);
+
+  return nil;
+}
+
 - (void) moveNode: (NSTreeNode *)node toIndexPath: (NSIndexPath *)indexPath
 {
-  // FIXME
+  [self moveNodes: [NSArray arrayWithObject: node] toIndexPath: indexPath];
 }
 
 - (void) moveNodes: (NSArray *)nodes toIndexPath: (NSIndexPath *)startingIndexPath
 {
-  // FIXME
+  NSUInteger length = [startingIndexPath length];
+  NSMutableArray *objects;
+  NSMutableArray *sources;
+  NSMutableArray *indexes;
+  NSMutableArray *to;
+  NSUInteger index;
+  NSUInteger i;
+
+  if (length == 0 || ![_content isKindOfClass: [NSArray class]])
+    {
+      return;
+    }
+
+  /* Take the objects out of their old places first: the path names the
+   * place of the first object once they have all been taken out.
+   */
+  objects = [NSMutableArray arrayWithCapacity: [nodes count]];
+  sources = [NSMutableArray arrayWithCapacity: [nodes count]];
+  indexes = [NSMutableArray arrayWithCapacity: [nodes count]];
+  FOR_IN(NSTreeNode*, node, nodes)
+    {
+      id object = [node representedObject];
+      NSMutableArray *from = [self _childrenHoldingObject: object
+						  inArray: _content];
+
+      if (from != nil)
+	{
+	  NSUInteger oldIndex = [from indexOfObjectIdenticalTo: object];
+
+	  [objects addObject: object];
+	  [sources addObject: from];
+	  [indexes addObject: [NSNumber numberWithUnsignedInteger: oldIndex]];
+	  [from removeObjectAtIndex: oldIndex];
+	}
+    }
+  END_FOR_IN(nodes);
+
+  to = [self _childrenHoldingIndexPath: startingIndexPath];
+  if (to != nil)
+    {
+      index = [startingIndexPath indexAtPosition: length - 1];
+      if (index > [to count])
+	{
+	  index = [to count];
+	}
+      for (i = 0; i < [objects count]; i++)
+	{
+	  [to insertObject: [objects objectAtIndex: i] atIndex: index++];
+	}
+    }
+  else
+    {
+      /* The path leads nowhere: put the objects back where they were.  */
+      i = [objects count];
+      while (i-- > 0)
+	{
+	  [[sources objectAtIndex: i]
+	    insertObject: [objects objectAtIndex: i]
+		 atIndex: [[indexes objectAtIndex: i] unsignedIntegerValue]];
+	}
+    }
+
+  [self rearrangeObjects];
 }
 
 - (NSArray *) selectedNodes
