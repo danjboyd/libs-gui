@@ -330,7 +330,14 @@
   
   size = [_items count];
   if (count < size)
-    [_items removeObjectsInRange: NSMakeRange(count, size - count)];
+    {
+      [_items removeObjectsInRange: NSMakeRange(count, size - count)];
+      // The selected segment may have been removed.
+      if (_selected_segment >= count)
+        {
+          _selected_segment = -1;
+        }
+    }
   
   while (count-- > size)
     {
@@ -404,9 +411,15 @@
 
 - (void) makeNextSegmentKey
 {
+  NSInteger count = [_items count];
   NSInteger next;
 
-  if (_selected_segment < [_items count])
+  if (count == 0)
+    {
+      return;
+    }
+  // Move to the next segment, wrapping around after the last one.
+  if (_selected_segment >= 0 && _selected_segment < count - 1)
     {
       next = _selected_segment + 1;
     }
@@ -414,23 +427,35 @@
     {
       next = 0;
     }
-  [self setSelected: NO forSegment: _selected_segment];
+  if (_selected_segment >= 0)
+    {
+      [self setSelected: NO forSegment: _selected_segment];
+    }
   [self setSelected: YES forSegment: next];
 }
 
 - (void) makePreviousSegmentKey
 {
+  NSInteger count = [_items count];
   NSInteger prev;
 
-  if (_selected_segment > 0)
+  if (count == 0)
+    {
+      return;
+    }
+  // Move to the previous segment, wrapping around before the first one.
+  if (_selected_segment > 0 && _selected_segment < count)
     {
       prev = _selected_segment - 1;
     }
   else
     {
-      prev = 0;
+      prev = count - 1;
     }
-  [self setSelected: NO forSegment: _selected_segment];
+  if (_selected_segment >= 0)
+    {
+      [self setSelected: NO forSegment: _selected_segment];
+    }
   [self setSelected: YES forSegment: prev];
 }
 
