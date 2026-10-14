@@ -708,7 +708,7 @@ cancelPrefetchingForItemsAtIndexPaths: (NSArray *)indexPaths
       for (itemIndex = 0; itemIndex < [items count]; itemIndex++)
 	{
 	  NSIndexPath *path = [NSIndexPath indexPathForItem: itemIndex inSection: sectionIndex];
-	  [_identifierToIndexPath setObject: RETAIN(path) forKey: [items objectAtIndex: itemIndex]];
+	  [_identifierToIndexPath setObject: path forKey: [items objectAtIndex: itemIndex]];
 	}
       sectionIndex++;
     }
