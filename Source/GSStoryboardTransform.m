@@ -639,6 +639,7 @@
 	      NSXMLDocument *document = nil;
 	      NSString *sceneId = [[e attributeForName: @"sceneID"] stringValue];
 	      NSString *controllerId = nil;
+	      NSArray *identifiers = nil;
 	      // Move children...
 	      FOR_IN(NSXMLElement*, child, children)
 		{
@@ -672,6 +673,16 @@
 		      [self processSegues: document
 			  forControllerId: controllerId];
 		    }
+
+		  // Map the storyboard identifiers of controllers to scenes...
+		  identifiers = [document nodesForXPath: @"//@storyboardIdentifier"
+						  error: NULL];
+		  FOR_IN(NSXMLNode*, identifier, identifiers)
+		    {
+		      [_controllerMap setObject: sceneId
+					 forKey: [identifier stringValue]];
+		    }
+		  END_FOR_IN(identifiers);
 		  RELEASE(document);
 		}
 	      END_FOR_IN(children);

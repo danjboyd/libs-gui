@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="14490.70" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="NO" initialViewController="MainController">
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14490.70"/>
+    </dependencies>
+    <scenes>
+        <scene sceneID="ApplicationScene">
+            <objects>
+                <application id="Application" sceneMemberID="viewController"/>
+            </objects>
+        </scene>
+        <scene sceneID="MainScene">
+            <objects>
+                <viewController id="MainController" customClass="MainController" sceneMemberID="viewController">
+                    <view key="view" id="MainView">
+                        <rect key="frame" x="0.0" y="0.0" width="120" height="80"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </view>
+                </viewController>
+            </objects>
+        </scene>
+        <scene sceneID="DetailScene">
+            <objects>
+                <viewController storyboardIdentifier="DetailIdentifier" id="DetailController" customClass="DetailController" sceneMemberID="viewController">
+                    <view key="view" id="DetailView">
+                        <rect key="frame" x="0.0" y="0.0" width="90" height="60"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </view>
+                </viewController>
+            </objects>
+        </scene>
+    </scenes>
+</document>
