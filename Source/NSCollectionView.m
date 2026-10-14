@@ -1866,6 +1866,26 @@ static NSString *_placeholderItem = nil;
     }
 }
 
+- (void) _unloadSectionAtIndex: (NSUInteger)cs
+{
+  NSArray *paths = [[_indexPathsToItems keyEnumerator] allObjects];
+
+  FOR_IN(NSIndexPath*, path, paths)
+    {
+      if ((NSUInteger)[path section] == cs)
+	{
+	  NSCollectionViewItem *item = [_indexPathsToItems objectForKey: path];
+
+	  [[item view] removeFromSuperview];
+	  [_visibleItems removeObject: item];
+	  [_itemsToAttributes removeObjectForKey: item];
+	  [_itemsToIndexPaths removeObjectForKey: item];
+	  [_indexPathsToItems removeObjectForKey: path];
+	}
+    }
+  END_FOR_IN(paths);
+}
+
 - (void) _clearMaps
 {
   // Remove objects from set/dict/maps
@@ -1975,22 +1995,15 @@ static NSString *_placeholderItem = nil;
 
 - (void) reloadSections: (NSIndexSet *)sections
 {
-  NSUInteger *buffer = NULL;
-  NSUInteger c = 0;
-  NSUInteger i = 0;
+  NSUInteger cs = [sections firstIndex];
 
-  c = [sections getIndexes: buffer
-		  maxCount: [sections count]
-	      inIndexRange: NULL];
-
-  if (buffer != NULL)
+  while (cs != NSNotFound)
     {
-      for (i = 0; i < c; i++)
-	{
-	  NSUInteger cs = buffer[i];
-	  [self _loadSectionAtIndex: cs];
-	}
+      [self _unloadSectionAtIndex: cs];
+      [self _loadSectionAtIndex: cs];
+      cs = [sections indexGreaterThanIndex: cs];
     }
+  [self _updateParentViewFrame];
 }
 
 - (void) reloadItemsAtIndexPaths: (NSSet *)indexPaths
