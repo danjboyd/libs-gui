@@ -987,8 +987,8 @@ enum {
               paperSize = [printer pageSizeForPaper: paperName];
               imageRect = [printer imageRectForPaper: paperName];
               topMargin    = (paperSize.height - NSMaxY(imageRect)) * factorValue;
-              bottomMargin = imageRect.origin.x * factorValue;
-              leftMargin   = imageRect.origin.y * factorValue;
+              bottomMargin = NSMinY(imageRect) * factorValue;
+              leftMargin   = NSMinX(imageRect) * factorValue;
               rightMargin  = (paperSize.width - NSMaxX(imageRect)) * factorValue;
             }
           else  //Custom Papers
