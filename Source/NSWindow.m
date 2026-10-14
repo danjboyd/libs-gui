@@ -4768,6 +4768,8 @@ checkCursorRectanglesExited(NSView *theView,  NSEvent *theEvent, NSPoint lastPoi
                   NSDebugLLog(@"NSDragging", @"Dragging exit");
                   GSPerformVoidDragSelector(_lastDragView,
                     @selector(draggingExited:), dragInfo);
+                  GSPerformVoidDragSelector(_lastDragView,
+                    @selector(draggingEnded:), dragInfo);
                 }
               _lastDragOperationMask = NSDragOperationNone;
               DESTROY(_lastDragView);
@@ -4793,6 +4795,11 @@ checkCursorRectanglesExited(NSView *theView,  NSEvent *theEvent, NSPoint lastPoi
                       GSPerformVoidDragSelector(_lastDragView,
                         @selector(concludeDragOperation:), dragInfo);
                     }
+                }
+              if (_lastDragView && _f.accepts_drag)
+                {
+                  GSPerformVoidDragSelector(_lastDragView,
+                    @selector(draggingEnded:), dragInfo);
                 }
               _lastDragOperationMask = NSDragOperationNone;
               DESTROY(_lastDragView);
