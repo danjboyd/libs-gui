@@ -343,7 +343,7 @@ implement, so we can't do that. */
 	    {
 	      NSImageRep *imageRep = [rep imageRepWithData: data];
 
-	      if (rep != nil)
+	      if (imageRep != nil)
 		[array addObject: imageRep];
 	    }
 	}
