@@ -313,7 +313,7 @@
 
 - (IBAction) add: (id)sender
 {
-  NSIndexPath *p = [NSIndexPath indexPathWithIndex: 0];
+  NSIndexPath *p = [NSIndexPath indexPathWithIndex: [_content count]];
   id newObject = [self newObject];
   [self insertObject: newObject atArrangedObjectIndexPath: p];
   RELEASE(newObject);
@@ -322,11 +322,25 @@
 - (IBAction) addChild: (id)sender
 {
   NSIndexPath *p = [self selectionIndexPath];
-  id newObject = [self newObject];
 
   if (p != nil)
     {
-      [self insertObject: newObject atArrangedObjectIndexPath: p];
+      NSArray *siblings = [self _childrenHoldingIndexPath: p];
+      NSUInteger i = [p indexAtPosition: [p length] - 1];
+      NSUInteger count = 0;
+      id newObject;
+
+      if (i < [siblings count])
+	{
+	  id parent = [siblings objectAtIndex: i];
+
+	  count = [[parent valueForKeyPath: _childrenKeyPath] count];
+	}
+      newObject = [self newObject];
+
+      /* Append the new object to the children of the selected object.  */
+      [self insertObject: newObject
+	atArrangedObjectIndexPath: [p indexPathByAddingIndex: count]];
       RELEASE(newObject);
     }
 }
@@ -399,7 +413,18 @@
 
 - (IBAction) insert: (id)sender
 {
-  [self addChild: sender];
+  NSIndexPath *p = [self selectionIndexPath];
+  id newObject = [self newObject];
+
+  /* Insert the new object at the selection, as a sibling of the selected
+   * object, or at the start of the content when nothing is selected.
+   */
+  if (p == nil)
+    {
+      p = [NSIndexPath indexPathWithIndex: 0];
+    }
+  [self insertObject: newObject atArrangedObjectIndexPath: p];
+  RELEASE(newObject);
 }
 
 - (void) removeObjectAtArrangedObjectIndexPath: (NSIndexPath *)indexPath
