@@ -491,7 +491,8 @@ static inline void _loadNSSoundPlugIns (void)
 
 - (void) writeToPasteboard: (NSPasteboard *)pasteboard
 {
-  NSData *d = [NSArchiver archivedDataWithRootObject: self];
+  /* Write the sound data, which -initWithPasteboard: reads back.  */
+  NSData *d = _data;
 
   if (d != nil) {
     [pasteboard declareTypes: [NSSound soundUnfilteredPasteboardTypes] 
