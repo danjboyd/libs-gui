@@ -1234,8 +1234,10 @@ static NSDragOperation currentDragOperation = NSDragOperationNone;
 {
   NSArray *selectedCells;
   NSEnumerator *selectedCellsEnumerator;
+  NSMutableArray *selectedRows;
   NSMatrix *matrix;
   NSCell *cell;
+  NSNumber *row;
 
   matrix = [self matrixInColumn: column];
   if (matrix == nil)
@@ -1243,17 +1245,11 @@ static NSDragOperation currentDragOperation = NSDragOperationNone;
       return;
     }
 
-  // Get the previously selected cells
-  selectedCells = [[matrix selectedCells] copy];
-
-  // Perform the data load
-  [self _performLoadOfColumn: column];
-
-  // set last column loaded
-  [self setLastColumn: column];
-
-  // Restore the selected cells
-  matrix = [self matrixInColumn: column];
+  /* Record the rows of the previously selected cells, as loading the
+   * column replaces its cells.
+   */
+  selectedCells = [matrix selectedCells];
+  selectedRows = [NSMutableArray arrayWithCapacity: [selectedCells count]];
   selectedCellsEnumerator = [selectedCells objectEnumerator];
   while ((cell = [selectedCellsEnumerator nextObject]) != nil)
     {
@@ -1261,10 +1257,28 @@ static NSDragOperation currentDragOperation = NSDragOperationNone;
 
       if ([matrix getRow: &sRow  column: &sColumn  ofCell: cell])
 	{
-	  [matrix selectCellAtRow: sRow  column: sColumn];
+	  [selectedRows addObject: [NSNumber numberWithInteger: sRow]];
 	}
     }
-  RELEASE(selectedCells);
+
+  // Perform the data load
+  [self _performLoadOfColumn: column];
+
+  // set last column loaded
+  [self setLastColumn: column];
+
+  // Reselect the rows that remain
+  matrix = [self matrixInColumn: column];
+  selectedCellsEnumerator = [selectedRows objectEnumerator];
+  while ((row = [selectedCellsEnumerator nextObject]) != nil)
+    {
+      NSInteger sRow = [row integerValue];
+
+      if (sRow < [matrix numberOfRows])
+	{
+	  [matrix selectCellAtRow: sRow  column: 0];
+	}
+    }
 }
 
 
