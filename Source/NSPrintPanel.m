@@ -574,10 +574,18 @@ static NSPrintPanel *shared_instance = nil;
   dict = [info dictionary];
   NSDebugLLog(@"NSPrinting", 
 	      @"Update PrintInfo dictionary\n %@ \n --------------", dict);
-  _pages = NSMakeRange([[dict objectForKey: NSPrintFirstPage] intValue],
-		       [[dict objectForKey: NSPrintLastPage] intValue]);
-  if (NSMaxRange(_pages) == 0)
-    _pages = NSMakeRange(1, 0);
+  {
+    /* The last page is inclusive, so the range holds last - first + 1
+     * pages.
+     */
+    int first = [[dict objectForKey: NSPrintFirstPage] intValue];
+    int last = [[dict objectForKey: NSPrintLastPage] intValue];
+
+    if (first < 1 || last < first)
+      _pages = NSMakeRange(1, 0);
+    else
+      _pages = NSMakeRange(first, last - first + 1);
+  }
 
   /* Setup the layout popup */
   layout = [[dict objectForKey: NSPrintPagesPerSheet] intValue];
