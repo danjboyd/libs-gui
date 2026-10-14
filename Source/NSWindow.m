@@ -2152,14 +2152,20 @@ titleWithRepresentedFilename(NSString *representedFilename)
 
 - (BOOL) showsResizeIndicator
 {
+  if (_f.hides_resize_indicator)
+    {
+      return NO;
+    }
   return ([self styleMask] & NSResizableWindowMask) ? YES : NO;
 }
 
 - (void) setShowsResizeIndicator: (BOOL)show
 {
-  // TODO
-  NSLog(@"Method %s is not implemented for class %s",
-        "setShowsResizeIndicator:", "NSWindow");
+  /* The setting is recorded; the window decoration always shows the
+   * resize bar of a resizable window, as it is also where the window is
+   * resized from.
+   */
+  _f.hides_resize_indicator = show ? NO : YES;
 }
 
 - (BOOL) preservesContentDuringLiveResize
