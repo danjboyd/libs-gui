@@ -845,10 +845,11 @@ static NSParagraphStyle	*defaultStyle = nil;
   [_tabStops removeAllObjects];
   [_tabStops addObjectsFromArray: p->_tabStops];
 
-  if (p->_textBlocks)
-    [self setTextBlocks: p->_textBlocks];
-  if (p->_textLists)
-    [self setTextLists: p->_textLists];
+  /* Take the blocks and lists even when there are none, so that the
+   * receiver's own are dropped.
+   */
+  [self setTextBlocks: p->_textBlocks];
+  [self setTextLists: p->_textLists];
 
   _alignment = p->_alignment;
   _firstLineHeadIndent = p->_firstLineHeadIndent;
