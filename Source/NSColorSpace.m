@@ -113,12 +113,50 @@
   return self;
 }
 
+/* Answers the colour space model named by the data colour space field of
+ * an ICC profile header, or NSUnknownColorSpaceModel.
+ */
+static NSColorSpaceModel
+modelFromICCProfileData(NSData *iccData)
+{
+  const unsigned char	*bytes;
+  uint32_t		sig;
+
+  /* The header is 128 bytes long, with the 'acsp' signature at offset 36
+   * and the data colour space signature at offset 16.
+   */
+  if ([iccData length] < 128)
+    {
+      return NSUnknownColorSpaceModel;
+    }
+  bytes = [iccData bytes];
+  if (memcmp(bytes + 36, "acsp", 4) != 0)
+    {
+      return NSUnknownColorSpaceModel;
+    }
+  sig = ((uint32_t)bytes[16] << 24) | ((uint32_t)bytes[17] << 16)
+    | ((uint32_t)bytes[18] << 8) | (uint32_t)bytes[19];
+  switch (sig)
+    {
+      case 0x47524159:	/* 'GRAY' */
+        return NSGrayColorSpaceModel;
+      case 0x52474220:	/* 'RGB ' */
+        return NSRGBColorSpaceModel;
+      case 0x434D594B:	/* 'CMYK' */
+        return NSCMYKColorSpaceModel;
+      case 0x4C616220:	/* 'Lab ' */
+        return NSLABColorSpaceModel;
+      default:
+        return NSUnknownColorSpaceModel;
+    }
+}
+
 - (id) initWithICCProfileData: (NSData *)iccData
 {
   if ((self = [super init]))
     {
       ASSIGN(_iccData, iccData);
-      _colorSpaceModel = NSUnknownColorSpaceModel;
+      _colorSpaceModel = modelFromICCProfileData(iccData);
     }
   return self;
 }
