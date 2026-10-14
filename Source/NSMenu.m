@@ -150,6 +150,10 @@ static BOOL menuBarVisible = YES;
 
 @end
 
+@interface NSMenu (GSMenuDelegate)
+- (void) _sendDelegateMenuMessage: (SEL)sel;
+@end
+
 
 @implementation NSMenuPanel
 - (void) _setmenu: (NSMenu *)menu
@@ -1459,6 +1463,10 @@ static BOOL menuBarVisible = YES;
   cellFrame.origin.x += point.x;
   cellFrame.origin.y += point.y;
   
+  /* The theme shows the menu without -display, and -close tells the
+   * delegate that it closed, so tell it here that it opens.
+   */
+  [self _sendDelegateMenuMessage: @selector(menuWillOpen:)];
   [[GSTheme theme] displayPopUpMenu: mr
                       withCellFrame: cellFrame
                   controlViewWindow: w
@@ -1804,6 +1812,15 @@ static BOOL menuBarVisible = YES;
   [self _updateUserDefaults: nil];
 } 
 
+/* Sends sel, taking the menu as argument, to the delegate if it responds.  */
+- (void) _sendDelegateMenuMessage: (SEL)sel
+{
+  if (_delegate != nil && [_delegate respondsToSelector: sel])
+    {
+      [_delegate performSelector: sel withObject: self];
+    }
+}
+
 - (void) display
 {
   if (_menu.transient)
@@ -1812,6 +1829,15 @@ static BOOL menuBarVisible = YES;
                    @"trying to display while already displayed transient");
     }
 
+  /* Tell the delegate before the menu is updated and sized, so that items
+   * it changes are shown, but only when the menu is not already on screen.
+   * In the NeXT interface style this includes the main menu whenever the
+   * application shows it.
+   */
+  if ([_aWindow isVisible] == NO)
+    {
+      [self _sendDelegateMenuMessage: @selector(menuWillOpen:)];
+    }
   [self update];
   if (_menu.needsSizing)
     {
@@ -1848,6 +1874,7 @@ static BOOL menuBarVisible = YES;
       return;
     }
 
+  [self _sendDelegateMenuMessage: @selector(menuWillOpen:)];
   [self update];
   if (_menu.needsSizing)
     {
@@ -1932,7 +1959,11 @@ static BOOL menuBarVisible = YES;
       [sub close];
       _attachedMenu = sub;
     }
-  [_aWindow orderOut: self];
+  if ([_aWindow isVisible])
+    {
+      [_aWindow orderOut: self];
+      [self _sendDelegateMenuMessage: @selector(menuDidClose:)];
+    }
 
   if (_superMenu && ![self isTornOff])
     {
@@ -1972,6 +2003,7 @@ static BOOL menuBarVisible = YES;
   
   _menu.transient = NO;
   [_view update];
+  [self _sendDelegateMenuMessage: @selector(menuDidClose:)];
 }
 
 - (NSWindow*) window

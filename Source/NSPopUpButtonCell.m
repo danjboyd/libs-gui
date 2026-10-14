@@ -49,6 +49,10 @@
  * and so on.  */
 static NSImage *_pbc_image[5];
 
+@interface NSMenu (GSMenuDelegate)
+- (void) _sendDelegateMenuMessage: (SEL)sel;
+@end
+
 @interface NSButtonCell (Private)
 - (GSThemeControlState) themeControlState;
 @end
@@ -971,6 +975,12 @@ static NSImage *_pbc_image[5];
 	  preferredEdge = NSMinYEdge;
 	}
     }
+
+  /* The theme shows the menu without -[NSMenu display], and -dismissPopUp
+   * closes it with -close, which tells the delegate that it closed, so
+   * tell it here that it opens.
+   */
+  [_menu _sendDelegateMenuMessage: @selector(menuWillOpen:)];
 
   // display the menu item...
   [[GSTheme theme] displayPopUpMenu: mr
