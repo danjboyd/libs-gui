@@ -1738,8 +1738,9 @@ inFileViewerRootedAtPath: (NSString*)rootFullpath
     }
   if (multipleFiles == nil)
     {
-      // FIXME: Icon does not exist
-      multipleFiles = [NSImage imageNamed: @"FileIcon_multi"];
+      // The multiple selection image libs-gui ships.
+      multipleFiles = RETAIN([NSImage _standardImageWithName:
+        @"MultipleSelection"]);
     }
 
   return multipleFiles;
