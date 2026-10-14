@@ -439,7 +439,15 @@ static Class pathCellClass;
                                                        withFrame: [self bounds]
                                                           inView: self];
       [_cell _setClickedPathComponentCell: pcc];
-      if ([[self cell] action])
+      /* The second click of a double click sends the double action, when
+       * there is one, instead of the action.
+       */
+      if ([event clickCount] == 2 && [[self cell] doubleAction])
+        {
+          [self sendAction: [[self cell] doubleAction]
+                        to: [[self cell] target]];
+        }
+      else if ([[self cell] action])
         {
           [self sendAction: [[self cell] action]
                         to: [[self cell] target]];
