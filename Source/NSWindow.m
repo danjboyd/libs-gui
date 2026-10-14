@@ -2971,14 +2971,16 @@ titleWithRepresentedFilename(NSString *representedFilename)
 
 - (NSWindowCollectionBehavior) collectionBehavior
 {
-  //TODO: we don't handle collections yet and perhaps never will fully
-  return 0;
+  return _collectionBehavior;
 }
 
 - (void) setCollectionBehavior: (NSWindowCollectionBehavior)props
 {
-  //TODO we don't handle collections yet. Perhaps certain features can be mapped on existing ones
-  //other features are Expose specific or anyway probably not implementable
+  /* The behavior is recorded for the application, but we don't handle
+   * collections yet.  Perhaps certain features can be mapped on existing
+   * ones; other features are Expose specific or probably not implementable.
+   */
+  _collectionBehavior = props;
 }
 
 /*

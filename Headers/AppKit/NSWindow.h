@@ -339,6 +339,7 @@ PACKAGE_SCOPE
 @protected 
   NSToolbar     *_toolbar;
   void          *_reserved_1;
+  NSWindowCollectionBehavior _collectionBehavior;
 }
 
 #if GS_HAS_DECLARED_PROPERTIES
