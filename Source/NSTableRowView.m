@@ -44,7 +44,12 @@
 
 - (NSBackgroundStyle) interiorBackgroundStyle
 {
-  return _interiorBackgroundStyle;
+  // Content on an emphasized selection is drawn as on a dark background.
+  if (_selected && _emphasized)
+    {
+      return NSBackgroundStyleEmphasized;
+    }
+  return NSBackgroundStyleNormal;
 }
 
 - (BOOL) isFloating
