@@ -75,7 +75,7 @@
   NSPoint origin;
   float floatValue = [self floatValue];
 
-  if (_isVertical && flipped)
+  if (_isVertical == YES && flipped)
     {
       floatValue = _maxValue + _minValue - floatValue;
     }
@@ -107,7 +107,7 @@
 
   PSsetalpha(1);
 
-  if (_isVertical)
+  if (_isVertical == YES)
     {
       for (i = 0; i < r.size.height; i += 1)
         {

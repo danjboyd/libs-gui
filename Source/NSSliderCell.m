@@ -239,7 +239,7 @@ double _doubleValueForMousePoint (NSPoint point, NSRect knobRect,
   [[GSTheme theme] drawSliderBorderAndBackground: aType 
 					   frame: cellFrame
 					  inCell: self
-				    isHorizontal: ![self isVertical]];
+				    isHorizontal: ([self isVertical] != 1)];
 }
 
 
@@ -273,7 +273,7 @@ double _doubleValueForMousePoint (NSPoint point, NSRect knobRect,
   double doubleValue = _value;
   
   // FIXME: this method needs to be refactored out to GSTheme
-  if (_isVertical && flipped)
+  if (_isVertical == YES && flipped)
     {
       doubleValue = _maxValue + _minValue - doubleValue;
     }
@@ -476,7 +476,7 @@ double _doubleValueForMousePoint (NSPoint point, NSRect knobRect,
       return 0;
     }
 
-  return _isVertical ? size.height : size.width;
+  return (_isVertical == YES) ? size.height : size.width;
 }
 
 /**<p>Sets the thickness of the knob to <var>thickness</var>, in pixels.
@@ -797,7 +797,8 @@ double _doubleValueForMousePoint (NSPoint point, NSRect knobRect,
 */
 - (NSInteger) isVertical
 {
-  return _isVertical;
+  /* _isVertical holds (BOOL)-1 until the orientation is known.  */
+  return (_isVertical == (BOOL)-1) ? -1 : (NSInteger)_isVertical;
 }
 
 /**<p>Returns the value by which the slider is incremented when the user
@@ -904,7 +905,7 @@ double _doubleValueForMousePoint (NSPoint point, NSRect knobRect,
 
   if (_numberOfTickMarks > 1)
     {
-      if (_isVertical)
+      if (_isVertical == YES)
 	{
 	  d = NSHeight(rect) / (_numberOfTickMarks - 1);
 	  rect.size.height = d;
@@ -987,7 +988,7 @@ double _doubleValueForMousePoint (NSPoint point, NSRect knobRect,
           // Mouse is not on the knob, move the knob to the mouse position
           double doubleValue;
           NSRect slotRect = [self trackRect];
-          BOOL isVertical = [self isVertical];
+          BOOL isVertical = ([self isVertical] == 1);
           double minValue = [self minValue];
           double maxValue = [self maxValue];
           
@@ -1026,7 +1027,7 @@ double _doubleValueForMousePoint (NSPoint point, NSRect knobRect,
       NSRect knobRect = [self knobRectFlipped: isFlipped];
       double oldDoubleValue = [self doubleValue];
       NSRect slotRect = [self trackRect];
-      BOOL isVertical = [self isVertical];
+      BOOL isVertical = ([self isVertical] == 1);
       double minValue = [self minValue];
       double maxValue = [self maxValue];
 
