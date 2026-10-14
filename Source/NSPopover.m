@@ -330,6 +330,15 @@
   [[NSNotificationCenter defaultCenter] postNotificationName:NSPopoverWillCloseNotification
 						      object:self
 						    userInfo:nil];
+
+  /* The panel is released when it is closed, so forget it; showing the
+   * popover again makes a new panel.
+   */
+  if ([notification object] == _realPanel)
+    {
+      _realPanel = nil;
+      _shown = NO;
+    }
 }
 
 - (id) initWithCoder: (NSCoder *)coder
