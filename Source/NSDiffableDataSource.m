@@ -479,7 +479,15 @@ GSDiffableDefaultSectionIdentifier()
   animatingDifferences: (BOOL)animatingDifferences
 {
   DESTROY(_snapshot);
-  _snapshot = [[NSDiffableDataSourceSnapshot alloc] init];
+  // Keep our own copy, so later changes to the caller's snapshot do not show.
+  if (snapshot != nil)
+    {
+      _snapshot = [snapshot copy];
+    }
+  else
+    {
+      _snapshot = [[NSDiffableDataSourceSnapshot alloc] init];
+    }
   [self _rebuildIndexLookup];
   [_collectionView reloadData];
 }
@@ -711,8 +719,15 @@ cancelPrefetchingForItemsAtIndexPaths: (NSArray *)indexPaths
   animatingDifferences: (BOOL)animatingDifferences
 {
   DESTROY(_snapshot);
-
-  _snapshot = [[NSDiffableDataSourceSnapshot alloc] init];
+  // Keep our own copy, so later changes to the caller's snapshot do not show.
+  if (snapshot != nil)
+    {
+      _snapshot = [snapshot copy];
+    }
+  else
+    {
+      _snapshot = [[NSDiffableDataSourceSnapshot alloc] init];
+    }
   [self _rebuildIndexLookup];
   [_tableView reloadData];
 }
