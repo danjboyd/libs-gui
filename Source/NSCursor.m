@@ -293,8 +293,16 @@ NSCursor *getStandardCursor(NSString *name, int style)
 
 + (NSCursor*) currentSystemCursor
 {
-  // FIXME
-  return nil;
+  /* The cursors of other applications are out of reach, so answer the
+   * cursor this application shows, the arrow until it sets one.
+   */
+  NSCursor *cursor = [self currentCursor];
+
+  if (cursor == nil)
+    {
+      cursor = [self arrowCursor];
+    }
+  return cursor;
 }
 
 + (NSCursor*) greenArrowCursor
