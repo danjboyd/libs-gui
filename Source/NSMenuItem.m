@@ -341,6 +341,8 @@ static Class imageClass;
 
 - (void) setMnemonicLocation: (NSUInteger)location
 {
+  if (location == NSNotFound)
+    location = 255; // No mnemonic
   if (_mnemonicLocation == location)
     return; // no change
 	
@@ -358,7 +360,7 @@ static Class imageClass;
 
 - (NSString*) mnemonic
 {
-  if (_mnemonicLocation != 255)
+  if (_mnemonicLocation != 255 && _mnemonicLocation < [_title length])
     return [_title substringWithRange: NSMakeRange(_mnemonicLocation, 1)];
   else
     return @"";
