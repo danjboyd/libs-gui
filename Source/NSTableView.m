@@ -134,7 +134,8 @@ typedef struct _tableViewFlags
 - (void) _postSelectionDidChangeNotification;
 - (void) _postColumnDidMoveNotificationWithOldIndex: (NSInteger) oldIndex
 					   newIndex: (NSInteger) newIndex;
-- (void) _postColumnDidResizeNotification;
+- (void) _postColumnDidResizeNotificationForColumn: (NSTableColumn *)column
+					   oldWidth: (CGFloat)oldWidth;
 - (BOOL) _shouldSelectTableColumn: (NSTableColumn *)tableColumn;
 - (BOOL) _shouldSelectRow: (NSInteger)rowIndex;
 
@@ -6861,13 +6862,16 @@ For a more detailed explanation, -setSortDescriptors:. */
 		  nil]];
 }
 
-- (void) _postColumnDidResizeNotificationWithOldWidth: (float) oldWidth
+- (void) _postColumnDidResizeNotificationForColumn: (NSTableColumn *)column
+					   oldWidth: (CGFloat)oldWidth
 {
   [nc postNotificationName:
 	NSTableViewColumnDidResizeNotification
       object: self
       userInfo: [NSDictionary
 		  dictionaryWithObjectsAndKeys:
+		    column,
+		  @"NSTableColumn",
 		    [NSNumber numberWithFloat: oldWidth],
 		  @"NSOldWidth",
 		  nil]];

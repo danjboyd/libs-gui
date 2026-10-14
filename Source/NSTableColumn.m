@@ -74,6 +74,11 @@
 #import "AppKit/NSTableView.h"
 #import "GSBindingHelpers.h"
 
+@interface NSTableView (NotificationRequestMethods)
+- (void) _postColumnDidResizeNotificationForColumn: (NSTableColumn *)column
+					   oldWidth: (CGFloat)oldWidth;
+@end
+
 @interface NSTableView (__NSTableColumnPrivate__)
 - (void) _registerPrototypeViews: (NSArray *)prototypeViews;
 @end
@@ -214,7 +219,8 @@
   the width of the table was actually changed, the table view (if any)
   is redisplayed (by calling tile), and the
   NSTableViewColumnDidResizeNotification is posted on behalf of the
-  table view.  */
+  table view, followed by the NSOutlineViewColumnDidResizeNotification
+  if the table view is an outline view.  */
 - (void) setWidth: (CGFloat)newWidth
 {
   CGFloat oldWidth = _width;
@@ -233,14 +239,8 @@
     {
       // Tiling also marks it as needing redisplay
       [_tableView tile];
-      
-      [[NSNotificationCenter defaultCenter] 
-	postNotificationName: NSTableViewColumnDidResizeNotification
-	object: _tableView
-	userInfo: [NSDictionary dictionaryWithObjectsAndKeys:
-				  self, @"NSTableColumn", 
-				  [NSNumber numberWithFloat: oldWidth],
-				@"NSOldWidth", nil]];
+      [_tableView _postColumnDidResizeNotificationForColumn: self
+						   oldWidth: oldWidth];
     }
 }
 

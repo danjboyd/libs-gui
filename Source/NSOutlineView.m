@@ -101,8 +101,6 @@ static NSImage *unexpandable  = nil;
 - (void) _postSelectionDidChangeNotification;
 - (void) _postColumnDidMoveNotificationWithOldIndex: (NSInteger) oldIndex
 					   newIndex: (NSInteger) newIndex;
-// FIXME: There is a method with a similar name.but this is never called
-//- (void) _postColumnDidResizeNotification;
 - (BOOL) _shouldSelectTableColumn: (NSTableColumn *)tableColumn;
 - (BOOL) _shouldSelectRow: (NSInteger)rowIndex;
 - (BOOL) _shouldSelectionChange;
@@ -142,6 +140,8 @@ static NSImage *unexpandable  = nil;
 @end
 
 @interface NSTableView (Private)
+- (void) _postColumnDidResizeNotificationForColumn: (NSTableColumn *)column
+					   oldWidth: (CGFloat)oldWidth;
 - (NSView *) _renderedViewForPath: (NSIndexPath *)path;
 - (void) _setRenderedView: (NSView *)view forPath: (NSIndexPath *)path;
 - (id) _prototypeCellViewFromTableColumn: (NSTableColumn *)tb;
@@ -1882,13 +1882,21 @@ Also returns the child index relative to this parent. */
 		  nil]];
 }
 
-- (void) _postColumnDidResizeNotificationWithOldWidth: (float) oldWidth
+/* The table view notification is posted too, as the table view's column
+ * autosaving relies on it.
+ */
+- (void) _postColumnDidResizeNotificationForColumn: (NSTableColumn *)column
+					   oldWidth: (CGFloat)oldWidth
 {
+  [super _postColumnDidResizeNotificationForColumn: column
+					  oldWidth: oldWidth];
   [nc postNotificationName:
 	NSOutlineViewColumnDidResizeNotification
       object: self
       userInfo: [NSDictionary
 		  dictionaryWithObjectsAndKeys:
+		    column,
+		  @"NSTableColumn",
 		    [NSNumber numberWithFloat: oldWidth],
 		  @"NSOldWidth",
 		  nil]];
