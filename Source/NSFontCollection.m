@@ -445,11 +445,23 @@ static NSLock *_fontCollectionLock = nil;
 + (NSFontCollection *) fontCollectionWithName: (NSFontCollectionName)name
 {
   NSFontCollection *fc = [_availableFontCollections objectForKey: name];
+
+  /* The standard collections always exist, as in Cocoa; any other name
+   * answers nil when no collection has been saved under it.
+   */
   if (fc == nil)
     {
-      fc = [[NSFontCollection alloc] init];
-      [fc _setName: name];
-      AUTORELEASE(fc);
+      if ([name isEqualToString: NSFontCollectionAllFonts])
+        {
+          fc = [NSFontCollection fontCollectionWithAllAvailableDescriptors];
+        }
+      else if ([name isEqualToString: NSFontCollectionUser]
+        || [name isEqualToString: NSFontCollectionFavorites]
+        || [name isEqualToString: NSFontCollectionRecentlyUsed])
+        {
+          fc = AUTORELEASE([[NSFontCollection alloc] init]);
+          [fc _setName: name];
+        }
     }
   return fc;
 }
