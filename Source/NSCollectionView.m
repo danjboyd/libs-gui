@@ -580,28 +580,56 @@ static NSString *_placeholderItem = nil;
 
 - (void) setSelectionIndexPaths: (NSSet *)paths
 {
-  NSSet *indexPaths = paths;
+  NSMutableSet *selection;
+  NSMutableSet *proposed;
+  NSSet *added;
+  NSSet *removed;
 
   if (!_isSelectable)
     {
       return;
     }
 
-  if ([_selectionIndexPaths isEqual: indexPaths])
+  if ([_selectionIndexPaths isEqual: paths])
     {
       return;
     }
-  else
+
+  /* Work out what changes, and let the delegate narrow the changes down
+   * before any of them is made.
+   */
+  proposed = [NSMutableSet setWithSet: _selectionIndexPaths];
+  [proposed minusSet: paths];
+  removed = proposed;
+  if ([removed count] > 0
+    && [_delegate respondsToSelector:
+      @selector(collectionView:shouldDeselectItemsAtIndexPaths:)])
     {
-      ASSIGN(_selectionIndexPaths, indexPaths);
+      removed = [_delegate collectionView: self
+	  shouldDeselectItemsAtIndexPaths: removed];
     }
 
-
-  if ([_delegate respondsToSelector: @selector(collectionView:shouldSelectItemsAtIndexPaths:)])
+  proposed = [NSMutableSet setWithSet: paths];
+  [proposed minusSet: _selectionIndexPaths];
+  added = proposed;
+  if ([added count] > 0
+    && [_delegate respondsToSelector:
+      @selector(collectionView:shouldSelectItemsAtIndexPaths:)])
     {
-      indexPaths = [_delegate collectionView: self
-			      shouldSelectItemsAtIndexPaths: indexPaths];
+      added = [_delegate collectionView: self
+	  shouldSelectItemsAtIndexPaths: added];
     }
+
+  if ([removed count] == 0 && [added count] == 0)
+    {
+      return;
+    }
+
+  selection = [NSMutableSet setWithSet: _selectionIndexPaths];
+  [selection minusSet: removed];
+  [selection unionSet: added];
+  ASSIGNCOPY(_selectionIndexPaths, selection);
+  [self _updateSelectionIndexes];
 
   // First unselect all of the items
   FOR_IN(id, item, _visibleItems)
@@ -614,7 +642,7 @@ static NSString *_placeholderItem = nil;
   END_FOR_IN(_visibleItems);
 
   // Now select all that are selected
-  FOR_IN(NSIndexPath*, p, indexPaths)
+  FOR_IN(NSIndexPath*, p, _selectionIndexPaths)
     {
       id item = [self itemAtIndexPath: p];
       if ([item respondsToSelector: @selector(setSelected:)])
@@ -622,14 +650,20 @@ static NSString *_placeholderItem = nil;
 	  [item setSelected: YES];
 	}
     }
-  END_FOR_IN(indexPaths);
+  END_FOR_IN(_selectionIndexPaths);
 
-  if ([_delegate respondsToSelector: @selector(collectionView:didSelectItemsAtIndexPaths:)])
+  if ([removed count] > 0
+    && [_delegate respondsToSelector:
+      @selector(collectionView:didDeselectItemsAtIndexPaths:)])
     {
-      [_delegate collectionView: self didSelectItemsAtIndexPaths: indexPaths];
+      [_delegate collectionView: self didDeselectItemsAtIndexPaths: removed];
     }
-
-  [self _updateSelectionIndexes];
+  if ([added count] > 0
+    && [_delegate respondsToSelector:
+      @selector(collectionView:didSelectItemsAtIndexPaths:)])
+    {
+      [_delegate collectionView: self didSelectItemsAtIndexPaths: added];
+    }
 }
 
 - (NSIndexSet *) selectionIndexes
