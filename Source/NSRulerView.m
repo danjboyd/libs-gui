@@ -38,6 +38,7 @@
 #import "AppKit/NSEvent.h"
 #import "AppKit/NSFont.h"
 #import "AppKit/NSGraphics.h"
+#import "AppKit/NSGraphicsContext.h"
 #import "AppKit/NSRulerMarker.h"
 #import "AppKit/NSRulerView.h"
 #import "AppKit/NSScrollView.h"
@@ -506,10 +507,44 @@ static NSMutableDictionary *units = nil;
     }
 }
 
+/* Answers the one point wide strip across the ruler at location.  */
+- (NSRect) _rulerlineRectAtLocation: (CGFloat)location
+{
+  NSRect bounds = [self bounds];
+
+  if (_orientation == NSHorizontalRuler)
+    {
+      return NSMakeRect(location, NSMinY(bounds), 1.0, NSHeight(bounds));
+    }
+  return NSMakeRect(NSMinX(bounds), location, NSWidth(bounds), 1.0);
+}
+
 - (void) moveRulerlineFromLocation: (CGFloat)oldLoc 
                         toLocation: (CGFloat)newLoc
 {
-  /* FIXME/TODO: not implemented */
+  if (![self canDraw])
+    {
+      return;
+    }
+
+  [self lockFocus];
+  /* Erase the old line by redrawing the ruler under it.  */
+  if (oldLoc >= 0.0)
+    {
+      NSRect r = [self _rulerlineRectAtLocation: oldLoc];
+
+      [NSGraphicsContext saveGraphicsState];
+      NSRectClip(r);
+      [self drawRect: r];
+      [NSGraphicsContext restoreGraphicsState];
+    }
+  if (newLoc >= 0.0)
+    {
+      [[NSColor blackColor] set];
+      NSRectFill([self _rulerlineRectAtLocation: newLoc]);
+    }
+  [self unlockFocus];
+  [_window flushWindow];
 }
 
 - (void)drawRect: (NSRect)aRect
