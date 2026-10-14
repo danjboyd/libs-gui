@@ -226,22 +226,47 @@
 
 - (BOOL)accessibilityPerformPress
 {
-  return NO;
+  if (![self isEnabled])
+    {
+      return NO;
+    }
+  // A press toggles the switch, as a click does.
+  [self performClick: self];
+  return YES;
+}
+
+/* Sets the state as the user would, sending the action if it changes.  */
+- (BOOL) _accessibilitySetState: (NSControlStateValue)s
+{
+  if (![self isEnabled])
+    {
+      return NO;
+    }
+  if (_state != s)
+    {
+      [self setState: s];
+      if (_action)
+        {
+          [self sendAction: _action
+                        to: _target];
+        }
+    }
+  return YES;
 }
 
 - (BOOL) accessibilityPerformDecrement
 {
-  return NO;
+  return [self _accessibilitySetState: NSControlStateValueOff];
 }
 
 - (BOOL) accessibilityPerformIncrement
 {
-  return NO;
+  return [self _accessibilitySetState: NSControlStateValueOn];
 }
 
 - (NSString *) accessibilityValue
 {
-  return nil;
+  return [self stringValue];
 }
 
 // NSCoding
