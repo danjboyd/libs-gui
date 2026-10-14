@@ -320,8 +320,16 @@ NSPlanarFromDepth(NSWindowDepth depth)
 /* Graphic Ops */
 NSColor* NSReadPixel(NSPoint location)
 {
-  NSLog(@"NSReadPixel not implemented");
-  return nil;
+  NSBitmapImageRep *rep;
+  NSColor *color;
+
+  /* Read the pixel holding location in the focused view.  */
+  rep = [[NSBitmapImageRep alloc]
+	  initWithFocusedViewRect: NSMakeRect(floor(location.x),
+					      floor(location.y), 1, 1)];
+  color = [rep colorAtX: 0 y: 0];
+  RELEASE(rep);
+  return color;
 }
 
 void NSCopyBitmapFromGState(int srcGstate, NSRect srcRect, NSRect destRect)
