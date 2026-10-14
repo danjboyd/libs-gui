@@ -343,6 +343,7 @@
     {
       [_destinationLinks addObject: link];
       [self _watchSourceOfLink: link];
+      _flags.isEdited = YES;
       result = YES;
 
       // Notify delegate that we're starting to track this link
@@ -404,6 +405,7 @@
       [dst break];
     }
   END_FOR_IN(_destinationLinks);
+  _flags.isEdited = YES;
 }
 
 - (void) removeLink: (NSDataLink *)link
@@ -416,6 +418,7 @@
 	  [_delegate dataLinkManager: self stopTrackingLink: link];
 	}
       [_sourceLinks removeObject: link];
+      _flags.isEdited = YES;
     }
 
   if ([_destinationLinks containsObject: link])
@@ -426,6 +429,7 @@
 	  [_delegate dataLinkManager: self stopTrackingLink: link];
 	}
       [_destinationLinks removeObject: link];
+      _flags.isEdited = YES;
     }
 
   [self _unwatchSourceOfLink: link];
@@ -474,6 +478,7 @@
 
 - (void) noteDocumentEdited
 {
+  _flags.isEdited = YES;
   if ([_delegate respondsToSelector: @selector(dataLinkManagerDidEditLinks:)])
     {
       [_delegate dataLinkManagerDidEditLinks: self];
@@ -482,6 +487,7 @@
 
 - (void) noteDocumentReverted
 {
+  _flags.isEdited = NO;
   if ([_delegate respondsToSelector: @selector(dataLinkManagerDidEditLinks:)])
     {
       [_delegate dataLinkManagerDidEditLinks: self];
@@ -490,6 +496,8 @@
 
 - (void) noteDocumentSaved
 {
+  _flags.isEdited = NO;
+
   // Update all source links when document is saved
   FOR_IN(NSDataLink*, link, _sourceLinks)
     {
