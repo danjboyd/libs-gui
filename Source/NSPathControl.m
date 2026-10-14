@@ -433,8 +433,9 @@ static Class pathCellClass;
     }
   else
     {
-      NSPathComponentCell *pcc = [_cell pathComponentCellAtPoint: [event locationInWindow]
-                                                       withFrame: [self frame]
+      NSPoint p = [self convertPoint: [event locationInWindow] fromView: nil];
+      NSPathComponentCell *pcc = [_cell pathComponentCellAtPoint: p
+                                                       withFrame: [self bounds]
                                                           inView: self];
       [_cell _setClickedPathComponentCell: pcc];
       if ([[self cell] action])
