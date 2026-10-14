@@ -39,6 +39,7 @@
 #define _GNUstep_H_NSApplication
 #import <AppKit/AppKitDefines.h>
 
+#import <AppKit/NSAppearance.h>
 #import <AppKit/NSResponder.h>
 #import <AppKit/NSUserInterfaceValidation.h>
 #import <AppKit/NSWindow.h>
@@ -525,6 +526,11 @@ APPKIT_EXPORT_CLASS
 #if OS_API_VERSION(MAC_OS_X_VERSION_10_3, GS_API_LATEST)
 @interface NSApplication (CharacterPanel)
 - (void) orderFrontCharacterPalette: (id)sender;
+@end
+#endif
+
+#if OS_API_VERSION(MAC_OS_X_VERSION_10_14, GS_API_LATEST)
+@interface NSApplication (NSAppearanceCustomization) <NSAppearanceCustomization>
 @end
 #endif
 

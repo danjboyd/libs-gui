@@ -3947,12 +3947,17 @@ struct _DelegateWrapper
   return self;
 }
 
+@end /* NSApplication */
+
+
+@implementation NSApplication (NSAppearanceCustomization)
+
 - (NSAppearance*) appearance {
   return _appearance;
 }
 
 - (void) setAppearance: (NSAppearance*) appearance {
-  ASSIGNCOPY(_appearance, appearance);
+  ASSIGN(_appearance, appearance);
 }
 
 - (NSAppearance*) effectiveAppearance {
@@ -3966,8 +3971,7 @@ struct _DelegateWrapper
   }
 }
 
-
-@end /* NSApplication */
+@end
 
 
 @implementation	NSApplication (Private)

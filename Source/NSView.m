@@ -5430,7 +5430,7 @@ static NSView* findByTag(NSView *view, NSInteger aTag, NSUInteger *level)
 }
 
 - (void) setAppearance: (NSAppearance*) appearance {
-  ASSIGNCOPY(_appearance, appearance);
+  ASSIGN(_appearance, appearance);
 }
 
 - (NSAppearance*) effectiveAppearance {
