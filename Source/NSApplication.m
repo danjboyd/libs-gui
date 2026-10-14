@@ -3798,6 +3798,7 @@ struct _DelegateWrapper
       name: NSApplication##notif_name##Notification object: self]
 
   SET_DELEGATE_NOTIFICATION(DidBecomeActive);
+  SET_DELEGATE_NOTIFICATION(DidChangeScreenParameters);
   SET_DELEGATE_NOTIFICATION(DidFinishLaunching);
   SET_DELEGATE_NOTIFICATION(DidHide);
   SET_DELEGATE_NOTIFICATION(DidResignActive);
