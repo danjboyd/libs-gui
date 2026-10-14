@@ -156,9 +156,19 @@ static Class pathComponentCellClass;
                                            inView:(NSView *)view
 {
   NSUInteger c = [_pathComponentCells count];
-  NSUInteger woc = frame.size.width / c;
-  NSUInteger item = (NSUInteger)point.x / woc;
+  CGFloat x = point.x - NSMinX(frame);
+  NSUInteger item;
 
+  // The components share the width of the frame equally.
+  if (c == 0 || x < 0.0 || x >= NSWidth(frame))
+    {
+      return nil;
+    }
+  item = (NSUInteger)(x / (NSWidth(frame) / (CGFloat)c));
+  if (item >= c)
+    {
+      item = c - 1;
+    }
   return [_pathComponentCells objectAtIndex: item];
 }
 
