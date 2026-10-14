@@ -40,6 +40,7 @@
 #import "AppKit/NSWorkspace.h"
 #import "AppKit/NSFileWrapper.h"
 #import "AppKit/NSHelpManager.h"
+#import "AppKit/NSScreen.h"
 #import "AppKit/NSHelpPanel.h"
 #import "AppKit/NSHelpPanel.h"
 #import "AppKit/NSCursor.h"
@@ -426,11 +427,43 @@ static NSCursor *helpCursor = nil;
   if (contextHelp)
     {
       GSHelpManagerPanel *helpPanel;
+      NSRect frame;
 
-      // FIXME: We should position the window at point! 
-      // runModalForWindow will centre the window.
       helpPanel = [GSHelpManagerPanel sharedHelpManagerPanel];
       [helpPanel setHelpText: contextHelp];
+      /* Show the panel centred on the hint (in screen coordinates), kept
+       * on the screen, or centred on the screen without a hint.  Order it
+       * front before running it, as -runModalForWindow: centres a panel
+       * that is not visible.
+       */
+      if (NSEqualPoints(point, NSZeroPoint))
+        {
+          [helpPanel center];
+        }
+      else
+        {
+          NSScreen *screen = [helpPanel screen];
+          NSRect visible;
+
+          if (screen == nil)
+            {
+              screen = [NSScreen mainScreen];
+            }
+          visible = [screen visibleFrame];
+          frame = [helpPanel frame];
+          frame.origin.x = point.x - NSWidth(frame) / 2.0;
+          frame.origin.y = point.y - NSHeight(frame) / 2.0;
+          if (NSMaxX(frame) > NSMaxX(visible))
+            frame.origin.x = NSMaxX(visible) - NSWidth(frame);
+          if (NSMinX(frame) < NSMinX(visible))
+            frame.origin.x = NSMinX(visible);
+          if (NSMaxY(frame) > NSMaxY(visible))
+            frame.origin.y = NSMaxY(visible) - NSHeight(frame);
+          if (NSMinY(frame) < NSMinY(visible))
+            frame.origin.y = NSMinY(visible);
+          [helpPanel setFrameOrigin: frame.origin];
+        }
+      [helpPanel orderFront: self];
       [NSApp runModalForWindow: helpPanel];
       return YES;
     }

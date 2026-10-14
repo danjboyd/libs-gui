@@ -178,7 +178,8 @@
 {
   if ([[NSHelpManager sharedHelpManager]
     showContextHelpForObject: self
-    locationHint: [theEvent locationInWindow]] == NO)
+    locationHint: [[theEvent window] convertBaseToScreen:
+                    [theEvent locationInWindow]]] == NO)
     {
       if (_next_responder)
 	{
