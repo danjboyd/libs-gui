@@ -879,22 +879,26 @@ static GSValidationCenter *vc = nil;
   id item = nil;
   NSArray *items = nil;
   NSEnumerator *en = nil;
+  NSNumber *visible;
+  NSNumber *displayMode;
+  NSNumber *sizeMode;
 
-  ASSIGN(_configurationDictionary, configDict);
-
-  // set
-  _visible = [[_configurationDictionary objectForKey: @"isVisible"] boolValue];
-  _displayMode = [[_configurationDictionary objectForKey: @"displayMode"] intValue];
+  /* Read the configuration from the argument: removing items saves the
+   * toolbar's current state as its configuration.
+   */
+  RETAIN(configDict);
+  visible = [configDict objectForKey: @"isVisible"];
+  displayMode = [configDict objectForKey: @"displayMode"];
+  sizeMode = [configDict objectForKey: @"sizeMode"];
 
   // remove all items...
-  for (i = 0; i < [_items count]; i++)
+  while ([_items count] > 0)
     {
       [self _removeItemAtIndex: 0 broadcast: YES];
     }
 
   // add all of the items...
-  i = 0;
-  items = [_configurationDictionary objectForKey: @"items"];
+  items = [configDict objectForKey: @"items"];
   en = [items objectEnumerator];
   while ((item = [en nextObject]) != nil)
     {
@@ -902,6 +906,28 @@ static GSValidationCenter *vc = nil;
 				  atIndex: i++
 				broadcast: YES];
     }
+
+  if (displayMode != nil)
+    {
+      [self _setDisplayMode: [displayMode intValue] broadcast: YES];
+    }
+  if (sizeMode != nil)
+    {
+      [self _setSizeMode: [sizeMode intValue] broadcast: YES];
+    }
+
+  /* Save the new items and modes before showing the toolbar, which builds
+   * it from the saved configuration, then save its visibility too.
+   */
+  [self _saveConfig];
+  if (visible != nil)
+    {
+      [self setVisible: [visible boolValue]];
+      [self _saveConfig];
+    }
+
+  ASSIGN(_configurationDictionary, configDict);
+  RELEASE(configDict);
 }
 
 /**
