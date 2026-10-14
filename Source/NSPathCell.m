@@ -131,6 +131,10 @@ static Class pathComponentCellClass;
 
 + (Class) pathComponentCellClass
 {
+  if (pathComponentCellClass == Nil)
+    {
+      return [NSPathComponentCell class];
+    }
   return pathComponentCellClass;
 }
 
@@ -210,7 +214,7 @@ static Class pathComponentCellClass;
 {
   ASSIGN(_objectValue, obj);
   [self setPathComponentCells:
-          [NSPathCell _generateCellsForURL: (NSURL *)_objectValue]];
+          [[self class] _generateCellsForURL: (NSURL *)_objectValue]];
 }
 
 - (NSURL *) URL
@@ -309,7 +313,7 @@ static Class pathComponentCellClass;
       // Decompose string...
       while (at_root == NO)
         {
-          NSPathComponentCell *cell = [[NSPathComponentCell alloc] init];
+          NSPathComponentCell *cell = [[[self pathComponentCellClass] alloc] init];
           NSImage *image = nil;
           NSString *string = [u path];
           

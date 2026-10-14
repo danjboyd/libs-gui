@@ -241,7 +241,8 @@ static Class pathCellClass;
   
   while ((item = [en nextObject]) != nil)
     {
-      NSPathComponentCell *cell = [[NSPathComponentCell alloc] init];  
+      NSPathComponentCell *cell =
+        [[[[_cell class] pathComponentCellClass] alloc] init];
       [cell setImage: [item image]];
       [cell setURL: [item URL]];
       [array addObject: cell];
