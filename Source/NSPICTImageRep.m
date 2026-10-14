@@ -57,7 +57,7 @@
 
 + (instancetype) imageRepWithData: (NSData *)imageData
 {
-  return [[[self class] alloc] initWithData: imageData];
+  return AUTORELEASE([[[self class] alloc] initWithData: imageData]);
 }
 
 - (instancetype) initWithData: (NSData *)imageData
