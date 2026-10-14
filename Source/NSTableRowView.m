@@ -23,6 +23,8 @@
 */
 
 #import <Foundation/NSArray.h>
+#import "AppKit/NSColor.h"
+#import "AppKit/NSGraphics.h"
 #import "AppKit/NSTableRowView.h"
 #import "AppKit/NSTableView.h"
 
@@ -160,18 +162,52 @@
 
 - (void) drawBackgroundInRect: (NSRect)dirtyRect
 {
+  if (_backgroundColor != nil)
+    {
+      [_backgroundColor set];
+      NSRectFill(NSIntersectionRect(dirtyRect, [self bounds]));
+    }
 }
 
 - (void) drawDraggingDestinationFeedbackInRect: (NSRect)dirtyRect
 {
+  if (_targetForDropOperation)
+    {
+      [[NSColor selectedControlColor] set];
+      NSFrameRectWithWidth([self bounds], 2.0);
+    }
 }
 
 - (void) drawSelectionInRect: (NSRect)dirtyRect
 {
+  if (_selected
+    && _selectionHighlightStyle != NSTableViewSelectionHighlightStyleNone)
+    {
+      if (_emphasized)
+	{
+	  [[NSColor alternateSelectedControlColor] set];
+	}
+      else
+	{
+	  [[NSColor secondarySelectedControlColor] set];
+	}
+      NSRectFill(NSIntersectionRect(dirtyRect, [self bounds]));
+    }
 }
 
 - (void) drawSeparatorInRect: (NSRect)dirtyRect
 {
+  NSRect bounds = [self bounds];
+  NSRect line = bounds;
+
+  // A one point line along the bottom edge of the row.
+  line.size.height = 1.0;
+  if ([self isFlipped])
+    {
+      line.origin.y = NSMaxY(bounds) - 1.0;
+    }
+  [[NSColor gridColor] set];
+  NSRectFill(NSIntersectionRect(dirtyRect, line));
 }
 
 - (id) viewAtColumn: (NSInteger)column
