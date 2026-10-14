@@ -124,6 +124,8 @@
 - (NSData *)dataForType:(NSString *)type
 {
   id object = [_dataMap objectForKey: type];
+  if (object == nil)
+    return nil;
   if ([object isKindOfClass: [NSData class]])
     return (NSData *)object;
   
@@ -140,6 +142,8 @@
     return (NSString *)object;
   
   NSData *data = [self dataForType: type];
+  if (data == nil)
+    return nil;
   return [[[NSString alloc] initWithData: data
                                 encoding: NSUTF8StringEncoding] autorelease];
 }
