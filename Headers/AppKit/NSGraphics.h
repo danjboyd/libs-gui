@@ -271,7 +271,7 @@ APPKIT_EXPORT void NSDrawWindowBackground(NSRect aRect);
 
 // Context information
 APPKIT_EXPORT void NSCountWindowsForContext(NSInteger context, NSInteger *count);
-APPKIT_EXPORT void NSWindowListForContext(NSInteger context, NSInteger size, NSInteger **list);
+APPKIT_EXPORT void NSWindowListForContext(NSInteger context, NSInteger size, NSInteger list[]);
 APPKIT_EXPORT int NSGetWindowServerMemory(int context, int *virtualMemory, 
                                           int *windowBackingMemory, 
                                           NSString **windowDumpStream);

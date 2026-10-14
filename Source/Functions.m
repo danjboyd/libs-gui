@@ -1233,10 +1233,13 @@ NSShowSystemInfoPanel(NSDictionary *options)
   [NSApp orderFrontStandardInfoPanelWithOptions: options];
 }
 
+/* An application has a single graphics context, so list all its
+ * windows, as NSWindowList does.
+ */
 void
-NSWindowListForContext(NSInteger context, NSInteger size, NSInteger **list)
+NSWindowListForContext(NSInteger context, NSInteger size, NSInteger list[])
 {
-// TODO
+  NSWindowList(size, list);
 }
 
 int
