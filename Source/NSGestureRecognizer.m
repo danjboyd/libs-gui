@@ -27,7 +27,10 @@
    Boston, MA 02110-1301, USA.
 */
 
+#import <AppKit/NSApplication.h>
+#import <AppKit/NSEvent.h>
 #import <AppKit/NSGestureRecognizer.h>
+#import <AppKit/NSView.h>
 
 @implementation NSGestureRecognizer
 - (id)initWithCoder: (NSCoder *)coder
@@ -42,7 +45,23 @@
 
 - (NSPoint)locationInView:(NSView *)view
 {
-  return NSZeroPoint;
+  /* Recognizers do not track events of their own yet, so locate the
+   * application's current event, in the window's base coordinates when
+   * there is no view.
+   */
+  NSEvent *event = [NSApp currentEvent];
+  NSPoint location;
+
+  if (event == nil)
+    {
+      return NSZeroPoint;
+    }
+  location = [event locationInWindow];
+  if (view != nil)
+    {
+      location = [view convertPoint: location fromView: nil];
+    }
+  return location;
 }
 @end
 
