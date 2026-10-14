@@ -521,63 +521,26 @@ static CGFloat default_miter_limit = 10.0;
 - (void)stroke
 {
   NSGraphicsContext *ctxt = GSCurrentContext();
-  
-  if (_cachesBezierPath) 
-    {
-      NSRect bounds = [self bounds];
-      NSPoint origin = bounds.origin;
 
-      // FIXME: I don't see how this should work with color changes
-      if (_cacheImage == nil) 
-        {
-	  _cacheImage = [[NSImage alloc] initWithSize: bounds.size];
-	  [_cacheImage lockFocus];
-	  DPStranslate(ctxt, -origin.x, -origin.y);
-	  [ctxt GSSendBezierPath: self];
-	  DPSstroke(ctxt);
-	  [_cacheImage unlockFocus];
-	}
-      [_cacheImage compositeToPoint: origin operation: NSCompositeCopy];
-    } 
-  else 
-    {
-      [ctxt GSSendBezierPath: self];
-      DPSstroke(ctxt);
-    }
+  /* The path is always drawn directly, even when it caches itself, as an
+   * image cached with the colour and context of the first drawing would
+   * not draw the path correctly afterwards.  Caching has no effect in
+   * Cocoa either.
+   */
+  [ctxt GSSendBezierPath: self];
+  DPSstroke(ctxt);
 }
 
 - (void)fill
 {
   NSGraphicsContext *ctxt = GSCurrentContext();
 
-  if (_cachesBezierPath) 
-    {
-      NSRect bounds = [self bounds];
-      NSPoint origin = bounds.origin;
-
-      // FIXME: I don't see how this should work with color changes
-      if (_cacheImage == nil) 
-        {
-	  _cacheImage = [[NSImage alloc] initWithSize: bounds.size];
-	  [_cacheImage lockFocus];
-	  DPStranslate(ctxt, -origin.x, -origin.y);
-	  [ctxt GSSendBezierPath: self];
-	  if ([self windingRule] == NSNonZeroWindingRule)
-	    DPSfill(ctxt);
-	  else
-	    DPSeofill(ctxt);
-	  [_cacheImage unlockFocus];
-	}
-      [_cacheImage compositeToPoint: origin operation: NSCompositeCopy];
-    } 
-  else 
-    {
-      [ctxt GSSendBezierPath: self];
-      if ([self windingRule] == NSNonZeroWindingRule)
-	DPSfill(ctxt);
-      else
-	DPSeofill(ctxt);
-    }
+  // As for -stroke, the path is always drawn directly.
+  [ctxt GSSendBezierPath: self];
+  if ([self windingRule] == NSNonZeroWindingRule)
+    DPSfill(ctxt);
+  else
+    DPSeofill(ctxt);
 }
 
 - (void)addClip
