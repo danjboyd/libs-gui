@@ -1053,12 +1053,18 @@ systemColorWithName(NSString *name)
 
 + (NSColor *)systemIndigoColor
 {
-  return nil;
+  return [self colorWithCalibratedRed: 0.29
+			        green: 0.0
+				 blue: 0.51
+			        alpha: 1.0];
 }
 
 + (NSColor *)systemTealColor
 {
-  return nil;
+  return [self colorWithCalibratedRed: 0.0
+			        green: 0.5
+				 blue: 0.5
+			        alpha: 1.0];
 }
 
 ////////////////////////////////////////////////////////////
