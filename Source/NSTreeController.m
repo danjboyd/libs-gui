@@ -277,6 +277,40 @@
   return _leafKeyPath;
 }
 
+/* Answers the mutable array of the content tree that holds the object at
+ * indexPath, so that an edit reaches the content and survives
+ * -rearrangeObjects, which rebuilds the arranged tree from the content.
+ * Answers nil when the path does not lead to a mutable array.
+ */
+- (NSMutableArray *) _childrenHoldingIndexPath: (NSIndexPath *)indexPath
+{
+  NSUInteger length = [indexPath length];
+  NSUInteger pos = 0;
+  id children = _content;
+
+  if (length == 0)
+    {
+      return nil;
+    }
+  for (pos = 0; pos < length - 1; pos++)
+    {
+      NSUInteger i = [indexPath indexAtPosition: pos];
+
+      if (_childrenKeyPath == nil
+	|| ![children isKindOfClass: [NSArray class]] || i >= [children count])
+	{
+	  return nil;
+	}
+      children = [[children objectAtIndex: i] valueForKeyPath: _childrenKeyPath];
+    }
+
+  if (![children isKindOfClass: [NSMutableArray class]])
+    {
+      return nil;
+    }
+  return children;
+}
+
 - (IBAction) add: (id)sender
 {
   NSIndexPath *p = [NSIndexPath indexPathWithIndex: 0];
@@ -320,19 +354,19 @@
   if ([self canAddChild]
       && [self countKeyPath] == nil)
     {
-      NSUInteger length = [indexPath length];
-      NSUInteger pos = 0;
-      NSMutableArray *children = [_arranged_objects mutableChildNodes];
+      NSMutableArray *children = [self _childrenHoldingIndexPath: indexPath];
+      NSUInteger index;
 
-      for (pos = 0; pos < length - 1; pos++)
+      if (children == nil)
 	{
-	  NSUInteger i = [indexPath indexAtPosition: pos];
-	  id node = [children objectAtIndex: i];
-
-	  children = [node valueForKeyPath: _childrenKeyPath];
+	  return;
 	}
-
-      [children addObject: object];
+      index = [indexPath indexAtPosition: [indexPath length] - 1];
+      if (index > [children count])
+	{
+	  index = [children count];
+	}
+      [children insertObject: object atIndex: index];
 
       [self rearrangeObjects];
     }
@@ -370,31 +404,32 @@
 
 - (void) removeObjectAtArrangedObjectIndexPath: (NSIndexPath *)indexPath
 {
-  NSUInteger length = [indexPath length];
-  NSUInteger pos = 0;
-  NSMutableArray *children = [_arranged_objects mutableChildNodes];
-  NSUInteger lastIndex = 0;
+  NSMutableArray *children = [self _childrenHoldingIndexPath: indexPath];
+  NSUInteger index;
 
-  for (pos = 0; pos < length - 1; pos++)
+  if (children == nil)
     {
-      NSUInteger i = [indexPath indexAtPosition: pos];
-      id node = [children objectAtIndex: i];
-
-      children = [node valueForKeyPath: _childrenKeyPath];
+      return;
     }
-
-  lastIndex = [indexPath indexAtPosition: length - 1];
-  [children removeObjectAtIndex: lastIndex];
+  index = [indexPath indexAtPosition: [indexPath length] - 1];
+  if (index < [children count])
+    {
+      [children removeObjectAtIndex: index];
+    }
   [self rearrangeObjects];
 }
 
 - (void) removeObjectsAtArrangedObjectIndexPaths: (NSArray *)indexPaths
 {
-  FOR_IN(NSIndexPath*, indexPath, indexPaths)
+  NSArray *sorted = [indexPaths sortedArrayUsingSelector: @selector(compare:)];
+  NSEnumerator *e = [sorted reverseObjectEnumerator];
+  NSIndexPath *indexPath;
+
+  /* Remove the last paths first, so each path still names its object.  */
+  while ((indexPath = [e nextObject]) != nil)
     {
       [self removeObjectAtArrangedObjectIndexPath: indexPath];
     }
-  END_FOR_IN(indexPaths);
 }
 
 - (void) removeSelectionIndexPaths: (NSArray *)indexPaths
