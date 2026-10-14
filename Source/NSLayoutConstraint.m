@@ -30,6 +30,8 @@
 #import "AppKit/NSView.h"
 #import "AppKit/NSAnimation.h"
 #import "AppKit/NSLayoutConstraint.h"
+#import "AppKit/NSLayoutAnchor.h"
+#import "GSAutoLayoutAnchorPrivate.h"
 #import "NSViewPrivate.h"
 #import "NSWindowPrivate.h"
 #import "AppKit/NSWindow.h"
@@ -522,14 +524,53 @@ static NSMapTable *installedContainers = nil;
   ASSIGN(_identifier, identifier);
 }
 
+/* Answers a new anchor for the attribute of item, of the class a view
+ * vends for that attribute, as views make their anchors on demand too.
+ * Keeping the anchors would retain the items, which constraints do not.
+ */
+static NSLayoutAnchor *
+anchorFor(id item, NSLayoutAttribute attribute)
+{
+  Class c;
+
+  if (item == nil)
+    {
+      return nil;
+    }
+  switch (attribute)
+    {
+      case NSLayoutAttributeLeft:
+      case NSLayoutAttributeRight:
+      case NSLayoutAttributeLeading:
+      case NSLayoutAttributeTrailing:
+      case NSLayoutAttributeCenterX:
+	c = [NSLayoutXAxisAnchor class];
+	break;
+      case NSLayoutAttributeTop:
+      case NSLayoutAttributeBottom:
+      case NSLayoutAttributeCenterY:
+      case NSLayoutAttributeLastBaseline:
+      case NSLayoutAttributeFirstBaseline:
+	c = [NSLayoutYAxisAnchor class];
+	break;
+      case NSLayoutAttributeWidth:
+      case NSLayoutAttributeHeight:
+	c = [NSLayoutDimension class];
+	break;
+      default:
+	return nil;
+    }
+  return AUTORELEASE([[c alloc] initWithItem: item attribute: attribute]);
+}
+
 - (NSLayoutAnchor *) firstAnchor
 {
-  return _firstAnchor;
+  return anchorFor(_firstItem, _firstAttribute);
 }
 
 - (NSLayoutAnchor *) secondAnchor
 {
-  return _secondAnchor;
+  return anchorFor(_secondItem, _secondAttribute);
 }
 
 - (NSLayoutPriority) priority
