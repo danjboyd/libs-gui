@@ -241,12 +241,11 @@ static NSParagraphStyle	*defaultStyle = nil;
   if (!rightToLeft)
     // Holds languages whose current scripts are written right to left.
     rightToLeft = [[NSArray alloc] initWithObjects: @"ar", @"ara", @"arc",
-				   @"chi", @"fa", @"fas", @"he", @"heb", @"iw",
+				   @"fa", @"fas", @"he", @"heb", @"iw",
 				   @"ji", @"kas", @"ks", @"ku", @"kur", @"pa",
-				   @"pan", @"per" @"ps", @"pus", @"sd", @"snd",
+				   @"pan", @"per", @"ps", @"pus", @"sd", @"snd",
 				   @"syr", @"tk", @"tmh", @"tuk", @"ug",
-				   @"uig", @"ur," @"urd", @"yi", @"yid", @"zh",
-				   @"zho", nil];
+				   @"uig", @"ur", @"urd", @"yi", @"yid", nil];
   if ([rightToLeft containsObject: langCode] == YES)
     writingDirection = NSWritingDirectionRightToLeft;
   else // If it's not RTL, assume LTR.
