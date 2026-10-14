@@ -87,7 +87,7 @@ NSString *_writeDataToTempFile(NSData *data)
     {
       NSString *filepath = _writeDataToTempFile(movie);
 
-      _url = [NSURL fileURLWithPath: filepath];
+      ASSIGN(_url, [NSURL fileURLWithPath: filepath]);
       _tmp = YES;
       ASSIGN(_movie, movie);
     }
@@ -101,6 +101,7 @@ NSString *_writeDataToTempFile(NSData *data)
   // Unsupported, as we don't really know what the arg will point to.
   // On macOS10.4 when this appeared it was assumed to be a QTMovie.
   //
+  RELEASE(self);
   return nil;
 }
 
@@ -111,6 +112,7 @@ NSString *_writeDataToTempFile(NSData *data)
     {
       if (url == nil)
 	{
+	  RELEASE(self);
 	  return nil;
 	}
 
