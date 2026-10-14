@@ -1433,6 +1433,7 @@ to make sure syncing is handled properly in all cases.
   /* NSTextView notifications */
   SET_DELEGATE_NOTIFICATION(ViewDidChangeSelection);
   SET_DELEGATE_NOTIFICATION(ViewWillChangeNotifyingTextView);
+  SET_DELEGATE_NOTIFICATION(ViewDidChangeTypingAttributes);
 
   [self _recacheDelegateResponses];
 }
