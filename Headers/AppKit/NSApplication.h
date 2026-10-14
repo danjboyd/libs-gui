@@ -372,6 +372,14 @@ APPKIT_EXPORT_CLASS
 - (void) setApplicationIconImage: (NSImage*)anImage;
 - (NSImage*) applicationIconImage;
 
+#if OS_API_VERSION(MAC_OS_X_VERSION_10_5, GS_API_LATEST)
+/**
+ * Returns the application's dock tile, which shows its icon, badge label
+ * and any content view set on it.
+ */
+- (NSDockTile *) dockTile;
+#endif
+
 /*
  * Hiding all windows
  */
