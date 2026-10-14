@@ -426,6 +426,7 @@ APPKIT_EXPORT_CLASS
   BOOL _isAlternate;
   char _indentation; // 0..15
   NSString *_toolTip;
+  NSAttributedString *_attributedTitle;
 }
 
 @end

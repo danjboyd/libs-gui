@@ -129,6 +129,7 @@ static Class imageClass;
   TEST_RELEASE(_submenu);
   TEST_RELEASE(_representedObject);
   TEST_RELEASE(_toolTip);
+  TEST_RELEASE(_attributedTitle);
   [super dealloc];
 }
 
@@ -256,6 +257,8 @@ static Class imageClass;
 
 - (void) setTitle: (NSString*)aString
 {
+  // A plain title replaces any attributed title.
+  DESTROY(_attributedTitle);
   if (nil == aString)
     aString = @"";
 	
@@ -522,14 +525,17 @@ static Class imageClass;
 
 - (NSAttributedString *)attributedTitle
 {
-  // FIXME
-  return nil;
+  return _attributedTitle;
 }
 
 -(void) setAttributedTitle: (NSAttributedString *)title
 {
-  // FIXME
+  /* Keep the plain title in step with the attributed one, which menus
+   * do not draw yet.
+   */
   [self setTitle: [title string]];
+  _attributedTitle = [title copy];
+  [_menu itemChanged: self];
 }
 
 - (NSInteger)indentationLevel
@@ -580,6 +586,7 @@ static Class imageClass;
   copy->_representedObject = RETAIN(_representedObject);
   copy->_submenu = [_submenu copy];
   copy->_toolTip = RETAIN(_toolTip);
+  copy->_attributedTitle = [_attributedTitle copyWithZone: zone];
   copy->_target = _target;
 
   return copy;
@@ -597,6 +604,10 @@ static Class imageClass;
           [aCoder encodeBool: YES forKey: @"NSIsSeparator"];
         }
       [aCoder encodeObject: _title forKey: @"NSTitle"];
+      if (_attributedTitle != nil)
+        {
+          [aCoder encodeObject: _attributedTitle forKey: @"NSAttributedTitle"];
+        }
       [aCoder encodeObject: NSStringFromSelector(_action) forKey: @"NSAction"];
       [aCoder encodeObject: _keyEquivalent forKey: @"NSKeyEquiv"];
       [aCoder encodeObject: _onStateImage forKey: @"NSOnImage"];
@@ -687,6 +698,11 @@ static Class imageClass;
                    keyEquivalent: key];
       //[aDecoder decodeObjectForKey: @"NSMenu"];
 
+      if ([aDecoder containsValueForKey: @"NSAttributedTitle"])
+        {
+          [self setAttributedTitle:
+            [aDecoder decodeObjectForKey: @"NSAttributedTitle"]];
+        }
       if ([aDecoder containsValueForKey: @"NSTarget"])
         {
          id target = [aDecoder decodeObjectForKey: @"NSTarget"];
