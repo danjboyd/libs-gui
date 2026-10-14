@@ -166,8 +166,6 @@
 
 - (void) _layoutViewsWithOrientation: (NSUserInterfaceLayoutOrientation)o
 {
-  NSRect currentFrame = [self frame];
-  NSRect newFrame = currentFrame;
   NSArray *sv = [self subviews];
   NSUInteger n = [sv count];
   CGFloat sp = [self spacing];
@@ -188,9 +186,7 @@
             }
         }
 
-      newFrame.size.height += sp; // * 2; // expand height
-      newFrame.origin.y -= (sp / 2.0); // move the view down.
-      newHeight = newFrame.size.height; // start at top of view...
+      newHeight = NSHeight([self bounds]); // start at top of view...
     }
   else
     {
@@ -202,11 +198,9 @@
               sp = [v frame].size.width;
             }
         }
-
-      newFrame.size.width += sp;
     }
-  
-  [self setFrame: newFrame];
+
+  /* Lay the views out within the stack view, leaving its frame alone.  */
   FOR_IN(NSView*,v,sv)
     {
       NSRect f; 
