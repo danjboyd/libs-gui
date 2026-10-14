@@ -1176,7 +1176,7 @@ static Class         fontPanelClass = Nil;
 		break;
 	      }
 	  }
-	[newAttributes setObject: [NSString stringWithFormat: @"%f", size]
+	[newAttributes setObject: [NSNumber numberWithFloat: size]
 		       forKey: NSFontSizeAttribute];
 	break;
       case NSSizeDownFontAction:
@@ -1189,7 +1189,7 @@ static Class         fontPanelClass = Nil;
 		break;
 	      }
 	  }
-	[newAttributes setObject: [NSString stringWithFormat: @"%f", size]
+	[newAttributes setObject: [NSNumber numberWithFloat: size]
 		       forKey: NSFontSizeAttribute];
 	break;
       case NSHeavierFontAction:
