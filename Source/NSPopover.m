@@ -272,8 +272,15 @@
 
 - (IBAction) performClose: (id)sender
 {
-  [_realPanel performClose: sender];
-  _shown = NO;
+  /* The panel is borderless, so it cannot perform a close itself: ask the
+   * delegate, then close.
+   */
+  if ([_delegate respondsToSelector: @selector(popoverShouldClose:)]
+    && [_delegate popoverShouldClose: self] == NO)
+    {
+      return;
+    }
+  [self close];
 }
 
 - (void) showRelativeToRect: (NSRect)positioningRect
@@ -341,7 +348,11 @@
 
 - (BOOL) windowShouldClose: (id)sender
 {
-  return [_delegate popoverShouldClose:self];
+  if ([_delegate respondsToSelector: @selector(popoverShouldClose:)])
+    {
+      return [_delegate popoverShouldClose: self];
+    }
+  return YES;
 }
 
 - (void) windowWillClose: (NSNotification *)notification
