@@ -460,7 +460,8 @@
 
 - (void) setValue: (id)value
 {
-  ASSIGNCOPY(_value, value);
+  // The value is a strong property, as in Cocoa: keep the object itself.
+  ASSIGN(_value, value);
 }
 
 - (NSString *) localizedKey
