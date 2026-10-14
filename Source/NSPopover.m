@@ -242,10 +242,32 @@
 
 /* Methods */
 
+/* Posts the named notification, and sends it to the delegate with sel if
+ * the delegate responds to it.
+ */
+- (void) _postNotificationName: (NSString *)name
+	      delegateSelector: (SEL)sel
+{
+  NSNotification *n = [NSNotification notificationWithName: name
+						    object: self];
+
+  [[NSNotificationCenter defaultCenter] postNotification: n];
+  if ([_delegate respondsToSelector: sel])
+    {
+      [_delegate performSelector: sel withObject: n];
+    }
+}
+
 - (void) close
 {
+  if (_realPanel == nil)
+    {
+      return;
+    }
   [_realPanel close];
   _shown = NO;
+  [self _postNotificationName: NSPopoverDidCloseNotification
+	     delegateSelector: @selector(popoverDidClose:)];
 }
 
 - (IBAction) performClose: (id)sender
@@ -304,6 +326,8 @@
       windowFrame.origin.x += viewFrame.size.width;
     }
 
+  [self _postNotificationName: NSPopoverWillShowNotification
+	     delegateSelector: @selector(popoverWillShow:)];
   [_realPanel setFrame: windowFrame display: YES];
   [_realPanel makeKeyAndOrderFront:self];
 
@@ -311,6 +335,8 @@
   NSDebugLog(@"Showing relative to in screen %@",NSStringFromRect(screenRect));
 
   _shown = YES;
+  [self _postNotificationName: NSPopoverDidShowNotification
+	     delegateSelector: @selector(popoverDidShow:)];
 }
 
 - (BOOL) windowShouldClose: (id)sender
@@ -318,18 +344,10 @@
   return [_delegate popoverShouldClose:self];
 }
 
-- (void) windowDidClose: (NSNotification *)notification
-{
-  [[NSNotificationCenter defaultCenter] postNotificationName:NSPopoverDidCloseNotification
-						      object:self
-						    userInfo:nil];
-}
-
 - (void) windowWillClose: (NSNotification *)notification
 {
-  [[NSNotificationCenter defaultCenter] postNotificationName:NSPopoverWillCloseNotification
-						      object:self
-						    userInfo:nil];
+  [self _postNotificationName: NSPopoverWillCloseNotification
+	     delegateSelector: @selector(popoverWillClose:)];
 
   /* The panel is released when it is closed, so forget it; showing the
    * popover again makes a new panel.
