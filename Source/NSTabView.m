@@ -222,7 +222,8 @@
 - (void) selectNextTabViewItem: (id)sender
 {
   NSUInteger selected_item = [self indexOfTabViewItem:_selected];
-  if (selected_item != NSNotFound)
+  // Do nothing on the last item.
+  if (selected_item != NSNotFound && selected_item + 1 < [_items count])
     {
       [self selectTabViewItemAtIndex: selected_item + 1];
     }
@@ -231,7 +232,8 @@
 - (void) selectPreviousTabViewItem: (id)sender
 {
   NSUInteger selected_item = [self indexOfTabViewItem:_selected];
-  if (selected_item != NSNotFound)
+  // Do nothing on the first item.
+  if (selected_item != NSNotFound && selected_item > 0)
     {
       [self selectTabViewItemAtIndex: selected_item - 1];
     }
