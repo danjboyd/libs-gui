@@ -50,7 +50,6 @@
       _menuItem = [[NSMenuItem alloc] initWithTitle: @"?"
                                              action: NULL
                                       keyEquivalent: @""];
-      [_menuItem setRepresentedObject: self];
       [self setLength: len];
     }
 
@@ -60,6 +59,7 @@
 - (void) dealloc
 {
   RELEASE(_menuItem);
+  RELEASE(_view);
   [super dealloc];
 }
 
