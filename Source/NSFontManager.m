@@ -1126,7 +1126,18 @@ static Class         fontPanelClass = Nil;
 	  }
 	else
 	  {
-	    t &= _trait;
+	    /* Add the trait, dropping its opposite, as
+	     * -convertFont:toHaveTrait: does.
+	     */
+	    if (_trait & NSBoldFontMask)
+	      {
+		t &= ~NSUnboldFontMask;
+	      }
+	    if (_trait & NSItalicFontMask)
+	      {
+		t &= ~NSUnitalicFontMask;
+	      }
+	    t |= _trait;
 	    // FIXME: What about weight for NSBoldFontMask?
 	  }
 	[newAttributes setObject: [NSNumber numberWithUnsignedInt: t]
