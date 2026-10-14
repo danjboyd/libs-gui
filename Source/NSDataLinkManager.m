@@ -64,6 +64,8 @@
 - (void) setDestinationManager: (id)dst;
 - (void) setSourceSelection: (id)src;
 - (void) setDestinationSelection: (id)dst;
+- (void) setLinkNumber: (NSDataLinkNumber)number;
+- (void) setDisposition: (NSDataLinkDisposition)disposition;
 @end
 
 @implementation NSDataLink (Private)
@@ -105,6 +107,16 @@
 - (void) setIsMarker: (BOOL)flag
 {
   _flags.isMarker = flag;
+}
+
+- (void) setLinkNumber: (NSDataLinkNumber)number
+{
+  _linkNumber = number;
+}
+
+- (void) setDisposition: (NSDataLinkDisposition)disposition
+{
+  _disposition = disposition;
 }
 @end
 
@@ -338,6 +350,11 @@
   [self _checkLink: link];
   [link setDestinationSelection: selection];
   [link setDestinationManager: self];
+  [link setDisposition: NSLinkInDestination];
+  if ([link linkNumber] == 0)
+    {
+      [link setLinkNumber: _nextLinkNumber++];
+    }
 
   if ([_destinationLinks containsObject: link] == NO)
     {
@@ -440,6 +457,11 @@
   BOOL result = NO;
 
   [link setSourceManager: self];
+  [link setDisposition: NSLinkInSource];
+  if ([link linkNumber] == 0)
+    {
+      [link setLinkNumber: _nextLinkNumber++];
+    }
 
   if ([_sourceLinks containsObject: link] == NO)
     {

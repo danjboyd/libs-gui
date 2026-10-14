@@ -289,6 +289,12 @@
   // circumstances a link cannot be broken, so this method 
   // always returns YES.
 
+  /* Mark the link broken before telling the delegates, so that they see
+   * it broken.
+   */
+  _disposition = NSLinkBroken;
+  _flags.broken = YES;
+
   if ([srcDelegate respondsToSelector: @selector(dataLinkManager:didBreakLink:)])
     {
       [srcDelegate dataLinkManager: _sourceManager didBreakLink: self];
@@ -299,7 +305,7 @@
       [dstDelegate dataLinkManager: _destinationManager didBreakLink: self];
     }
 
-  return (_flags.broken = YES);
+  return YES;
 }
 
 - (void)noteSourceEdited
