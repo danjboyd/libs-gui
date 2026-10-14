@@ -52,6 +52,15 @@ static NSAnimationContext *_currentContext = nil;
 {
 }
 
+- (void) dealloc
+{
+  if (_completionHandler != NULL)
+    {
+      Block_release(_completionHandler);
+    }
+  [super dealloc];
+}
+
 // Properties...
 - (void) setDuration: (NSTimeInterval)duration
 {
@@ -70,7 +79,20 @@ static NSAnimationContext *_currentContext = nil;
 
 - (void) setCompletionHandler: (GSAnimationContextCompletionHandler) completionHandler
 {
-  _completionHandler = completionHandler;
+  if (completionHandler != _completionHandler)
+    {
+      GSAnimationContextCompletionHandler old = _completionHandler;
+
+      /* The handler is a copy property: keep our own copy of the block,
+       * as the caller's block may live on the stack or be released.
+       */
+      _completionHandler = (completionHandler == NULL)
+        ? NULL : Block_copy(completionHandler);
+      if (old != NULL)
+        {
+          Block_release(old);
+        }
+    }
 }
 
 - (void *) timingFunction
