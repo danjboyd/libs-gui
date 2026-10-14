@@ -111,7 +111,7 @@
 
 - (void) setIndexPath: (NSIndexPath *)indexPath
 {
-  _indexPath = indexPath;
+  ASSIGN(_indexPath, indexPath);
 }
 
 - (NSInteger) zIndex
@@ -134,19 +134,27 @@
   return _representedElementKind;
 }
 
+- (void) dealloc
+{
+  RELEASE(_indexPath);
+  RELEASE(_representedElementKind);
+  [super dealloc];
+}
+
 // Copying
 - (id) copyWithZone: (NSZone *)z
 {
-  NSCollectionViewLayoutAttributes *a = [[NSCollectionViewLayoutAttributes allocWithZone: z] init];
+  NSCollectionViewLayoutAttributes *a = [[[self class] allocWithZone: z] init];
 
   [a setFrame: [self frame]];
-  [a setSize: [self size]];
   [a setAlpha: [self alpha]];
   [a setHidden: [self isHidden]];
   [a setIndexPath: [self indexPath]];
   [a setZIndex: [self zIndex]];
-  
-  return self;
+  a->_representedElementCategory = _representedElementCategory;
+  ASSIGN(a->_representedElementKind, _representedElementKind);
+
+  return a;
 }
 
 - (NSString *) description
