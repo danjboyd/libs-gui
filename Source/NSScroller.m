@@ -1019,6 +1019,11 @@ static float	buttonsOffset = 1.0; // buttonsWidth = sw - 2*buttonsOffset
 
   NSDebugLog (@"trackScrollButtons");
 
+  /* The arrow cells are shared by all scrollers, so they must send this
+   * scroller's action to its target.
+   */
+  [self _setTargetAndActionToCells];
+
   _hitPart = [self testPart: [theEvent locationInWindow]];
 
   /*
