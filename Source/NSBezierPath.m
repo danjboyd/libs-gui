@@ -2182,7 +2182,7 @@ static NSPoint point_on_curve(double t, NSPoint a, NSPoint b, NSPoint c,
 
 	  case NSCurveToBezierPathElement:
 	    {
-	      double t0, t1, t;
+	      double t0, t1, t, a, b;
 	      NSPoint q;
 
 	      num_curves++;
@@ -2198,13 +2198,27 @@ static NSPoint point_on_curve(double t, NSPoint a, NSPoint b, NSPoint c,
 	      t = (p.x * (pts[2].x - pts[1].x) \
 		   + pts[0].x * (-pts[2].x - pts[1].x) \
 		   + pts[1].x * pts[1].x + pts[0].x * pts[0].x); \
-	      if (t >= 0.0) \
+	      a = -pts[2].x + 3 * pts[1].x - 3 * pts[0].x + p.x; \
+	      b = pts[1].x - 2 * pts[0].x + p.x; \
+	      if (a == 0.0) \
+		{ \
+		  /* The derivative is linear, with one root at most.  */ \
+		  if (b != 0.0) \
+		    { \
+		      t0 = (p.x - pts[0].x) / (2 * b); \
+		      if (t0 > 0.0 && t0 < 1.0) \
+			{ \
+			  q = point_on_curve(t0, p, pts[0], pts[1], pts[2]); \
+			  CHECK_MAX(max, q) \
+			  CHECK_MIN(min, q) \
+			} \
+		    } \
+		} \
+	      else if (t >= 0.0) \
 		{ \
 		  t = sqrt(t); \
-		  t0 = (pts[1].x - 2 * pts[0].x + p.x + t) \
-		       / (-pts[2].x + 3 * pts[1].x - 3 * pts[0].x + p.x); \
-		  t1 = (pts[1].x - 2 * pts[0].x + p.x - t) \
-		       / (-pts[2].x + 3 * pts[1].x - 3 * pts[0].x + p.x); \
+		  t0 = (b + t) / a; \
+		  t1 = (b - t) / a; \
 \
 		  if (t0 > 0.0 && t0 < 1.0) \
 		    { \
