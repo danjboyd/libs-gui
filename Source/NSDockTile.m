@@ -24,9 +24,12 @@
    Boston, MA 02110 USA.
 */
 
+#import "AppKit/NSAffineTransform.h"
+#import <Foundation/NSEnumerator.h>
 #import "AppKit/NSApplication.h"
 #import "AppKit/NSDockTile.h"
 #import "AppKit/NSGraphics.h"
+#import "AppKit/NSGraphicsContext.h"
 #import "AppKit/NSView.h"
 #import "AppKit/NSImage.h"
 #import "AppKit/NSFont.h"
@@ -44,6 +47,47 @@ clearDockTileRect(NSSize size)
 {
   NSRectFillUsingOperation(NSMakeRect(0, 0, size.width, size.height),
 			   NSCompositeClear);
+}
+
+/* Draws view and its subviews into the current context.  A dock tile's
+ * content view is never in a window, so it cannot lock focus or display
+ * itself; set up its coordinates here instead.
+ */
+static void
+drawViewHierarchy(NSView *view)
+{
+  NSRect frame = [view frame];
+  NSRect bounds = [view bounds];
+  NSAffineTransform *t;
+  NSEnumerator *e;
+  NSView *sub;
+
+  if ([view isHidden] || NSWidth(bounds) <= 0.0 || NSHeight(bounds) <= 0.0)
+    {
+      return;
+    }
+
+  [NSGraphicsContext saveGraphicsState];
+  t = [NSAffineTransform transform];
+  [t translateXBy: NSMinX(frame) yBy: NSMinY(frame)];
+  if ([view isFlipped])
+    {
+      [t translateXBy: 0.0 yBy: NSHeight(frame)];
+      [t scaleXBy: 1.0 yBy: -1.0];
+    }
+  [t scaleXBy: NSWidth(frame) / NSWidth(bounds)
+	  yBy: NSHeight(frame) / NSHeight(bounds)];
+  [t translateXBy: -NSMinX(bounds) yBy: -NSMinY(bounds)];
+  [t concat];
+  NSRectClip(bounds);
+
+  [view drawRect: bounds];
+  e = [[view subviews] objectEnumerator];
+  while ((sub = [e nextObject]) != nil)
+    {
+      drawViewHierarchy(sub);
+    }
+  [NSGraphicsContext restoreGraphicsState];
 }
 
 @implementation NSDockTile
@@ -127,10 +171,9 @@ clearDockTileRect(NSSize size)
 {
   clearDockTileRect(_size);
 
-  if (_contentView != nil && [_contentView canDraw])
+  if (_contentView != nil)
     {
-      [_contentView displayRectIgnoringOpacity: [_contentView bounds]
-                                      inContext: [NSGraphicsContext currentContext]];
+      drawViewHierarchy(_contentView);
     }
   else
     {
