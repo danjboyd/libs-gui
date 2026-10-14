@@ -260,7 +260,6 @@
   [kvp setValue: _initialValue];
 
   _count++;
-  AUTORELEASE(kvp);
 
   return kvp;
 }

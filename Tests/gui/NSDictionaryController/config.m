@@ -36,6 +36,7 @@ int main()
   PASS([[kvp key] isEqual: @"myKey"], "the key-value pair key round-trips");
   [kvp setValue: @"myValue"];
   PASS([[kvp value] isEqual: @"myValue"], "the key-value pair value round-trips");
+  RELEASE(kvp);
 
   [dc setInitialKey: @"otherKey"];
   PASS([[dc initialKey] isEqual: @"otherKey"], "initialKey round-trips");
