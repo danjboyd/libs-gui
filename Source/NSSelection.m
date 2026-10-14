@@ -114,7 +114,7 @@ typedef enum
     {
       _sharedAllSelection =
 	[NSSelection _wellKnownSelection: "GNUstep All selection marker"];
-      [_sharedEmptySelection _setSelectionType: GSAllSelection];
+      [_sharedAllSelection _setSelectionType: GSAllSelection];
     }
   return _sharedAllSelection;
 }
