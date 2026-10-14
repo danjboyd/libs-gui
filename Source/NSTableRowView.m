@@ -22,7 +22,9 @@
    Boston, MA 02110 USA.
 */
 
+#import <Foundation/NSArray.h>
 #import "AppKit/NSTableRowView.h"
+#import "AppKit/NSTableView.h"
 
 @implementation NSTableRowView
 
@@ -122,9 +124,28 @@
   _groupRowStyle = flag;
 }
 
+/* Answers the table view holding the row view, if any.  */
+- (NSTableView *) _tableView
+{
+  NSView *sv = [self superview];
+
+  if ([sv isKindOfClass: [NSTableView class]])
+    {
+      return (NSTableView *)sv;
+    }
+  return nil;
+}
+
 - (NSInteger) numberOfColumns
 {
-  return 0;
+  NSTableView *tv = [self _tableView];
+
+  /* A row view on its own holds one view per column.  */
+  if (tv == nil)
+    {
+      return [[self subviews] count];
+    }
+  return [tv numberOfColumns];
 }
 
 - (NSColor *) backgroundColor
@@ -155,7 +176,30 @@
 
 - (id) viewAtColumn: (NSInteger)column
 {
-  return nil;
+  NSTableView *tv = [self _tableView];
+  NSRect frame = [self frame];
+  NSInteger row;
+
+  if (tv == nil)
+    {
+      NSArray *subviews = [self subviews];
+
+      if (column < 0 || column >= (NSInteger)[subviews count])
+	{
+	  return nil;
+	}
+      return [subviews objectAtIndex: column];
+    }
+
+  /* A table only places the views of the visible columns in the row, so
+   * ask the table for the view of the column in this row.
+   */
+  row = [tv rowAtPoint: NSMakePoint(NSMidX(frame), NSMidY(frame))];
+  if (row < 0 || column < 0 || column >= [tv numberOfColumns])
+    {
+      return nil;
+    }
+  return [tv viewAtColumn: column row: row makeIfNecessary: NO];
 }
 
 - (BOOL) isNextRowSelected
