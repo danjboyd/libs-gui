@@ -173,8 +173,13 @@ NSGraphicsContext	*GSCurrentContext(void)
   NSThread *th = GSCurrentThread();
 
 # if     defined(_NONFRAGILE_ABI)
-  object_setIvar(th,
-    class_getInstanceVariable(object_getClass(th), "_gcontext"), context);
+  /* The thread retains its context and releases it when deallocated, but
+   * object_setIvar() does not retain, as the ivar is not declared strong.
+   */
+  Ivar ivar = class_getInstanceVariable(object_getClass(th), "_gcontext");
+  id *addr = (id*)((char*)th + ivar_getOffset(ivar));
+
+  ASSIGN(*addr, context);
 # else
   ASSIGN(th->_gcontext, context);
 # endif
