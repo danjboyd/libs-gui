@@ -888,7 +888,22 @@ static NSString	*namePrefix = @"NSTypedFilenamesPboardType:";
 	}
       else if (file != nil)
 	{
-	  [sender writeFileContents: file];
+	  if ([originalTypes containsObject: type] == YES)
+	    {
+	      /* The original types of a filtered file are the file's name
+	       * types, so the data is the name of the file.
+	       */
+	      [sender setPropertyList: [NSArray arrayWithObject: file]
+			      forType: type];
+	    }
+	  else
+	    {
+	      /* An identity filter service: the file holds data of the
+	       * type asked for.
+	       */
+	      [sender setData: [NSData dataWithContentsOfFile: file]
+		      forType: type];
+	    }
 	}
       else
 	{
