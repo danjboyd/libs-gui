@@ -6157,7 +6157,9 @@ configuation! */
       if (attributes != nil)
         {
           attributes = [sender convertAttributes: attributes];
-          [_textStorage setAttributes: attributes range: foundRange];
+          // The run may extend beyond the range to change.
+          [_textStorage setAttributes: attributes
+                                range: NSIntersectionRange(foundRange, aRange)];
         }
     }
   [_textStorage endEditing];
