@@ -240,9 +240,10 @@ APPKIT_EXPORT_CLASS
 - (void) removeObjectsAtArrangedObjectIndexPaths: (NSArray *)indexPaths;
 
 /**
- * Removes selection of objects at the specified indexPaths.
+ * Removes the specified indexPaths from the selection, leaving the
+ * objects in place.  Returns NO if editing could not be committed.
  */
-- (void) removeSelectionIndexPaths: (NSArray *)indexPaths;
+- (BOOL) removeSelectionIndexPaths: (NSArray *)indexPaths;
 
 /**
  * Remove the currently selected object
@@ -255,9 +256,10 @@ APPKIT_EXPORT_CLASS
 - (void) removeObjectsAtArrangedObjectIndexPaths: (NSArray *)indexPaths;
 
 /**
- * Removes selection of objects at the specified indexPaths.
+ * Removes the specified indexPaths from the selection, leaving the
+ * objects in place.  Returns NO if editing could not be committed.
  */
-- (void) removeSelectionIndexPaths: (NSArray *)indexPaths;
+- (BOOL) removeSelectionIndexPaths: (NSArray *)indexPaths;
 
 /**
  * Remove the currently selected object. This method will only

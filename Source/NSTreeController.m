@@ -457,9 +457,18 @@
     }
 }
 
-- (void) removeSelectionIndexPaths: (NSArray *)indexPaths
+- (BOOL) removeSelectionIndexPaths: (NSArray *)indexPaths
 {
-  [self removeObjectsAtArrangedObjectIndexPaths: indexPaths];
+  BOOL f = [self commitEditing];
+
+  if (YES == f)
+    {
+      [self willChangeValueForKey: @"selectionIndexPaths"];
+      [_selection_index_paths removeObjectsInArray: indexPaths];
+      [self didChangeValueForKey: @"selectionIndexPaths"];
+    }
+
+  return f;
 }
 
 - (void) setAlwaysUsesMultipleValuesMarker: (BOOL)flag
