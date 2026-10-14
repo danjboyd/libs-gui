@@ -54,6 +54,9 @@ APPKIT_EXPORT_CLASS
   NSView *_view;
   CGFloat _length;
   BOOL _highlightMode;
+  NSImage *_alternateImage;
+  SEL _doubleAction;
+  NSInteger _sendActionMask;
 }
 
 - (SEL) action;

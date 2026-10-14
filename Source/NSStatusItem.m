@@ -35,6 +35,8 @@
 #import <Foundation/NSAttributedString.h>
 #import <Foundation/NSString.h>
 
+#import <AppKit/NSEvent.h>
+#import <AppKit/NSImage.h>
 #import <AppKit/NSStatusItem.h>
 #import <AppKit/NSMenuItem.h>
 #import <AppKit/NSView.h>
@@ -51,6 +53,7 @@
                                              action: NULL
                                       keyEquivalent: @""];
       [self setLength: len];
+      _sendActionMask = NSLeftMouseUpMask;
     }
 
   return self;
@@ -60,6 +63,7 @@
 {
   RELEASE(_menuItem);
   RELEASE(_view);
+  RELEASE(_alternateImage);
   [super dealloc];
 }
 
@@ -75,8 +79,7 @@
 
 - (SEL) doubleAction
 {
-  // NIMP
-  return NULL;
+  return _doubleAction;
 }
 
 - (void) drawStatusBarBackgroundInRect: (NSRect)rect withHighlight: (BOOL)flag
@@ -116,8 +119,10 @@
 
 - (NSInteger) sendActionOn: (NSInteger)mask
 {
-  //NIMP
-  return 0;
+  NSInteger previous = _sendActionMask;
+
+  _sendActionMask = mask;
+  return previous;
 }
 
 - (void) setAction: (SEL)action
@@ -132,7 +137,7 @@
 
 - (void) setDoubleAction: (SEL)sel
 {
-  // NIMP
+  _doubleAction = sel;
 }
 
 - (void) setEnabled: (BOOL)flag
@@ -208,13 +213,12 @@
 
 - (NSImage*) alternateImage
 {
-  //NIMP
-  return nil;
+  return _alternateImage;
 }
 
 - (void) setAlternateImage: (NSImage*)img
 {
-  //NIMP
+  ASSIGN(_alternateImage, img);
 }
 
 @end
