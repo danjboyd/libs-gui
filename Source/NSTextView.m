@@ -141,6 +141,11 @@ a new internal method called from NSLayoutManager when text has changed.
 /*
 Interface for a bunch of internal methods that need to be cleaned up.
 */
+@interface NSTextView (GSClickedOnLink)
+- (BOOL) _delegateHandlesClickedOnLink;
+- (BOOL) _sendClickedOnLink: (id)link atIndex: (NSUInteger)charIndex;
+@end
+
 @interface NSTextView (GNUstepPrivate)
 - (NSUInteger) _characterIndexForPoint: (NSPoint)point
                        respectFraction: (BOOL)respectFraction;
@@ -3602,18 +3607,39 @@ This method is for user changes; see NSTextView_actions.m.
   return [NSDictionary dictionaryWithDictionary: _layoutManager->_typingAttributes];
 }
 
+/* Whether the delegate implements either form of the clicked on link
+ * method.
+ */
+- (BOOL) _delegateHandlesClickedOnLink
+{
+  return _delegate != nil
+    && ([_delegate respondsToSelector:
+          @selector(textView:clickedOnLink:atIndex:)]
+        || [_delegate respondsToSelector: @selector(textView:clickedOnLink:)]);
+}
+
+/* Tells the delegate of a clicked link, with the index when it takes it,
+ * or with the older form without the index, and answers whether the
+ * delegate handled the click.
+ */
+- (BOOL) _sendClickedOnLink: (id)link atIndex: (NSUInteger)charIndex
+{
+  if ([_delegate respondsToSelector:
+    @selector(textView:clickedOnLink:atIndex:)])
+    {
+      return [_delegate textView: self clickedOnLink: link atIndex: charIndex];
+    }
+  if ([_delegate respondsToSelector: @selector(textView:clickedOnLink:)])
+    {
+      return [_delegate textView: self clickedOnLink: link];
+    }
+  return NO;
+}
+
 - (void) clickedOnLink: (id)link
 	       atIndex: (NSUInteger)charIndex
 {
-  if (_delegate != nil)
-    {
-      SEL selector = @selector(textView:clickedOnLink:atIndex:);
-
-      if ([_delegate respondsToSelector: selector])
-        {
-          [_delegate textView: self clickedOnLink: link atIndex: charIndex];
-        }
-    }
+  [self _sendClickedOnLink: link atIndex: charIndex];
 }
 
 - (void) updateFontPanel
@@ -5773,15 +5799,12 @@ other than copy/paste or dragging. */
 	       originally created the link object and saved it under
 	       the NSLinkAttributeName in the text.  Normally, a NSURL
 	       object is used. */
-	    /* TODO: should call -clickedOnLink:atIndex: instead */
 	    id link = [_textStorage attribute: NSLinkAttributeName
 				    atIndex: startIndex
 				    effectiveRange: NULL];
 	    if (link != nil  &&  _delegate != nil)
 	      {
-		SEL selector = @selector(textView:clickedOnLink:atIndex:);
-		
-		if ([_delegate respondsToSelector: selector])
+		if ([self _delegateHandlesClickedOnLink])
 		  {
 		    /* Move the insertion point over the link.  */
 		    chosenRange = [self selectionRangeForProposedRange: 
@@ -5797,9 +5820,7 @@ other than copy/paste or dragging. */
 		       YES if it handles the click, NO if it doesn't
 		       -- and if it doesn't, we need to pass the click
 		       to the next responder.  */
-		    if ([_delegate textView: self
-                              clickedOnLink: link  
-                                    atIndex: startIndex])
+		    if ([self _sendClickedOnLink: link atIndex: startIndex])
 		      {
 			return;
 		      }
