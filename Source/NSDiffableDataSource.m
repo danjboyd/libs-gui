@@ -432,7 +432,10 @@ GSDiffableDefaultSectionIdentifier()
     {
       _collectionView = collectionView;
       _snapshot = [[NSDiffableDataSourceSnapshot alloc] init];
-      _itemProvider = (void*)RETAIN(itemProvider);
+      /* Keep our own copy of the block, as the caller's block may live on
+       * the stack or be released.
+       */
+      _itemProvider = (itemProvider == NULL) ? NULL : Block_copy(itemProvider);
       _identifierToIndexPath = [[NSMutableDictionary alloc] init];
       _creatingIndexPaths = [[NSMutableSet alloc] init];
       [_collectionView setDataSource: self];
@@ -447,7 +450,10 @@ GSDiffableDefaultSectionIdentifier()
 - (void) dealloc
 {
   DESTROY(_snapshot);
-  DESTROY(_itemProvider);
+  if (_itemProvider != NULL)
+    {
+      Block_release(_itemProvider);
+    }
   DESTROY(_identifierToIndexPath);
   DESTROY(_creatingIndexPaths);
   [super dealloc];
@@ -677,7 +683,8 @@ cancelPrefetchingForItemsAtIndexPaths: (NSArray *)indexPaths
     {
       _tableView = tableView;
       _snapshot = [[NSDiffableDataSourceSnapshot alloc] init];
-      _cellProvider = (void*)RETAIN(cellProvider);
+      // Keep our own copy of the block, as for the collection view.
+      _cellProvider = (cellProvider == NULL) ? NULL : Block_copy(cellProvider);
       _identifierToIndexPath = [[NSMutableDictionary alloc] init];
       _creatingIndexPaths = [[NSMutableSet alloc] init];
       [_tableView setDataSource: self];
@@ -688,7 +695,10 @@ cancelPrefetchingForItemsAtIndexPaths: (NSArray *)indexPaths
 - (void) dealloc
 {
   DESTROY(_snapshot);
-  DESTROY(_cellProvider);
+  if (_cellProvider != NULL)
+    {
+      Block_release(_cellProvider);
+    }
   DESTROY(_identifierToIndexPath);
   DESTROY(_creatingIndexPaths);
   [super dealloc];
