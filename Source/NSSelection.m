@@ -112,8 +112,8 @@ typedef enum
 {
   if (!_sharedAllSelection)
     {
-      _sharedAllSelection =
-	[NSSelection _wellKnownSelection: "GNUstep All selection marker"];
+      _sharedAllSelection = RETAIN(
+	[NSSelection _wellKnownSelection: "GNUstep All selection marker"]);
       [_sharedAllSelection _setSelectionType: GSAllSelection];
     }
   return _sharedAllSelection;
@@ -123,8 +123,8 @@ typedef enum
 {
   if (!_sharedCurrentSelection)
     {
-      _sharedCurrentSelection =
-	[NSSelection _wellKnownSelection: "GNUstep Current selection marker"];
+      _sharedCurrentSelection = RETAIN(
+	[NSSelection _wellKnownSelection: "GNUstep Current selection marker"]);
       [_sharedCurrentSelection _setSelectionType: GSCurrentSelection];
     }
   return _sharedCurrentSelection;
@@ -134,8 +134,8 @@ typedef enum
 {
   if (!_sharedEmptySelection)
     {
-      _sharedEmptySelection =
-	[NSSelection _wellKnownSelection: "GNUstep Empty selection marker"];
+      _sharedEmptySelection = RETAIN(
+	[NSSelection _wellKnownSelection: "GNUstep Empty selection marker"]);
       [_sharedEmptySelection _setSelectionType: GSEmptySelection];
     }
   return _sharedEmptySelection;
