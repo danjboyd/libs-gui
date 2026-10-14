@@ -276,7 +276,10 @@ APPKIT_EXPORT_CLASS
  * Delegate methods provide fine-grained control over opening/closing
  * operations and content resizing.
  */
-@interface NSDrawerDelegate
+@protocol NSDrawerDelegate <NSObject>
+#if GS_PROTOCOLS_HAVE_OPTIONAL
+@optional
+#endif
 
 /**
  * Asks the delegate whether the drawer should close.
