@@ -29,7 +29,10 @@
    Boston, MA 02110-1301, USA.
 */ 
 
+#import <Foundation/NSArray.h>
+#import <Foundation/NSCoder.h>
 #import <Foundation/NSException.h>
+#import <Foundation/NSValue.h>
 #import "AppKit/NSBezierPath.h"
 #import "AppKit/NSColor.h"
 #import "AppKit/NSColorSpace.h"
@@ -277,22 +280,88 @@ relativeCenterPosition: (NSPoint)relativeCenterPoint
  */
 - (void) encodeWithCoder: (NSCoder*)aCoder
 {
+  /* The colour space is not archived, as NSColorSpace does not archive
+   * itself yet; it is taken from the colours again when decoding.
+   */
   if ([aCoder allowsKeyedCoding])
     {
+      NSMutableArray *locations;
+      NSInteger i;
+
+      locations = [NSMutableArray arrayWithCapacity: _numberOfColorStops];
+      for (i = 0; i < _numberOfColorStops; i++)
+        {
+          [locations addObject: [NSNumber numberWithDouble: _locations[i]]];
+        }
+      [aCoder encodeObject: _colors forKey: @"NSColors"];
+      [aCoder encodeObject: locations forKey: @"NSColorLocations"];
     }
   else
     {
+      [aCoder encodeObject: _colors];
+      [aCoder encodeValueOfObjCType: @encode(NSInteger)
+                                 at: &_numberOfColorStops];
+      [aCoder encodeArrayOfObjCType: @encode(CGFloat)
+                              count: _numberOfColorStops
+                                 at: _locations];
     }
 }
 
 - (id) initWithCoder: (NSCoder*)aDecoder
 {
+  NSArray *colors;
+  CGFloat *locations = NULL;
+  NSUInteger count;
+
   if ([aDecoder allowsKeyedCoding])
     {
+      NSArray *locationArray;
+
+      colors = [aDecoder decodeObjectForKey: @"NSColors"];
+      locationArray = [aDecoder decodeObjectForKey: @"NSColorLocations"];
+      count = [colors count];
+      if (count >= 2 && [locationArray count] == count)
+        {
+          NSUInteger i;
+
+          locations = malloc(sizeof(CGFloat) * count);
+          for (i = 0; i < count; i++)
+            {
+              locations[i] = [[locationArray objectAtIndex: i] doubleValue];
+            }
+        }
     }
   else
     {
+      NSInteger stops;
+
+      colors = [aDecoder decodeObject];
+      [aDecoder decodeValueOfObjCType: @encode(NSInteger) at: &stops];
+      count = [colors count];
+      if (stops < 0 || (NSUInteger)stops != count)
+        {
+          DESTROY(self);
+          [NSException raise: NSInternalInconsistencyException
+                      format: @"NSGradient archive holds %ld locations"
+                              @" for %lu colours", (long)stops,
+                       (unsigned long)count];
+        }
+      locations = malloc(sizeof(CGFloat) * (count > 0 ? count : 1));
+      [aDecoder decodeArrayOfObjCType: @encode(CGFloat)
+                                count: count
+                                   at: locations];
     }
+
+  if (count < 2)
+    {
+      free(locations);
+      DESTROY(self);
+      return nil;
+    }
+  self = [self initWithColors: colors
+                  atLocations: locations
+                   colorSpace: nil];
+  free(locations);
   return self;
 }
 
