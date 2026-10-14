@@ -1221,8 +1221,10 @@ NSConvertWindowNumberToGlobal(int winNum, unsigned int *globalNum)
 void
 NSCountWindowsForContext(NSInteger context, NSInteger *count)
 {
-// TODO
-  *count = 0;
+  /* An application has a single context, so count all its windows, as
+   * NSCountWindows does.
+   */
+  NSCountWindows(count);
 }
 
 void
