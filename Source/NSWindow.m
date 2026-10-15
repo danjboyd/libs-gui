@@ -6100,8 +6100,15 @@ current key view.<br />
   return _attachedSheet;
 }
 
+/** Returns the window the receiver is attached to as a sheet, or nil if
+ * the receiver is not a sheet that is being shown.
+ */
 - (NSWindow *) sheetParent
 {
+  if (_parent != nil && [_parent attachedSheet] == self)
+    {
+      return _parent;
+    }
   return nil;
 }
 
