@@ -88,13 +88,22 @@ enum {
 * NSTerminateNow;
 * NSTerminateLater.
 * </example>
+* NSTerminateCancel and NSTerminateNow have the values of NO and YES, so
+* a delegate using the older API returning a BOOL works too.<br />
+* The enum_extensibility attribute (which Cocoa's NS_ENUM gives every
+* enumeration) lets Swift import the type as NSApplication.TerminateReply
+* with the cases .terminateCancel, .terminateNow and .terminateLater.
 */
-enum {
-  NSTerminateCancel = NO,
-  NSTerminateNow = YES, 
-  NSTerminateLater
-};
-typedef NSUInteger NSApplicationTerminateReply;
+typedef NS_ENUM(NSUInteger, NSApplicationTerminateReply)
+{
+  NSTerminateCancel NS_SWIFT_NAME(terminateCancel) = 0,
+  NSTerminateNow NS_SWIFT_NAME(terminateNow) = 1,
+  NSTerminateLater NS_SWIFT_NAME(terminateLater) = 2
+}
+#if __has_attribute(enum_extensibility)
+__attribute__((enum_extensibility(open)))
+#endif
+NS_SWIFT_NAME(NSApplication.TerminateReply);
 
 /** 
 * Type used by -requestUserAttention: when an applications opened.  Possible values are:
