@@ -1,9 +1,7 @@
 /* EPS and PDF operations make data for copying, so they answer YES from
    -isCopyingOperation.  Every operation answered NO.  Making an operation
    needs the backend and the printing bundle, so the set is skipped
-   without them.  The operations are made but not run; only one operation
-   may be current for a thread, so the first is cleared before the second
-   is made. */
+   without them.  The operations are made but not run. */
 #include "Testing.h"
 
 #include <Foundation/NSAutoreleasePool.h>
@@ -30,6 +28,8 @@ main(int argc, char **argv)
   NS_HANDLER
     if ([[localException name] isEqualToString: NSInternalInconsistencyException])
       SKIP("It looks like GNUstep backend is not yet installed")
+    else
+      [localException raise];
   NS_ENDHANDLER
 
   view = AUTORELEASE([[NSView alloc]
@@ -44,9 +44,9 @@ main(int argc, char **argv)
       SKIP("the printing bundle is not available")
     }
   PASS([eps isCopyingOperation], "an EPS operation is a copying operation");
-  PASS([NSPrintOperation currentOperation] == eps,
-    "a new operation is the current operation");
-
+  /* GNUstep makes a new operation the current one at once, and will not
+     make another while there is one; Cocoa does neither until an
+     operation runs.  So clear it before making the next. */
   [NSPrintOperation setCurrentOperation: nil];
   pdf = [NSPrintOperation PDFOperationWithView: view
                                     insideRect: [view bounds]
