@@ -65,6 +65,12 @@ static NSRecursiveLock  *serverLock = nil;
 
 static GSDisplayServer *currentServer = nil;
 
+/* Counts the events posted at the start of an event queue, so a scan of
+ * the queue that has passed its start can begin again.  Event queues are
+ * used on the AppKit thread only.
+ */
+static NSUInteger	headInsertions = 0;
+
 /** Returns the GSDisplayServer that created the interal
     representation for window. If the internal representation has not
     yet been created (for instance, if the window is deferred), it
@@ -958,6 +964,8 @@ GSCurrentServer(void)
  * back to the event queue and sees the event.  It is a run loop watcher
  * that triggers at once, removing itself when it does.  The run loop does
  * not retain watchers, so there is one for each thread, never released.
+ * If the event is taken from the queue before the loop next waits in that
+ * mode, the waker stays until then and makes that one pass return at once.
  */
 @interface GSPostedEventWaker : NSObject <RunLoopEvents>
 {
@@ -1050,11 +1058,19 @@ GSCurrentServer(void)
 			  dequeue: (BOOL)flag
 {
   NSUInteger pos = 0;	/* Position in queue scanned so far	*/
+  NSUInteger inserted = headInsertions;
   NSRunLoop *loop = nil;
 
   do
     {
       NSUInteger count = [event_queue count];
+
+      if (inserted != headInsertions)
+	{
+	  /* An event was put at the start of the queue: scan it all again. */
+	  inserted = headInsertions;
+	  pos = 0;
+	}
       NSEvent *event;
       NSUInteger i = 0;
 
@@ -1165,20 +1181,24 @@ GSCurrentServer(void)
 
 /** Posts an event to the event queue.  The value of flag determines
  * whether the event is inserted at the start of the queue or appended
- * at the end.
- */
-/**
- * Puts anEvent in the event queue, at its start if flag is YES.  If the
- * run loop of the calling thread is running (for example when the event
- * is posted from a timer while a modal loop waits for events) it is made
- * to stop waiting for input, so the event is seen at once, as in Cocoa.
+ * at the end.<br />
+ * If the run loop of the calling thread is running (for example when the
+ * event is posted from a timer while a modal loop waits for events) it is
+ * made to stop waiting for input, so the event is seen at once.  The queue
+ * belongs to the AppKit thread: call this method there (-[NSApplication
+ * postEvent:atStart:] passes events from other threads on to it).
  */
 - (void) postEvent: (NSEvent*)anEvent atStart: (BOOL)flag
 {
   if (flag)
-    [event_queue insertObject: anEvent atIndex: 0];
+    {
+      [event_queue insertObject: anEvent atIndex: 0];
+      headInsertions++;
+    }
   else
-    [event_queue addObject: anEvent];
+    {
+      [event_queue addObject: anEvent];
+    }
   [GSPostedEventWaker wakeCurrentRunLoop];
 }
 
