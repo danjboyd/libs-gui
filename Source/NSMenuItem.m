@@ -338,7 +338,13 @@ static Class imageClass;
 
 - (NSUInteger) userKeyEquivalentModifierMask
 {
-  // FIXME
+  /* User key equivalents come from the NSCommandKeys default, whose
+   * entries are command keys.
+   */
+  if ([[self userKeyEquivalent] length] == 0)
+    {
+      return 0;
+    }
   return NSCommandKeyMask;
 }
 
