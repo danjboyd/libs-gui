@@ -1,9 +1,11 @@
 /* A menu keeps the context and tear-off menu representations it is given.
-   Both setters were stubs and the getters answered nil.  Menus need no
-   backend for this. */
+   Both setters were stubs and the getters answered nil.  A menu makes its
+   panel, which needs the shared application (and with it the backend);
+   the set is skipped without them. */
 #include "Testing.h"
 
 #include <Foundation/NSAutoreleasePool.h>
+#include <AppKit/NSApplication.h>
 #include <AppKit/NSMenu.h>
 
 int
@@ -15,6 +17,13 @@ main(int argc, char **argv)
   id tearOff = AUTORELEASE([NSObject new]);
 
   START_SET("NSMenu representations")
+
+  NS_DURING
+    [NSApplication sharedApplication];
+  NS_HANDLER
+    if ([[localException name] isEqualToString: NSInternalInconsistencyException])
+      SKIP("It looks like GNUstep backend is not yet installed")
+  NS_ENDHANDLER
 
   menu = AUTORELEASE([[NSMenu alloc] initWithTitle: @"Test"]);
   PASS([menu contextMenuRepresentation] == nil

@@ -1,9 +1,11 @@
 /* A cell keeps its user interface layout direction, left to right by
    default.  The setter was a stub, so the direction always read as left to
-   right.  Cells need no backend for this. */
+   right.  A text cell needs fonts, so the shared application (and with
+   it the backend) must exist; the set is skipped without them. */
 #include "Testing.h"
 
 #include <Foundation/NSAutoreleasePool.h>
+#include <AppKit/NSApplication.h>
 #include <AppKit/NSCell.h>
 
 int
@@ -13,6 +15,13 @@ main(int argc, char **argv)
   NSCell *c;
 
   START_SET("NSCell userInterfaceLayoutDirection")
+
+  NS_DURING
+    [NSApplication sharedApplication];
+  NS_HANDLER
+    if ([[localException name] isEqualToString: NSInternalInconsistencyException])
+      SKIP("It looks like GNUstep backend is not yet installed")
+  NS_ENDHANDLER
 
   c = AUTORELEASE([[NSCell alloc] initTextCell: @"x"]);
   PASS([c userInterfaceLayoutDirection]
