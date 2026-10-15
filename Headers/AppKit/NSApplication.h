@@ -89,7 +89,9 @@ enum {
 * NSTerminateLater.
 * </example>
 * NSTerminateCancel and NSTerminateNow have the values of NO and YES, so
-* a delegate using the older API returning a BOOL works too.<br />
+* in Objective-C a delegate using the older API returning a BOOL works
+* too.  In Objective-C++ (as with Cocoa) a method declared to return
+* NSApplicationTerminateReply must return one of the constants.<br />
 * The enum_extensibility attribute (which Cocoa's NS_ENUM gives every
 * enumeration) lets Swift import the type as NSApplication.TerminateReply
 * with the cases .terminateCancel, .terminateNow and .terminateLater.

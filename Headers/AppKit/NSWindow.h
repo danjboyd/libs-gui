@@ -96,8 +96,10 @@ enum {
  * (.OK, .cancel, .alertFirstButtonReturn and so on).<br />
  * For Clang the constants are static constants of the type, as in Cocoa,
  * since Swift makes only those members of the type; Clang accepts them
- * as case labels.  Other compilers get an enumeration, so the constants
- * stay integer constant expressions.
+ * as case labels (GNU constant folding, which -pedantic warns about).
+ * Other compilers get an enumeration, so the constants stay integer
+ * constant expressions.  The constants are NSInteger with Clang and int
+ * otherwise, so print them with %ld and a cast to long.
  */
 #ifndef NS_TYPED_EXTENSIBLE_ENUM
 /* Defined by gnustep-base from the version that declares
