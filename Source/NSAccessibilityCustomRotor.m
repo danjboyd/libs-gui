@@ -29,49 +29,70 @@
 - (instancetype) initWithLabel: (NSString *)label
             itemSearchDelegate: (id<NSAccessibilityCustomRotorItemSearchDelegate>)delegate
 {
-  return nil;
+  if ((self = [super init]) != nil)
+    {
+      _type = NSAccessibilityCustomRotorTypeCustom;
+      ASSIGNCOPY(_label, label);
+      _itemSearchDelegate = delegate;
+    }
+  return self;
 }
 
 - (instancetype) initWithRotorType: (NSAccessibilityCustomRotorType)rotorType
                 itemSearchDelegate: (id<NSAccessibilityCustomRotorItemSearchDelegate>)delegate
 {
-  return nil;
+  if ((self = [super init]) != nil)
+    {
+      _type = rotorType;
+      _itemSearchDelegate = delegate;
+    }
+  return self;
+}
+
+- (void) dealloc
+{
+  RELEASE(_label);
+  [super dealloc];
 }
 
 - (NSAccessibilityCustomRotorType) type
 {
-  return 0;
+  return _type;
 }
 
 - (void) setType: (NSAccessibilityCustomRotorType)type
 {
+  _type = type;
 }
 
 - (NSString *) label
 {
-  return nil;
+  return _label;
 }
 
 - (void) setLabel: (NSString *)label
 {
+  ASSIGNCOPY(_label, label);
 }
 
 - (id<NSAccessibilityCustomRotorItemSearchDelegate>) itemSearchDelegate
 {
-  return nil;
+  return _itemSearchDelegate;
 }
 
 - (void) setItemSearchDelegate: (id<NSAccessibilityCustomRotorItemSearchDelegate>) delegate
 {
+  _itemSearchDelegate = delegate;
 }
 
 - (id<NSAccessibilityElementLoading>) itemLoadingDelegate
 {
-  return nil;
+  return _itemLoadingDelegate;
 }
 
 - (void) setItemLoadingDelegate: (id<NSAccessibilityElementLoading>) delegate
 {
+  _itemLoadingDelegate = delegate;
 }
   
 @end
@@ -81,34 +102,52 @@
 
 - (instancetype)initWithTargetElement:(id<NSAccessibilityElement>)targetElement
 {
-  return nil;
+  if ((self = [super init]) != nil)
+    {
+      ASSIGN(_targetElement, targetElement);
+      _targetRange = NSMakeRange(NSNotFound, 0);
+    }
+  return self;
 }
 
 - (instancetype)initWithItemLoadingToken: (id<NSAccessibilityLoadingToken>)token
                              customLabel: (NSString *)customLabel
 {
-  return nil;
+  if ((self = [super init]) != nil)
+    {
+      ASSIGN(_itemLoadingToken, (id)token);
+      ASSIGNCOPY(_customLabel, customLabel);
+      _targetRange = NSMakeRange(NSNotFound, 0);
+    }
+  return self;
+}
+
+- (void) dealloc
+{
+  RELEASE(_targetElement);
+  RELEASE(_itemLoadingToken);
+  RELEASE(_customLabel);
+  [super dealloc];
 }
 
 - (id<NSAccessibilityElement>) targetElement
 {
-  return nil;
+  return _targetElement;
 }
 
 - (id<NSAccessibilityLoadingToken>) itemLoadingToken
 {
-  return nil;
+  return _itemLoadingToken;
 }
 
 - (NSRange) targetRange
 {
-  return NSMakeRange(0,NSNotFound);
+  return _targetRange;
 }
 
 - (NSString *) customLabel
 {
-  return nil;
+  return _customLabel;
 }
 
 @end
-

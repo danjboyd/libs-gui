@@ -83,6 +83,12 @@ typedef NSInteger NSAccessibilityCustomRotorType;
 // Rotor...
 APPKIT_EXPORT_CLASS
 @interface NSAccessibilityCustomRotor : NSObject
+{
+  NSAccessibilityCustomRotorType _type;
+  NSString *_label;
+  id _itemSearchDelegate; // not retained
+  id _itemLoadingDelegate; // not retained
+}
   
 - (instancetype) initWithLabel: (NSString *)label
                    itemSearchDelegate: (id<NSAccessibilityCustomRotorItemSearchDelegate>)delegate;
@@ -107,6 +113,12 @@ APPKIT_EXPORT_CLASS
 // Results...
 APPKIT_EXPORT_CLASS
 @interface NSAccessibilityCustomRotorItemResult : NSObject
+{
+  id _targetElement;
+  id _itemLoadingToken;
+  NSRange _targetRange;
+  NSString *_customLabel;
+}
 
 - (instancetype)initWithTargetElement:(id<NSAccessibilityElement>)targetElement;
 
