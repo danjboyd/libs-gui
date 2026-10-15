@@ -5314,16 +5314,19 @@ static NSView* findByTag(NSView *view, NSInteger aTag, NSUInteger *level)
     }
 }
 
+/* The direction is kept for the application; GNUstep views lay out left
+ * to right whatever it is.
+ */
 - (NSUserInterfaceLayoutDirection) userInterfaceLayoutDirection
 {
-  // FIXME
-  return NSUserInterfaceLayoutDirectionLeftToRight;
+  return _rFlags.right_to_left
+    ? NSUserInterfaceLayoutDirectionRightToLeft
+    : NSUserInterfaceLayoutDirectionLeftToRight;
 }
 
 - (void) setUserInterfaceLayoutDirection: (NSUserInterfaceLayoutDirection)dir
 {
-  // FIXME: implement this
-  return;
+  _rFlags.right_to_left = (dir == NSUserInterfaceLayoutDirectionRightToLeft);
 }
 
 /**

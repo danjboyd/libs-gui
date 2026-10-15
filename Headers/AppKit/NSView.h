@@ -174,6 +174,7 @@ PACKAGE_SCOPE
     unsigned	has_tooltips:1;		/* The view has tooltips set.	*/
     unsigned	ignores_backing:1;      /* The view does not trigger    */
                                         /* backing flush when drawn     */
+    unsigned	right_to_left:1;	/* Right to left layout.	*/
   } _rFlags;
 
 @protected
