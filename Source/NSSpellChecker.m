@@ -169,19 +169,26 @@ static int __documentTag = 0;
     }
 }
 
+/* These follow the user's defaults, under the names Cocoa uses, and are
+ * off when the user has not set them, as GNUstep text views do not
+ * substitute by themselves.
+ */
 + (BOOL)isAutomaticTextReplacementEnabled
 {
-  return NO;
+  return [[NSUserDefaults standardUserDefaults]
+    boolForKey: @"NSAutomaticTextReplacementEnabled"];
 }
 
 + (BOOL)isAutomaticDashSubstitutionEnabled
 {
-  return NO;
+  return [[NSUserDefaults standardUserDefaults]
+    boolForKey: @"NSAutomaticDashSubstitutionEnabled"];
 }
 
 + (BOOL)isAutomaticQuoteSubstitutionEnabled
 {
-  return NO;
+  return [[NSUserDefaults standardUserDefaults]
+    boolForKey: @"NSAutomaticQuoteSubstitutionEnabled"];
 }
 
 //
