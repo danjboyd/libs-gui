@@ -37,9 +37,13 @@
 
 @implementation NSTextBlock
 
+/** Initialises a text block with no colours, absolute dimensions and
+ * widths of 0, and top vertical alignment, as in Cocoa.  These are the
+ * zero values of the ivars.
+ */
 - (id) init
 {
-  // FIXME
+  self = [super init];
   return self;
 }
 
