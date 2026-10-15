@@ -87,9 +87,16 @@ APPKIT_EXPORT_CLASS
 @end /* interface of NSOutlineView */
 
 /** 
- * protocol NSOutlineViewDataSource 
+ * protocol NSOutlineViewDataSource<br />
+ * As in Cocoa, every method is optional.  A data source for an outline
+ * view without a content binding must implement
+ * -outlineView:numberOfChildrenOfItem:, -outlineView:child:ofItem: and
+ * -outlineView:isItemExpandable:, which -setDataSource: checks for.
  */
 @protocol NSOutlineViewDataSource
+#if GS_PROTOCOLS_HAVE_OPTIONAL
+@optional
+#endif
 /**
  * Called to perform drop operation and returns YES if successful,
  * and NO otherwise.
@@ -99,15 +106,13 @@ APPKIT_EXPORT_CLASS
                 item: (id)item 
           childIndex: (NSInteger)index;
 /**
- * Implementation of this method is required.  Returns the child at 
- * the specified index for the given item.
+ * Returns the child at the specified index for the given item.
  */
 - (id) outlineView: (NSOutlineView *)outlineView 
              child: (NSInteger)index 
             ofItem: (id)item;
 /**
- * This is a required method.  Returns whether or not the outline view
- * item specified is expandable or not.
+ * Returns whether or not the outline view item specified is expandable.
  */
 - (BOOL) outlineView: (NSOutlineView *)outlineView
     isItemExpandable: (id)item;
@@ -118,16 +123,15 @@ APPKIT_EXPORT_CLASS
 - (id) outlineView: (NSOutlineView *)outlineView 
   itemForPersistentObject: (id)object;
 
-/*
- * This is a required method.  Returns the number of children of
- * the given item.
+/**
+ * Returns the number of children of the given item.
  */
 - (NSInteger) outlineView: (NSOutlineView *)outlineView
   numberOfChildrenOfItem: (id)item;
 
 /**
- * This is a required method.  Returns the object corresponding to the
- * item representing it in the outline view.
+ * Returns the object corresponding to the item representing it in the
+ * outline view.
  */
 - (id) outlineView: (NSOutlineView *)outlineView 
   objectValueForTableColumn: (NSTableColumn *)tableColumn 
@@ -199,6 +203,9 @@ APPKIT_EXPORT NSString *NSOutlineViewItemWillCollapseNotification;
  * Methods Implemented by the Delegate
  */
 @protocol NSOutlineViewDelegate
+#if GS_PROTOCOLS_HAVE_OPTIONAL
+@optional
+#endif
 // notification methods
 /**
  * Called after the column has moved.

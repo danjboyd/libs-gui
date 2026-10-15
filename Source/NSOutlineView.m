@@ -523,7 +523,8 @@ static NSImage *unexpandable  = nil;
 
       result = !leaf; // if item is a leaf, it's not expandable...
     }
-  else if (item != nil)
+  else if (item != nil
+    && [_dataSource respondsToSelector: @selector(outlineView:isItemExpandable:)])
     {
       result = [_dataSource outlineView: self isItemExpandable: item];
     }
@@ -650,9 +651,17 @@ static NSImage *unexpandable  = nil;
       if ((index = [childArray indexOfObjectIdenticalTo: object]) != NSNotFound)
 	{
 	  parent = (parent == [NSNull null]) ? (id)nil : (id)parent;
-	  dsobj = [_dataSource outlineView: self
-			       child: index
-			       ofItem: parent];
+	  if ([_dataSource respondsToSelector:
+	    @selector(outlineView:child:ofItem:)])
+	    {
+	      dsobj = [_dataSource outlineView: self
+				   child: index
+				  ofItem: parent];
+	    }
+	  else
+	    {
+	      dsobj = item;
+	    }
 
 	  if (dsobj != item)
 	    {
@@ -2350,9 +2359,13 @@ Also returns the child index relative to this parent. */
        * usable with a big tree structure. For example, an outline view to browse
        * file system would try to traverse every file/directory on -reloadData.
        */
-      if (startitem == nil
+      if ((startitem == nil
 	  || ([self isExpandable: startitem]
 	      && [self isItemExpanded: startitem]))
+	&& [_dataSource respondsToSelector:
+	  @selector(outlineView:numberOfChildrenOfItem:)]
+	&& [_dataSource respondsToSelector:
+	  @selector(outlineView:child:ofItem:)])
 	{
 	  num = [_dataSource outlineView: self
 		  numberOfChildrenOfItem: startitem];
