@@ -208,6 +208,8 @@ APPKIT_EXPORT_CLASS
 
   /* NSTableRowView support */
   NSMutableDictionary *_rowViews;
+
+  NSTableViewColumnAutoresizingStyle _columnAutoresizingStyle;
 }
 
 /* Data Source */

@@ -4617,6 +4617,14 @@ This method is deprecated, use -columnIndexesInRect:. */
 - (void) setAutoresizesAllColumnsToFit: (BOOL)flag
 {
   _autoresizesAllColumnsToFit = flag;
+  if (flag)
+    {
+      _columnAutoresizingStyle = NSTableViewUniformColumnAutoresizingStyle;
+    }
+  else if (_columnAutoresizingStyle == NSTableViewUniformColumnAutoresizingStyle)
+    {
+      _columnAutoresizingStyle = NSTableViewNoColumnAutoresizing;
+    }
 }
 
 - (BOOL) autoresizesAllColumnsToFit
@@ -4624,15 +4632,20 @@ This method is deprecated, use -columnIndexesInRect:. */
   return _autoresizesAllColumnsToFit;
 }
 
+/* Only the uniform style resizes the columns, through
+ * autoresizesAllColumnsToFit; the other styles are kept for the
+ * application.
+ */
 - (NSTableViewColumnAutoresizingStyle) columnAutoresizingStyle
 {
-  // FIXME
-  return NSTableViewNoColumnAutoresizing;
+  return _columnAutoresizingStyle;
 }
 
 - (void) setColumnAutoresizingStyle: (NSTableViewColumnAutoresizingStyle)style
 {
-  // FIXME
+  _columnAutoresizingStyle = style;
+  _autoresizesAllColumnsToFit =
+    (style == NSTableViewUniformColumnAutoresizingStyle);
 }
 
 - (void) sizeLastColumnToFit
@@ -5714,6 +5727,8 @@ This method is deprecated, use -columnIndexesInRect:. */
 
       // Encode that the table is view based...
       [aCoder encodeBool: _viewBased forKey: @"NSViewBased"];
+      [aCoder encodeInteger: _columnAutoresizingStyle
+                     forKey: @"NSColumnAutoresizingStyle"];
     }
   else
     {
@@ -5904,6 +5919,12 @@ This method is deprecated, use -columnIndexesInRect:. */
       if ([aDecoder containsValueForKey: @"NSViewBased"])
 	{
 	  _viewBased = [aDecoder decodeBoolForKey: @"NSViewBased"];
+	}
+
+      if ([aDecoder containsValueForKey: @"NSColumnAutoresizingStyle"])
+	{
+	  [self setColumnAutoresizingStyle:
+	    [aDecoder decodeIntegerForKey: @"NSColumnAutoresizingStyle"]];
 	}
 
       // get the table columns...
