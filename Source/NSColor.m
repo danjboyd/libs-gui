@@ -2199,6 +2199,22 @@ static	NSRecursiveLock		*namedColorLock = nil;
   return NSColorTypeCatalog;
 }
 
+/* A catalog colour converts to the component based colour its colour list
+ * holds under its name.
+ */
+- (NSColor *) colorUsingType: (NSColorType)type
+{
+  if (type == NSColorTypeComponentBased)
+    {
+      NSColor *real;
+
+      real = [[NSColorList colorListNamed: _catalog_name]
+	       colorWithKey: _color_name];
+      return [real colorUsingType: type];
+    }
+  return [super colorUsingType: type];
+}
+
 - (NSUInteger) hash
 {
   return [_catalog_name hash] + [_color_name hash];
