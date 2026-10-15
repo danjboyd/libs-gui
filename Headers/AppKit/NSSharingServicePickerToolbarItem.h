@@ -37,6 +37,10 @@ extern "C" {
   
 APPKIT_EXPORT_CLASS
 @interface NSSharingServicePickerToolbarItem : NSToolbarItem
+{
+  id _activityItemsConfiguration;
+  id _sharingDelegate; // not retained
+}
 
 - (id) activityItemsConfiguration;
 
