@@ -1194,15 +1194,19 @@ static const char *eventTypes[] = {
   return NULL;
 }
 
+/* Kept for the application; the backend decides how it merges mouse
+ * motion events.
+ */
+static BOOL mouseCoalescingEnabled = YES;
+
 + (void) setMouseCoalescingEnabled: (BOOL)flag
 {
-  // FIXME
+  mouseCoalescingEnabled = flag;
 }
 
 + (BOOL) isMouseCoalescingEnabled
 {
-  // FIXME
-  return YES;
+  return mouseCoalescingEnabled;
 }
 
 + (NSEventModifierFlags) modifierFlags
