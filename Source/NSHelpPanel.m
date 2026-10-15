@@ -124,6 +124,9 @@ static NSHelpPanel	*_sharedPanel = nil;
   return _helpDirectory;
 }
 
+/** Answers the path of the help file last shown with
+ * -showFile:atMarker:, or nil if none has been shown.
+ */
 - (NSString *) helpFile
 {
   return _helpFile;
@@ -199,6 +202,7 @@ static NSHelpPanel	*_sharedPanel = nil;
       filename = [[[NSHelpPanel sharedHelpPanel] helpDirectory]
         stringByAppendingPathComponent: filename];
     }
+  ASSIGN(_helpFile, filename);
   [[NSHelpManager sharedHelpManager] setContextHelp: (id)filename
                                           forObject: self];
   [self showHelpAttachedTo: self];
