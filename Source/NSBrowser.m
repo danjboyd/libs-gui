@@ -1551,24 +1551,37 @@ static NSDragOperation currentDragOperation = NSDragOperationNone;
 
 - (BOOL) autohidesScroller
 {
-  // FIXME
-  return NO;
+  return _autohidesScroller;
 }
 
 - (void) setAutohidesScroller: (BOOL)flag
 {
-  // FIXME
+  // Kept for the application; the scroller is always shown.
+  _autohidesScroller = flag;
 }
 
 - (NSColor *) backgroundColor
 {
-  // FIXME
-  return [NSColor controlColor];
+  if (_backgroundColor == nil)
+    {
+      return [NSColor controlColor];
+    }
+  return _backgroundColor;
 }
 
 - (void) setBackgroundColor: (NSColor *)backgroundColor
 {
-  // FIXME
+  NSMatrix *matrix;
+  NSInteger i;
+
+  ASSIGN(_backgroundColor, backgroundColor);
+  // Matrices made later take the colour when they are made.
+  for (i = 0; i <= _lastColumnLoaded; i++)
+    {
+      matrix = [self matrixInColumn: i];
+      [matrix setBackgroundColor: [self backgroundColor]];
+    }
+  [self setNeedsDisplay: YES];
 }
 
 - (BOOL) canDragRowsWithIndexes: (NSIndexSet *)rowIndexes
@@ -2484,6 +2497,10 @@ static NSDragOperation currentDragOperation = NSDragOperationNone;
   if (column < 0 || column > _lastColumnLoaded)
     return;
 
+  // Remember where the click was, for -clickedColumn and -clickedRow.
+  _clickedColumn = column;
+  _clickedRow = [sender selectedRow];
+
   array = [sender selectedCells];
   aCount = [array count];
   if (aCount == 0)
@@ -2591,20 +2608,20 @@ static NSDragOperation currentDragOperation = NSDragOperationNone;
 {
   // We have already handled the single click
   // so send the double action
+  _clickedColumn = [self columnOfMatrix: sender];
+  _clickedRow = [sender selectedRow];
 
   [self sendAction: _doubleAction to: [self target]];
 }
 
 - (NSInteger) clickedColumn
 {
-  // FIXME: Return column number from doClick:
-  return -1;
+  return _clickedColumn;
 }
 
 - (NSInteger) clickedRow
 {
-  // FIXME: Return row number from doClick:
-  return -1;
+  return _clickedRow;
 }
 
 + (void) _themeDidActivate: (NSNotification*)n
@@ -2707,6 +2724,8 @@ static NSDragOperation currentDragOperation = NSDragOperationNone;
   _firstVisibleColumn = 0;
   _lastVisibleColumn = 0;
   _maxVisibleColumns = 3;
+  _clickedColumn = -1;
+  _clickedRow = -1;
   [self _createColumn];
 
   // Item based delegate, 10.6+
@@ -2738,6 +2757,7 @@ static NSDragOperation currentDragOperation = NSDragOperationNone;
   RELEASE(_horizontalScroller);
   RELEASE(_browserColumns);
   RELEASE(_columnDictionary);
+  RELEASE(_backgroundColor);
   TEST_RELEASE(_charBuffer);
 
   [super dealloc];
@@ -3328,6 +3348,10 @@ static NSDragOperation currentDragOperation = NSDragOperationNone;
       [aDecoder decodeValueOfObjCType: @encode(int) at: &colCount];
       [aDecoder decodeValueOfObjCType: @encode(int) at: &_firstVisibleColumn];
     }
+
+  // No click yet, however the browser was archived.
+  _clickedColumn = -1;
+  _clickedRow = -1;
 
   // Display even if there isn't any column
   _isLoaded = NO;

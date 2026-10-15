@@ -117,6 +117,10 @@ APPKIT_EXPORT_CLASS
 
   BOOL _itemBasedDelegate;
   NSMutableDictionary *_columnDictionary;
+  BOOL _autohidesScroller;
+  NSColor *_backgroundColor;
+  NSInteger _clickedColumn;
+  NSInteger _clickedRow;
 }
 
 //
