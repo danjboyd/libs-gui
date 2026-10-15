@@ -949,6 +949,13 @@ PACKAGE_SCOPE
 - (void) setMovableByWindowBackground: (BOOL)flag;
 #endif
 
+#if OS_API_VERSION(MAC_OS_X_VERSION_10_1, GS_API_LATEST)
+/**
+ * Returns the sheet attached to the window, or nil.
+ */
+- (NSWindow *) attachedSheet;
+#endif
+
 #if OS_API_VERSION(MAC_OS_X_VERSION_10_4, GS_API_LATEST)
 - (BOOL) displaysWhenScreenProfileChanges;
 - (void) setDisplaysWhenScreenProfileChanges: (BOOL)flag;
@@ -1076,12 +1083,6 @@ willPositionSheet: (NSWindow *)sheet
 - (void) windowWillMove: (NSNotification*)aNotification;
 @end
 #endif
-
-@interface NSObject (NSWindowDelegateAdditions)
-#if OS_API_VERSION(MAC_OS_X_VERSION_10_1, GS_API_LATEST)
-- (NSWindow *) attachedSheet;
-#endif
-@end
 
 /* Notifications */
 APPKIT_EXPORT NSString *NSWindowDidBecomeKeyNotification;
