@@ -24,11 +24,20 @@
 
 #import "AppKit/NSMediaLibraryBrowserController.h"
 
+/* GNUstep has no media library browser panel, so the shared controller
+ * only keeps whether the application wants it shown.
+ */
 @implementation NSMediaLibraryBrowserController
 
 + (NSMediaLibraryBrowserController *) sharedMediaLibraryBrowserController
 {
-  return nil;
+  static NSMediaLibraryBrowserController *shared = nil;
+
+  if (shared == nil)
+    {
+      shared = [[self alloc] init];
+    }
+  return shared;
 }
 
 - (NSRect) frame
@@ -38,16 +47,17 @@
 
 - (IBAction) togglePanel: (id)sender
 {
+  [self setVisible: ![self isVisible]];
 }
 
 - (BOOL) isVisible
 {
-  return NO;
+  return _visible;
 }
 
 - (void) setVisible: (BOOL)flag
 {
+  _visible = flag;
 }
   
 @end
-
