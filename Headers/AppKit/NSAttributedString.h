@@ -54,39 +54,66 @@
 
 /* Global NSString attribute names used in accessing the respective
    property in a text attributes dictionary.  if the key is not in the
-   dictionary the default value is assumed.  */
-APPKIT_EXPORT NSString *NSAttachmentAttributeName;
-APPKIT_EXPORT NSString *NSBackgroundColorAttributeName;
-APPKIT_EXPORT NSString *NSBaselineOffsetAttributeName;
-APPKIT_EXPORT NSString *NSCursorAttributeName;
-APPKIT_EXPORT NSString *NSExpansionAttributeName;
-APPKIT_EXPORT NSString *NSFontAttributeName;
-APPKIT_EXPORT NSString *NSForegroundColorAttributeName;
-APPKIT_EXPORT NSString *NSKernAttributeName;
-APPKIT_EXPORT NSString *NSLigatureAttributeName;
-APPKIT_EXPORT NSString *NSLinkAttributeName;
-APPKIT_EXPORT NSString *NSObliquenessAttributeName;
-APPKIT_EXPORT NSString *NSParagraphStyleAttributeName;
-APPKIT_EXPORT NSString *NSShadowAttributeName;
-APPKIT_EXPORT NSString *NSStrikethroughColorAttributeName;
-APPKIT_EXPORT NSString *NSStrikethroughStyleAttributeName;
-APPKIT_EXPORT NSString *NSStrokeColorAttributeName;
-APPKIT_EXPORT NSString *NSStrokeWidthAttributeName;
-APPKIT_EXPORT NSString *NSSuperscriptAttributeName;
-APPKIT_EXPORT NSString *NSToolTipAttributeName;
-APPKIT_EXPORT NSString *NSUnderlineColorAttributeName;
-APPKIT_EXPORT NSString *NSUnderlineStyleAttributeName;
+   dictionary the default value is assumed.  As in Cocoa they have the
+   NSAttributedStringKey type, so Swift imports them as the members of
+   NSAttributedString.Key (NSAttributedString.Key.font for
+   NSFontAttributeName).  */
+APPKIT_EXPORT NSAttributedStringKey _Nonnull const NSAttachmentAttributeName
+  NS_SWIFT_NAME(attachment);
+APPKIT_EXPORT NSAttributedStringKey _Nonnull const NSBackgroundColorAttributeName
+  NS_SWIFT_NAME(backgroundColor);
+APPKIT_EXPORT NSAttributedStringKey _Nonnull const NSBaselineOffsetAttributeName
+  NS_SWIFT_NAME(baselineOffset);
+APPKIT_EXPORT NSAttributedStringKey _Nonnull const NSCursorAttributeName
+  NS_SWIFT_NAME(cursor);
+APPKIT_EXPORT NSAttributedStringKey _Nonnull const NSExpansionAttributeName
+  NS_SWIFT_NAME(expansion);
+APPKIT_EXPORT NSAttributedStringKey _Nonnull const NSFontAttributeName
+  NS_SWIFT_NAME(font);
+APPKIT_EXPORT NSAttributedStringKey _Nonnull const NSForegroundColorAttributeName
+  NS_SWIFT_NAME(foregroundColor);
+APPKIT_EXPORT NSAttributedStringKey _Nonnull const NSKernAttributeName
+  NS_SWIFT_NAME(kern);
+APPKIT_EXPORT NSAttributedStringKey _Nonnull const NSLigatureAttributeName
+  NS_SWIFT_NAME(ligature);
+APPKIT_EXPORT NSAttributedStringKey _Nonnull const NSLinkAttributeName
+  NS_SWIFT_NAME(link);
+APPKIT_EXPORT NSAttributedStringKey _Nonnull const NSObliquenessAttributeName
+  NS_SWIFT_NAME(obliqueness);
+APPKIT_EXPORT NSAttributedStringKey _Nonnull const NSParagraphStyleAttributeName
+  NS_SWIFT_NAME(paragraphStyle);
+APPKIT_EXPORT NSAttributedStringKey _Nonnull const NSShadowAttributeName
+  NS_SWIFT_NAME(shadow);
+APPKIT_EXPORT NSAttributedStringKey _Nonnull const NSStrikethroughColorAttributeName
+  NS_SWIFT_NAME(strikethroughColor);
+APPKIT_EXPORT NSAttributedStringKey _Nonnull const NSStrikethroughStyleAttributeName
+  NS_SWIFT_NAME(strikethroughStyle);
+APPKIT_EXPORT NSAttributedStringKey _Nonnull const NSStrokeColorAttributeName
+  NS_SWIFT_NAME(strokeColor);
+APPKIT_EXPORT NSAttributedStringKey _Nonnull const NSStrokeWidthAttributeName
+  NS_SWIFT_NAME(strokeWidth);
+APPKIT_EXPORT NSAttributedStringKey _Nonnull const NSSuperscriptAttributeName
+  NS_SWIFT_NAME(superscript);
+APPKIT_EXPORT NSAttributedStringKey _Nonnull const NSToolTipAttributeName
+  NS_SWIFT_NAME(toolTip);
+APPKIT_EXPORT NSAttributedStringKey _Nonnull const NSUnderlineColorAttributeName
+  NS_SWIFT_NAME(underlineColor);
+APPKIT_EXPORT NSAttributedStringKey _Nonnull const NSUnderlineStyleAttributeName
+  NS_SWIFT_NAME(underlineStyle);
 
 #if OS_API_VERSION(MAC_OS_X_VERSION_10_8, GS_API_LATEST)
-APPKIT_EXPORT NSString *NSTextAlternativesAttributeName;
+APPKIT_EXPORT NSAttributedStringKey _Nonnull const NSTextAlternativesAttributeName
+  NS_SWIFT_NAME(textAlternatives);
 #endif
 
 #if OS_API_VERSION(MAC_OS_X_VERSION_10_6, GS_API_LATEST)
-APPKIT_EXPORT NSString *NSWritingDirectionAttributeName;
+APPKIT_EXPORT NSAttributedStringKey _Nonnull const NSWritingDirectionAttributeName
+  NS_SWIFT_NAME(writingDirection);
 #endif
 
 #if OS_API_VERSION(MAC_OS_X_VERSION_10_2, GS_API_LATEST)
-APPKIT_EXPORT NSString *NSGlyphInfoAttributeName;
+APPKIT_EXPORT NSAttributedStringKey _Nonnull const NSGlyphInfoAttributeName
+  NS_SWIFT_NAME(glyphInfo);
 #endif
 
 #if OS_API_VERSION(MAC_OS_X_VERSION_10_4, GS_API_LATEST)
@@ -149,9 +176,11 @@ APPKIT_EXPORT NSString *NSWebResourceLoadDelegateDocumentOption;
 
 // special attributes
 
-APPKIT_EXPORT NSString *NSCharacterShapeAttributeName;
+APPKIT_EXPORT NSAttributedStringKey _Nonnull const NSCharacterShapeAttributeName
+  NS_SWIFT_NAME(characterShape);
 APPKIT_EXPORT const unsigned NSUnderlineByWordMask;
-APPKIT_EXPORT NSString *NSSpellingStateAttributeName;
+APPKIT_EXPORT NSAttributedStringKey _Nonnull const NSSpellingStateAttributeName
+  NS_SWIFT_NAME(spellingState);
 APPKIT_EXPORT const unsigned NSSpellingStateSpellingFlag;
 APPKIT_EXPORT const unsigned NSSpellingStateGrammarFlag;
 

@@ -509,33 +509,33 @@ APPKIT_DECLARE NSString *NSWorkspaceWillSleepNotification = @"NSWorkspaceWillSle
 /*
  *	NSStringDrawing NSAttributedString additions
  */
-APPKIT_DECLARE NSString *NSAttachmentAttributeName = @"NSAttachment";
-APPKIT_DECLARE NSString *NSBackgroundColorAttributeName = @"NSBackgroundColor";
-APPKIT_DECLARE NSString *NSBaselineOffsetAttributeName = @"NSBaselineOffset";
-APPKIT_DECLARE NSString *NSCursorAttributeName = @"NSCursor";
-APPKIT_DECLARE NSString *NSExpansionAttributeName = @"NSExpansion";
-APPKIT_DECLARE NSString *NSFontAttributeName = @"NSFont";
-APPKIT_DECLARE NSString *NSForegroundColorAttributeName = @"NSColor";
-APPKIT_DECLARE NSString *NSKernAttributeName = @"NSKern";
-APPKIT_DECLARE NSString *NSLigatureAttributeName = @"NSLigature";
-APPKIT_DECLARE NSString *NSLinkAttributeName = @"NSLink";
-APPKIT_DECLARE NSString *NSObliquenessAttributeName = @"NSObliqueness";
-APPKIT_DECLARE NSString *NSParagraphStyleAttributeName = @"NSParagraphStyle";
-APPKIT_DECLARE NSString *NSShadowAttributeName = @"NSShadow";
-APPKIT_DECLARE NSString *NSStrikethroughColorAttributeName = @"NSStrikethroughColor";
-APPKIT_DECLARE NSString *NSStrikethroughStyleAttributeName = @"NSStrikethrough";
-APPKIT_DECLARE NSString *NSStrokeColorAttributeName = @"NSStrokeColor";
-APPKIT_DECLARE NSString *NSStrokeWidthAttributeName = @"NSStrokeWidth";
-APPKIT_DECLARE NSString *NSSuperscriptAttributeName = @"NSSuperScript";
-APPKIT_DECLARE NSString *NSToolTipAttributeName = @"NSToolTip";
-APPKIT_DECLARE NSString *NSUnderlineColorAttributeName = @"NSUnderlineColor";
-APPKIT_DECLARE NSString *NSUnderlineStyleAttributeName = @"NSUnderline";
+APPKIT_DECLARE NSAttributedStringKey const NSAttachmentAttributeName = @"NSAttachment";
+APPKIT_DECLARE NSAttributedStringKey const NSBackgroundColorAttributeName = @"NSBackgroundColor";
+APPKIT_DECLARE NSAttributedStringKey const NSBaselineOffsetAttributeName = @"NSBaselineOffset";
+APPKIT_DECLARE NSAttributedStringKey const NSCursorAttributeName = @"NSCursor";
+APPKIT_DECLARE NSAttributedStringKey const NSExpansionAttributeName = @"NSExpansion";
+APPKIT_DECLARE NSAttributedStringKey const NSFontAttributeName = @"NSFont";
+APPKIT_DECLARE NSAttributedStringKey const NSForegroundColorAttributeName = @"NSColor";
+APPKIT_DECLARE NSAttributedStringKey const NSKernAttributeName = @"NSKern";
+APPKIT_DECLARE NSAttributedStringKey const NSLigatureAttributeName = @"NSLigature";
+APPKIT_DECLARE NSAttributedStringKey const NSLinkAttributeName = @"NSLink";
+APPKIT_DECLARE NSAttributedStringKey const NSObliquenessAttributeName = @"NSObliqueness";
+APPKIT_DECLARE NSAttributedStringKey const NSParagraphStyleAttributeName = @"NSParagraphStyle";
+APPKIT_DECLARE NSAttributedStringKey const NSShadowAttributeName = @"NSShadow";
+APPKIT_DECLARE NSAttributedStringKey const NSStrikethroughColorAttributeName = @"NSStrikethroughColor";
+APPKIT_DECLARE NSAttributedStringKey const NSStrikethroughStyleAttributeName = @"NSStrikethrough";
+APPKIT_DECLARE NSAttributedStringKey const NSStrokeColorAttributeName = @"NSStrokeColor";
+APPKIT_DECLARE NSAttributedStringKey const NSStrokeWidthAttributeName = @"NSStrokeWidth";
+APPKIT_DECLARE NSAttributedStringKey const NSSuperscriptAttributeName = @"NSSuperScript";
+APPKIT_DECLARE NSAttributedStringKey const NSToolTipAttributeName = @"NSToolTip";
+APPKIT_DECLARE NSAttributedStringKey const NSUnderlineColorAttributeName = @"NSUnderlineColor";
+APPKIT_DECLARE NSAttributedStringKey const NSUnderlineStyleAttributeName = @"NSUnderline";
 
-APPKIT_DECLARE NSString *NSTextAlternativesAttributeName = @"NSTextAlternatives";
-APPKIT_DECLARE NSString *NSWritingDirectionAttributeName = @"NSWritingDirection";
+APPKIT_DECLARE NSAttributedStringKey const NSTextAlternativesAttributeName = @"NSTextAlternatives";
+APPKIT_DECLARE NSAttributedStringKey const NSWritingDirectionAttributeName = @"NSWritingDirection";
 
-APPKIT_DECLARE NSString *NSCharacterShapeAttributeName = @"NSCharacterShape";
-APPKIT_DECLARE NSString *NSGlyphInfoAttributeName = @"NSGlyphInfo";
+APPKIT_DECLARE NSAttributedStringKey const NSCharacterShapeAttributeName = @"NSCharacterShape";
+APPKIT_DECLARE NSAttributedStringKey const NSGlyphInfoAttributeName = @"NSGlyphInfo";
 
 APPKIT_DECLARE NSString *NSPaperSizeDocumentAttribute = @"PaperSize";
 APPKIT_DECLARE NSString *NSLeftMarginDocumentAttribute = @"LeftMargin";
@@ -568,7 +568,7 @@ APPKIT_DECLARE NSString *NSTextInsertionUndoableAttributeName =   @"NSTextInsert
 
 APPKIT_DECLARE const unsigned NSUnderlineByWordMask = 0x01;
 
-APPKIT_DECLARE NSString *NSSpellingStateAttributeName = @"NSSpellingState";
+APPKIT_DECLARE NSAttributedStringKey const NSSpellingStateAttributeName = @"NSSpellingState";
 APPKIT_DECLARE const unsigned NSSpellingStateSpellingFlag = 1;
 APPKIT_DECLARE const unsigned NSSpellingStateGrammarFlag = 2;
 
