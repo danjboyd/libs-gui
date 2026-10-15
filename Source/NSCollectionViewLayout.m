@@ -41,26 +41,60 @@
 @implementation NSCollectionViewLayoutAttributes
 
 // Initializers
+
+- (instancetype) init
+{
+  if ((self = [super init]) != nil)
+    {
+      // Opaque by default, as in Cocoa.
+      _alpha = 1.0;
+    }
+  return self;
+}
+
+/* Answers new attributes for the element of the category and kind at
+ * indexPath.
+ */
++ (instancetype) _layoutAttributesForCategory: (NSCollectionElementCategory)category
+                                         kind: (NSString *)kind
+                                    indexPath: (NSIndexPath *)indexPath
+{
+  NSCollectionViewLayoutAttributes *a = AUTORELEASE([[self alloc] init]);
+
+  [a setIndexPath: indexPath];
+  a->_representedElementCategory = category;
+  ASSIGNCOPY(a->_representedElementKind, kind);
+  return a;
+}
+
 + (instancetype) layoutAttributesForItemWithIndexPath: (NSIndexPath *)indexPath
 {
-  return nil;
+  return [self _layoutAttributesForCategory: NSCollectionElementCategoryItem
+                                       kind: nil
+                                  indexPath: indexPath];
 }
 
 + (instancetype) layoutAttributesForInterItemGapBeforeIndexPath: (NSIndexPath *)indexPath
 {
-  return nil;
+  return [self _layoutAttributesForCategory: NSCollectionElementCategoryInterItemGap
+                                       kind: nil
+                                  indexPath: indexPath];
 }
 
 + (instancetype) layoutAttributesForSupplementaryViewOfKind: (NSCollectionViewSupplementaryElementKind)elementKind
                                               withIndexPath: (NSIndexPath *)indexPath
 {
-  return nil;
+  return [self _layoutAttributesForCategory: NSCollectionElementCategorySupplementaryView
+                                       kind: elementKind
+                                  indexPath: indexPath];
 }
 
 + (instancetype)layoutAttributesForDecorationViewOfKind: (NSCollectionViewDecorationElementKind)decorationViewKind
                                           withIndexPath: (NSIndexPath*)indexPath
 {
-  return nil;
+  return [self _layoutAttributesForCategory: NSCollectionElementCategoryDecorationView
+                                       kind: decorationViewKind
+                                  indexPath: indexPath];
 }
 
 // Properties
