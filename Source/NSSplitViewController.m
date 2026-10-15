@@ -154,14 +154,33 @@ const CGFloat NSSplitViewControllerAutomaticDimension = -FLT_MAX;
 }
 
 // instance methods...
-- (NSRect) splitView: (NSSplitView *)splitView additionalEffectiveRectOfDividerAtIndex: (NSInteger)dividerIndex
+
+/* Answers the item whose view controller's view is view, or nil.
+ */
+- (NSSplitViewItem *) _splitViewItemForView: (NSView *)view
 {
-  return [splitView frame];
+  FOR_IN (NSSplitViewItem*, svi, _splitViewItems)
+    if ([[svi viewController] view] == view)
+      {
+        return svi;
+      }
+  END_FOR_IN (_splitViewItems);
+  return nil;
 }
 
+/** Answers NSZeroRect: a divider has no effective area beyond the one
+ * the split view gives it.
+ */
+- (NSRect) splitView: (NSSplitView *)splitView additionalEffectiveRectOfDividerAtIndex: (NSInteger)dividerIndex
+{
+  return NSZeroRect;
+}
+
+/** Answers whether the item of subview can collapse.
+ */
 - (BOOL) splitView: (NSSplitView *)splitView canCollapseSubview: (NSView *)subview
 {
-  return YES;
+  return [[self _splitViewItemForView: subview] canCollapse];
 }
 
 - (NSRect) splitView: (NSSplitView *)splitView effectiveRect: (NSRect)proposedEffectiveRect forDrawnRect: (NSRect)drawnRect
@@ -170,19 +189,32 @@ const CGFloat NSSplitViewControllerAutomaticDimension = -FLT_MAX;
   return proposedEffectiveRect;
 }
 
+/** Answers whether the item of subview can collapse.
+ */
 - (BOOL) splitView:(NSSplitView *)splitView shouldCollapseSubview: (NSView *)subview forDoubleClickOnDividerAtIndex: (NSInteger)dividerIndex
 {
-  return YES;
+  return [[self _splitViewItemForView: subview] canCollapse];
 }
 
+/** Answers NO: dividers are shown.
+ */
 - (BOOL) splitView: (NSSplitView *)splitView shouldHideDividerAtIndex: (NSInteger)dividerIndex
 {
-  return YES;
+  return NO;
 }
 
+/** Collapses the first sidebar item, or expands it if it is collapsed.
+ * Does nothing when there is no sidebar item.
+ */
 - (IBAction)toggleSidebar:(id)sender
 {
-  NSLog(@"Toggle");
+  FOR_IN (NSSplitViewItem*, svi, _splitViewItems)
+    if ([svi behavior] == NSSplitViewItemBehaviorSidebar)
+      {
+        [svi setCollapsed: ![svi isCollapsed]];
+        return;
+      }
+  END_FOR_IN (_splitViewItems);
 }
 
 // NSCoding
