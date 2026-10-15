@@ -222,6 +222,7 @@ static CGFloat scrollerWidth;
   _vPageScroll = 10;
   _borderType = NSNoBorder;
   _scrollsDynamically = YES;
+  _automaticallyAdjustsContentInsets = YES;
   //_autohidesScrollers = NO;
   // FIXME: Not sure here Apple says by default all scrollers are off.
   // For compatibility the ruler should be present but not visible.
@@ -1463,7 +1464,8 @@ GSOppositeEdge(NSRectEdge edge)
 
 - (void) setScrollsDynamically: (BOOL)flag
 {
-  // FIXME: This should change the behaviour of the scrollers
+  /* Kept for the application; the scrollers always scroll dynamically.
+   */
   _scrollsDynamically = flag;
 }
 
@@ -1484,13 +1486,13 @@ GSOppositeEdge(NSRectEdge edge)
 
 - (BOOL)allowsMagnification
 {
-  //we need an ivar for this
-  return NO;
+  return _allowsMagnification;
 }
 
 - (void)setAllowsMagnification:(BOOL)m
 {
-  //we need an ivar for this
+  // Kept for the application; GNUstep does not magnify yet.
+  _allowsMagnification = m;
 }
 
 /*
@@ -1503,6 +1505,20 @@ GSOppositeEdge(NSRectEdge edge)
   if ([aCoder allowsKeyedCoding])
     {
       unsigned long flags = 0;
+
+      /* GNUstep's own keys for the kept magnification and inset state.  */
+      [aCoder encodeBool: _allowsMagnification
+		  forKey: @"GSAllowsMagnification"];
+      [aCoder encodeBool: _automaticallyAdjustsContentInsets
+		  forKey: @"GSAutomaticallyAdjustsContentInsets"];
+      [aCoder encodeDouble: _contentInsets.top forKey: @"GSContentInsets.top"];
+      [aCoder encodeDouble: _contentInsets.left forKey: @"GSContentInsets.left"];
+      [aCoder encodeDouble: _contentInsets.bottom forKey: @"GSContentInsets.bottom"];
+      [aCoder encodeDouble: _contentInsets.right forKey: @"GSContentInsets.right"];
+      [aCoder encodeDouble: _scrollerInsets.top forKey: @"GSScrollerInsets.top"];
+      [aCoder encodeDouble: _scrollerInsets.left forKey: @"GSScrollerInsets.left"];
+      [aCoder encodeDouble: _scrollerInsets.bottom forKey: @"GSScrollerInsets.bottom"];
+      [aCoder encodeDouble: _scrollerInsets.right forKey: @"GSScrollerInsets.right"];
 
       [aCoder encodeObject: _horizScroller forKey: @"NSHScroller"];
       [aCoder encodeObject: _vertScroller forKey: @"NSVScroller"];
@@ -1578,8 +1594,27 @@ GSOppositeEdge(NSRectEdge edge)
   if (!self)
     return nil;
 
+  _automaticallyAdjustsContentInsets = YES;
+
   if ([aDecoder allowsKeyedCoding])
     {
+      if ([aDecoder containsValueForKey: @"GSAutomaticallyAdjustsContentInsets"])
+	{
+	  _allowsMagnification =
+	    [aDecoder decodeBoolForKey: @"GSAllowsMagnification"];
+	  _automaticallyAdjustsContentInsets =
+	    [aDecoder decodeBoolForKey: @"GSAutomaticallyAdjustsContentInsets"];
+	  _contentInsets = NSEdgeInsetsMake(
+	    [aDecoder decodeDoubleForKey: @"GSContentInsets.top"],
+	    [aDecoder decodeDoubleForKey: @"GSContentInsets.left"],
+	    [aDecoder decodeDoubleForKey: @"GSContentInsets.bottom"],
+	    [aDecoder decodeDoubleForKey: @"GSContentInsets.right"]);
+	  _scrollerInsets = NSEdgeInsetsMake(
+	    [aDecoder decodeDoubleForKey: @"GSScrollerInsets.top"],
+	    [aDecoder decodeDoubleForKey: @"GSScrollerInsets.left"],
+	    [aDecoder decodeDoubleForKey: @"GSScrollerInsets.bottom"],
+	    [aDecoder decodeDoubleForKey: @"GSScrollerInsets.right"]);
+	}
       NSScroller *hScroller = [aDecoder decodeObjectForKey: @"NSHScroller"];
       NSScroller *vScroller = [aDecoder decodeObjectForKey: @"NSVScroller"];
       NSClipView *content = [aDecoder decodeObjectForKey: @"NSContentView"]; 
@@ -1729,53 +1764,36 @@ GSOppositeEdge(NSRectEdge edge)
   return self;
 }
 
+/* The insets are kept for the application; -tile does not apply them yet.
+ */
 - (BOOL)automaticallyAdjustsContentInsets
 {
-  // FIXME
-  return NO;
+  return _automaticallyAdjustsContentInsets;
 }
 
 - (void)setAutomaticallyAdjustsContentInsets: (BOOL)adjusts
 {
-  static BOOL logged = NO;
-  if (!logged)
-    {
-      NSLog(@"warning: stub no-op implementation of"
-            "-[NSScrollView setAutomaticallyAdjustsContentInsets:]");
-      logged = YES;
-    }
+  _automaticallyAdjustsContentInsets = adjusts;
 }
 
 - (NSEdgeInsets)contentInsets
 {
-  // FIXME
-  return NSEdgeInsetsZero;
+  return _contentInsets;
 }
+
 - (void)setContentInsets: (NSEdgeInsets)edgeInsets
 {
-  static BOOL logged = NO;
-  if (!logged)
-    {
-      NSLog(@"warning: stub no-op implementation of"
-            "-[NSScrollView setContentInsets:]");
-      logged = YES;
-    }
+  _contentInsets = edgeInsets;
 }
 
 - (NSEdgeInsets)scrollerInsets
 {
-  // FIXME
-  return NSEdgeInsetsZero;
+  return _scrollerInsets;
 }
+
 - (void)setScrollerInsets: (NSEdgeInsets)insets
 {
-  static BOOL logged = NO;
-  if (!logged)
-    {
-      NSLog(@"warning: stub no-op implementation of"
-            "-[NSScrollView setScrollerInsets:]");
-      logged = YES;
-    }
+  _scrollerInsets = insets;
 }
 
 - (NSScrollerStyle)scrollerStyle {

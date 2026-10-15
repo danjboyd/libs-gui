@@ -81,6 +81,10 @@ APPKIT_EXPORT_CLASS
   NSScrollerKnobStyle _scrollerKnobStyle;
   BOOL _hasHorizScrollerRequested;
   BOOL _hasVertScrollerRequested;
+  BOOL _allowsMagnification;
+  BOOL _automaticallyAdjustsContentInsets;
+  NSEdgeInsets _contentInsets;
+  NSEdgeInsets _scrollerInsets;
 }
 
 /* Calculating layout */
