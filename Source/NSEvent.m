@@ -33,6 +33,7 @@
 
 #include "config.h"
 #import <Foundation/NSDictionary.h>
+#import <Foundation/NSUserDefaults.h>
 #import <Foundation/NSLock.h>
 #import <Foundation/NSTimer.h>
 #import <Foundation/NSRunLoop.h>
@@ -1210,16 +1211,18 @@ static const char *eventTypes[] = {
   return 0;
 }
 
+/* The X server repeats keys itself, and no backend reports its settings
+ * yet, so these answer the X server's usual delay of 660 ms and rate of
+ * 25 repeats a second.
+ */
 + (NSTimeInterval) keyRepeatDelay
 {
-  // FIXME
-  return 0;
+  return 0.66;
 }
 
 + (NSTimeInterval) keyRepeatInterval
 {
-  // FIXME
-  return 0;
+  return 0.04;
 }
 
 + (NSUInteger) pressedMouseButtons
@@ -1230,8 +1233,17 @@ static const char *eventTypes[] = {
 
 + (NSTimeInterval) doubleClickInterval
 {
-  // FIXME
-  return 0;
+  /* The backend takes the GSDoubleClickTime default, in milliseconds, and
+   * uses 300 ms for a missing or shorter than 200 ms setting.
+   */
+  NSUserDefaults *defs = [NSUserDefaults standardUserDefaults];
+  NSInteger clickTime = [defs integerForKey: @"GSDoubleClickTime"];
+
+  if (clickTime < 200)
+    {
+      clickTime = 300;
+    }
+  return clickTime / 1000.0;
 }
 
 - (NSEventPhase) phase
