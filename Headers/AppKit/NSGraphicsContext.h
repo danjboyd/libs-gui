@@ -54,16 +54,14 @@
 typedef struct CGContext *CGContextRef;
 
 /*
- * Backing Store Types
+ * Backing Store Types.  An NS_ENUM type, as in Cocoa.
  */
-enum _NSBackingStoreType
+typedef NS_ENUM(NSUInteger, NSBackingStoreType)
 {
-  NSBackingStoreRetained,
-  NSBackingStoreNonretained,
-  NSBackingStoreBuffered
-
+  NSBackingStoreRetained = 0,
+  NSBackingStoreNonretained = 1,
+  NSBackingStoreBuffered = 2
 };
-typedef NSUInteger NSBackingStoreType;
 
 /** NSCompositingOperation defines how an image is drawn or composited onto another.
  * <list>
