@@ -3497,9 +3497,6 @@ static NSDictionary *titleTextAttributes[3] = {nil, nil, nil};
 
       tb = [tableColumns objectAtIndex: i];
       cell = [tb dataCellForRow: rowIndex];
-      [tableView _willDisplayCell: cell
-		 forTableColumn: tb
-		 row: rowIndex];
       if (i == editedColumn && rowIndex == editedRow)
         {
           [cell _setInEditing: YES];
@@ -3509,6 +3506,10 @@ static NSDictionary *titleTextAttributes[3] = {nil, nil, nil};
           [cell setObjectValue: [tableView _objectValueForTableColumn: tb
                                                                   row: rowIndex]];
         }
+      /* The delegate sees the cell with this row's value, as in Cocoa. */
+      [tableView _willDisplayCell: cell
+		 forTableColumn: tb
+		 row: rowIndex];
       drawingRect = [tableView frameOfCellAtColumn: i
 			       row: rowIndex];
 
@@ -3637,9 +3638,6 @@ static NSDictionary *titleTextAttributes[3] = {nil, nil, nil};
       NSTableColumn *tb = [tableColumns objectAtIndex: i];
       NSCell *cell = [outlineView preparedCellAtColumn: i row: rowIndex];
 
-      [outlineView _willDisplayCell: cell
-		     forTableColumn: tb
-				row: rowIndex];
       if (i == editedColumn && rowIndex == editedRow)
         {
           [cell _setInEditing: YES];
@@ -3651,6 +3649,10 @@ static NSDictionary *titleTextAttributes[3] = {nil, nil, nil};
 							 row: rowIndex];
 	  [cell setObjectValue: value];
         }
+      /* The delegate sees the cell with this row's value, as in Cocoa. */
+      [outlineView _willDisplayCell: cell
+		     forTableColumn: tb
+				row: rowIndex];
 
       drawingRect = [outlineView frameOfCellAtColumn: i
 						 row: rowIndex];
