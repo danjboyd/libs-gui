@@ -2520,6 +2520,7 @@ titleWithRepresentedFilename(NSString *representedFilename)
 {
   _increments = aSize;
   _aspectRatio = NSZeroSize;
+  _contentAspectRatio = NSZeroSize;
   if (_windowNum > 0)
     {
       [GSServerForWindow(self) setresizeincrements: aSize : _windowNum];
@@ -2535,6 +2536,7 @@ titleWithRepresentedFilename(NSString *representedFilename)
 {
   _aspectRatio = ratio;
   _increments = NSZeroSize;
+  _contentAspectRatio = NSZeroSize;
 }
 
 - (NSSize) contentMaxSize
@@ -2581,15 +2583,19 @@ titleWithRepresentedFilename(NSString *representedFilename)
   [self setMinSize: rect.size];
 }
 
+/* The content aspect ratio is kept for the application, and, as in Cocoa,
+ * replaces the frame aspect ratio; resizing does not keep it yet.
+ */
 - (NSSize) contentAspectRatio
 {
-  // FIXME
-  return NSMakeSize(1, 1);
+  return _contentAspectRatio;
 }
 
 - (void) setContentAspectRatio: (NSSize)ratio
 {
-  // FIXME
+  _contentAspectRatio = ratio;
+  _aspectRatio = NSZeroSize;
+  _increments = NSZeroSize;
 }
 
 - (NSSize) contentResizeIncrements

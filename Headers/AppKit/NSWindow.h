@@ -341,6 +341,7 @@ PACKAGE_SCOPE
   NSToolbar     *_toolbar;
   void          *_reserved_1;
   NSWindowCollectionBehavior _collectionBehavior;
+  NSSize _contentAspectRatio;
 }
 
 #if GS_HAS_DECLARED_PROPERTIES
