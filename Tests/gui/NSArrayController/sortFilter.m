@@ -1,7 +1,9 @@
 /* Setting an array controller's sort descriptors or filter predicate
    rearranges its objects at once, as in Cocoa, and observers of
    arrangedObjects are told.  They used to be stored only, so the arranged
-   objects kept their old order and contents until -rearrangeObjects. */
+   objects kept their old order and contents until -rearrangeObjects.
+   Rearranging keeps the selected objects selected, and never leaves an
+   index past the end of the arranged objects. */
 #include "Testing.h"
 
 #include <Foundation/NSAutoreleasePool.h>
@@ -67,6 +69,26 @@ int main()
     "clearing the filter predicate brings the objects back");
   PASS_EQUAL([[ac arrangedObjects] objectAtIndex: 0], @"alpha",
     "and they are still sorted");
+
+  /* The selected objects stay selected (preservesSelection, the
+     default), and indexes past the end are dropped. */
+  [ac setSortDescriptors: nil];
+  [ac setSelectedObjects: [NSArray arrayWithObject: @"charlie"]];
+  [ac setSortDescriptors: [NSArray arrayWithObject: sd]];
+  PASS([ac selectionIndex] == 2
+    && [[ac selectedObjects] isEqual: [NSArray arrayWithObject: @"charlie"]],
+    "sorting keeps the selected object selected");
+  [ac setFilterPredicate:
+    [NSPredicate predicateWithFormat: @"SELF BEGINSWITH 'a'"]];
+  PASS([[ac selectedObjects] count] == 0 && [[ac selectionIndexes] count] == 0,
+    "filtering the selected object out leaves no selection");
+  [ac setFilterPredicate: nil];
+  [ac setPreservesSelection: NO];
+  [ac setSelectionIndex: 2];
+  [ac setFilterPredicate:
+    [NSPredicate predicateWithFormat: @"SELF BEGINSWITH 'b'"]];
+  PASS([[ac selectionIndexes] count] == 0 && [[ac selectedObjects] count] == 0,
+    "without preservesSelection an index past the end is dropped");
 
   [ac removeObserver: obs forKeyPath: @"arrangedObjects"];
   END_SET("NSArrayController sort and filter")

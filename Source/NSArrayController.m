@@ -533,13 +533,53 @@
   return _arranged_objects;
 }
 
+/* The indexes of set below count. */
+static NSIndexSet *
+indexesBelow(NSIndexSet *set, NSUInteger count)
+{
+  NSMutableIndexSet	*below;
+
+  if ([set count] == 0 || [set lastIndex] < count)
+    {
+      return set;
+    }
+  below = AUTORELEASE([set mutableCopy]);
+  [below removeIndexesInRange: NSMakeRange(count, NSNotFound - count)];
+  return below;
+}
+
+/** Arranges the content again with -arrangeObjects:.  When the receiver
+ * preserves its selection (the default), the objects that were selected
+ * stay selected where they are still arranged; otherwise the selection
+ * indexes are kept as far as they are still in range.
+ */
 - (void) rearrangeObjects
 {
+  NSArray	*selected = nil;
+  NSIndexSet	*indexes;
+
+  if (_arranged_objects != nil && [_selection_indexes count] > 0
+    && [self preservesSelection])
+    {
+      indexes = indexesBelow(_selection_indexes, [_arranged_objects count]);
+      selected = [_arranged_objects objectsAtIndexes: indexes];
+    }
+
   [self willChangeValueForKey: @"arrangedObjects"];
   DESTROY(_arranged_objects);
   _arranged_objects = [[GSObservableArray alloc]
 			  initWithArray: [self arrangeObjects: _content]];
   [self didChangeValueForKey: @"arrangedObjects"];
+
+  if (selected != nil)
+    {
+      indexes = [self _indexSetForObjects: selected];
+    }
+  else
+    {
+      indexes = indexesBelow(_selection_indexes, [_arranged_objects count]);
+    }
+  [self setSelectionIndexes: indexes];
 }
 
 /** Sets the sort descriptors the arranged objects are sorted with, and
