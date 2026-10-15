@@ -98,6 +98,12 @@ static NSDataLinkPanel *_sharedDataLinkPanel;
 
 @implementation NSDataLinkPanel
 
+- (void) dealloc
+{
+  RELEASE(_accessoryView);
+  [super dealloc];
+}
+
 + (void)initialize
 {
   if (self == [NSDataLinkPanel class])
@@ -199,20 +205,20 @@ static NSDataLinkPanel *_sharedDataLinkPanel;
 //
 
 /**
- * Add an accessory view to the panel.
+ * Get the accessory view.
  */
 - (NSView *)accessoryView
 {
-  // not yet implemented.
-  return nil;
+  return _accessoryView;
 }
 
 /**
- * Get the accessory view.
+ * Set the accessory view.  The view is kept for the application; the
+ * panel does not show it yet.
  */
 - (void)setAccessoryView:(NSView *)aView
 {
-  // not yet implemented.
+  ASSIGN(_accessoryView, aView);
 }
 
 //
