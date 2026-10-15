@@ -1734,9 +1734,55 @@ and layout is left-to-right */
   [self setRulerVisible: !_tf.is_ruler_visible];
 }
 
+/* Outlines the selected text, by giving it a positive stroke width, or
+ * removes the outline when the selected text starts outlined.
+ */
 - (void) outline: (id)sender
 {
-  // FIXME
+  BOOL doOutline = YES;
+  NSRange aRange = [self rangeForUserCharacterAttributeChange];
+  NSNumber *width = [NSNumber numberWithFloat: 3.0];
+
+  if (aRange.location == NSNotFound)
+    return;
+
+  if (aRange.location < [_textStorage length]
+      && [[_textStorage attribute: NSStrokeWidthAttributeName
+                          atIndex: aRange.location
+                   effectiveRange: NULL] floatValue] != 0.0)
+    doOutline = NO;
+
+  if (aRange.length)
+    {
+      if (![self shouldChangeTextInRange: aRange
+                       replacementString: nil])
+        return;
+      [_textStorage beginEditing];
+      if (doOutline)
+        {
+          [_textStorage addAttribute: NSStrokeWidthAttributeName
+                               value: width
+                               range: aRange];
+        }
+      else
+        {
+          [_textStorage removeAttribute: NSStrokeWidthAttributeName
+                                  range: aRange];
+        }
+      [_textStorage endEditing];
+      [self didChangeText];
+    }
+
+  if (doOutline)
+    {
+      [_layoutManager->_typingAttributes setObject: width
+                                            forKey: NSStrokeWidthAttributeName];
+    }
+  else
+    {
+      [_layoutManager->_typingAttributes
+        removeObjectForKey: NSStrokeWidthAttributeName];
+    }
 }
 
 - (void) setBaseWritingDirection: (NSWritingDirection)direction
@@ -1748,9 +1794,57 @@ and layout is left-to-right */
   [_textStorage setBaseWritingDirection: direction range: range];
 }
 
+/* Makes the selected paragraphs, and the paragraph style of the typing
+ * attributes, right to left, or left to right when the first of them is
+ * already right to left.  Plain text has no paragraph styles, so it is
+ * left as it is.
+ */
 - (void) toggleBaseWritingDirection: (id)sender
 {
-  // FIXME
+  NSRange r = [self rangeForUserParagraphAttributeChange];
+  NSWritingDirection direction = NSWritingDirectionRightToLeft;
+  NSParagraphStyle *style = nil;
+  NSMutableParagraphStyle *typingStyle;
+
+  if (r.location == NSNotFound || !_tf.is_rich_text)
+    return;
+
+  if (r.location < [_textStorage length])
+    {
+      style = [_textStorage attribute: NSParagraphStyleAttributeName
+                              atIndex: r.location
+                       effectiveRange: NULL];
+    }
+  else
+    {
+      style = [_layoutManager->_typingAttributes
+                objectForKey: NSParagraphStyleAttributeName];
+    }
+  if ([style baseWritingDirection] == NSWritingDirectionRightToLeft)
+    {
+      direction = NSWritingDirectionLeftToRight;
+    }
+
+  if (r.length > 0)
+    {
+      if (![self shouldChangeTextInRange: r
+                       replacementString: nil])
+        return;
+      [self setBaseWritingDirection: direction range: r];
+      [self didChangeText];
+    }
+
+  style = [_layoutManager->_typingAttributes
+            objectForKey: NSParagraphStyleAttributeName];
+  if (style == nil)
+    {
+      style = [NSParagraphStyle defaultParagraphStyle];
+    }
+  typingStyle = [style mutableCopy];
+  [typingStyle setBaseWritingDirection: direction];
+  [_layoutManager->_typingAttributes setObject: typingStyle
+                                        forKey: NSParagraphStyleAttributeName];
+  RELEASE(typingStyle);
 }
 
 @end
