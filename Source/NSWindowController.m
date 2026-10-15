@@ -157,22 +157,32 @@
   return _window_nib_name;
 }
 
-- (NSString *)windowNibPath
+/** Returns the path of the nib the window is loaded from: the path the
+ * receiver was initialised with, or else the nib named by -windowNibName
+ * in the owner's bundle or the main bundle.  A subclass may name its nib
+ * by overriding -windowNibName.  Returns nil when there is no such nib.
+ */
+- (NSString *) windowNibPath
 {
-  if ((_window_nib_name != nil) && (_window_nib_path == nil))
-  {
-    NSString *path;
+  NSString *name;
+  NSString *path;
 
-    path = [[NSBundle bundleForClass: [_owner class]] 
-	       pathForNibResource: _window_nib_name];
-    if (path == nil)
-      path = [[NSBundle mainBundle] 
-		 pathForNibResource: _window_nib_name];
-
-    return path;
-  }
-
-  return _window_nib_path;
+  if (_window_nib_path != nil)
+    {
+      return _window_nib_path;
+    }
+  name = [self windowNibName];
+  if (name == nil)
+    {
+      return nil;
+    }
+  path = [[NSBundle bundleForClass: [_owner class]]
+	   pathForNibResource: name];
+  if (path == nil)
+    {
+      path = [[NSBundle mainBundle] pathForNibResource: name];
+    }
+  return path;
 }
 
 - (id) owner
@@ -495,14 +505,26 @@
 - (void) loadWindow
 {
   NSDictionary *table;
+  NSString *path;
 
   if ([self isWindowLoaded]) 
     {
       return;
     }
 
+  path = [self windowNibPath];
+  if (path == nil)
+    {
+      /* No nib: a subclass that makes its window overrides this method. */
+      if ([self windowNibName] != nil)
+        {
+	  NSLog (@"%@: could not find nib named %@",
+		 [self class], [self windowNibName]);
+	}
+      return;
+    }
   table = [NSDictionary dictionaryWithObject: _owner forKey: NSNibOwner];
-  if ([NSBundle loadNibFile: [self windowNibPath]
+  if ([NSBundle loadNibFile: path
 		externalNameTable: table
 		withZone: [_owner zone]])
     {
@@ -520,11 +542,7 @@
     }
   else
     {
-      if (_window_nib_name != nil)
-        {
-	  NSLog (@"%@: could not load nib named %@.nib", 
-		 [self class], _window_nib_name);
-	}
+      NSLog (@"%@: could not load nib %@", [self class], path);
     }
 }
 
