@@ -1916,9 +1916,18 @@ static SEL getSel;
   [self setPreviousKeyView: anObject];
 }
 
+/**<p>If <var>flag</var> is NO, the cell size is no longer taken as valid,
+   so it is computed again from the cells, as -sizeToFit computes it, and
+   the matrix is resized to the new cell size.  If <var>flag</var> is YES,
+   the cell size is kept.</p>
+   <p>See Also: -sizeToFit</p>
+ */
 - (void) setValidateSize: (BOOL)flag
 {
-  // TODO
+  if (flag == NO)
+    {
+      [self sizeToFit];
+    }
 }
 
 - (void) sizeToCells
