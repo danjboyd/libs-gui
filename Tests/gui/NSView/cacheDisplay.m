@@ -37,6 +37,17 @@
 }
 @end
 
+/* Raises from -drawRect:. */
+@interface Raiser : NSView
+@end
+
+@implementation Raiser
+- (void) drawRect: (NSRect)r
+{
+  [NSException raise: @"RaiserException" format: @"drawing failed"];
+}
+@end
+
 static Swatch *
 swatch(NSRect frame, NSColor *fill, NSColor *corner)
 {
@@ -127,6 +138,39 @@ int main(int argc, const char **argv)
   [v cacheDisplayInRect: NSMakeRect(0, 0, 20, 20) toBitmapImageRep: rep];
   PASS([rep pixelsWide] == 20 && pixelIs(rep, 2, 17, blue)
     && pixelIs(rep, 17, 2, red), "a part of the view fills the bitmap");
+
+  /* The snapshot is complete when the method returns: changing the
+     bitmap afterwards sticks, even once autoreleased objects go. */
+  {
+    NSAutoreleasePool	*pool = [NSAutoreleasePool new];
+
+    rep = RETAIN([v bitmapImageRepForCachingDisplayInRect: [v bounds]]);
+    [v cacheDisplayInRect: [v bounds] toBitmapImageRep: rep];
+    [rep setColor: green atX: 30 y: 30];
+    [pool release];
+    AUTORELEASE(rep);
+  }
+  PASS(pixelIs(rep, 30, 30, green) && pixelIs(rep, 15, 30, red),
+    "a change to the bitmap after the snapshot is kept");
+
+  /* A view that raises while drawing leaves the current context alone. */
+  {
+    Raiser		*r = AUTORELEASE([[Raiser alloc]
+      initWithFrame: NSMakeRect(0, 0, 10, 10)]);
+    NSGraphicsContext	*before = [NSGraphicsContext currentContext];
+    BOOL		raised = NO;
+
+    [[w contentView] addSubview: r];
+    rep = [r bitmapImageRepForCachingDisplayInRect: [r bounds]];
+    NS_DURING
+      [r cacheDisplayInRect: [r bounds] toBitmapImageRep: rep];
+    NS_HANDLER
+      raised = [[localException name] isEqual: @"RaiserException"];
+    NS_ENDHANDLER
+    PASS(raised && [NSGraphicsContext currentContext] == before,
+      "an exception from -drawRect: passes through and the context is restored");
+    [r removeFromSuperview];
+  }
 
   /* A view outside any window. */
   [v removeFromSuperview];

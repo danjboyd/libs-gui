@@ -2973,44 +2973,78 @@ static void autoresize(CGFloat oldContainerSize,
  * Draws rect of the receiver and its subviews into bitmap, scaled so that
  * rect fills the bitmap.  The view need not be in a window, and what the
  * window shows does not matter: the views draw themselves with -drawRect:
- * into a graphics context for bitmap.  The backend must be able to draw
- * into the bitmap's format (8 bits per sample RGBA, as made by
- * -bitmapImageRepForCachingDisplayInRect:, always works with cairo).
+ * into a graphics context for bitmap.<br />
+ * The backend must be able to draw into the bitmap.  The cairo backend
+ * can for 8 bits per sample RGBA bitmaps, such as those made by
+ * -bitmapImageRepForCachingDisplayInRect:; for other formats nothing is
+ * drawn.  Other backends have not been tried.
  */
 - (void) cacheDisplayInRect: (NSRect)rect 
            toBitmapImageRep: (NSBitmapImageRep *)bitmap
 {
-  NSGraphicsContext *ctxt;
-  NSAffineTransform *base;
-  NSRect wrect;
+  NSException *exception = nil;
+  NSUInteger drawing = 0;
 
   if (bitmap == nil || NSIsEmptyRect(rect))
     {
       return;
     }
-  ctxt = [NSGraphicsContext graphicsContextWithBitmapImageRep: bitmap];
-  if (ctxt == nil)
+  if (_window != nil)
     {
-      return;
+      drawing = [_window->_rectsBeingDrawn count];
     }
 
+  /* The context writes what was drawn into bitmap once more when it is
+   * deallocated, so it must not outlive this method, or it would undo
+   * later changes to bitmap.
+   */
+  ENTER_POOL
+  NSGraphicsContext *ctxt;
+
+  ctxt = [NSGraphicsContext graphicsContextWithBitmapImageRep: bitmap];
   [NSGraphicsContext saveGraphicsState];
   [NSGraphicsContext setCurrentContext: ctxt];
+  NS_DURING
+    {
+      NSAffineTransform *base;
+      NSRect wrect;
 
-  /* Map rect, in window base coordinates, onto the whole bitmap.  Each
-   * view then concatenates its own matrix to the window.
-   */
-  wrect = [self convertRect: rect toView: nil];
-  base = [NSAffineTransform transform];
-  [base scaleXBy: [bitmap pixelsWide] / NSWidth(wrect)
-             yBy: [bitmap pixelsHigh] / NSHeight(wrect)];
-  [base translateXBy: -NSMinX(wrect) yBy: -NSMinY(wrect)];
-  [base concat];
+      /* Map rect, in window base coordinates, onto the whole bitmap.
+       * Each view then concatenates its own matrix to the window.
+       */
+      wrect = [self convertRect: rect toView: nil];
+      base = [NSAffineTransform transform];
+      [base scaleXBy: [bitmap pixelsWide] / NSWidth(wrect)
+                 yBy: [bitmap pixelsHigh] / NSHeight(wrect)];
+      [base translateXBy: -NSMinX(wrect) yBy: -NSMinY(wrect)];
+      [base concat];
 
-  [self _cacheDisplayRect: rect inContext: ctxt];
+      [self _cacheDisplayRect: rect inContext: ctxt];
 
-  [ctxt flushGraphics];
+      [ctxt flushGraphics];
+    }
+  NS_HANDLER
+    {
+      exception = RETAIN(localException);
+    }
+  NS_ENDHANDLER
   [NSGraphicsContext restoreGraphicsState];
+  LEAVE_POOL
+
+  if (exception != nil)
+    {
+      /* Forget the rectangles of the views whose drawing raised. */
+      if (_window != nil)
+        {
+          NSMutableArray *rects = _window->_rectsBeingDrawn;
+
+          while ([rects count] > drawing)
+            {
+              [rects removeLastObject];
+            }
+        }
+      [AUTORELEASE(exception) raise];
+    }
 }
 
 
