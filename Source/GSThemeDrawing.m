@@ -79,6 +79,8 @@
 
 @interface NSTableView (Private)
 - (CGFloat *)_columnOrigins;
+- (NSCell *) _dataCellAtColumn: (NSInteger)columnIndex
+			   row: (NSInteger)rowIndex;
 - (void) _willDisplayCell: (NSCell*)cell
 	   forTableColumn: (NSTableColumn *)tb
 		      row: (NSInteger)index;
@@ -3636,7 +3638,7 @@ static NSDictionary *titleTextAttributes[3] = {nil, nil, nil};
     {
       id item = [outlineView itemAtRow: rowIndex];
       NSTableColumn *tb = [tableColumns objectAtIndex: i];
-      NSCell *cell = [outlineView preparedCellAtColumn: i row: rowIndex];
+      NSCell *cell = [outlineView _dataCellAtColumn: i row: rowIndex];
 
       if (i == editedColumn && rowIndex == editedRow)
         {

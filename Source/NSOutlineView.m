@@ -140,6 +140,8 @@ static NSImage *unexpandable  = nil;
 @end
 
 @interface NSTableView (Private)
+- (NSCell *) _dataCellAtColumn: (NSInteger)columnIndex
+			   row: (NSInteger)rowIndex;
 - (void) _postColumnDidResizeNotificationForColumn: (NSTableColumn *)column
 					   oldWidth: (CGFloat)oldWidth;
 - (NSView *) _renderedViewForPath: (NSIndexPath *)path;
@@ -1623,7 +1625,7 @@ Also returns the child index relative to this parent. */
 
   // Prepare the cell
   // NB: need to be released when no longer used
-  _editedCell = [[self preparedCellAtColumn: columnIndex row: rowIndex] copy];
+  _editedCell = [[self _dataCellAtColumn: columnIndex row: rowIndex] copy];
 
   [_editedCell setEditable: _dataSource_editable];
   tb = [_tableColumns objectAtIndex: columnIndex];
@@ -2567,7 +2569,11 @@ Also returns the child index relative to this parent. */
     }
 }
 
-- (NSCell *) preparedCellAtColumn: (NSInteger)columnIndex row: (NSInteger)rowIndex
+/* The cell for the row's item, from the delegate's
+ * -outlineView:dataCellForTableColumn:item: or else the column, without
+ * the row's value.  NSTableView's -preparedCellAtColumn:row: sets it up.
+ */
+- (NSCell *) _dataCellAtColumn: (NSInteger)columnIndex row: (NSInteger)rowIndex
 {
   NSCell *cell = nil;
 

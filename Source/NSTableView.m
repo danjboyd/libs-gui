@@ -159,6 +159,8 @@ typedef struct _tableViewFlags
 
 - (BOOL) _isEditableColumn: (NSInteger)columnIndex
 		       row: (NSInteger)rowIndex;
+- (NSCell *) _dataCellAtColumn: (NSInteger)columnIndex
+			   row: (NSInteger)rowIndex;
 - (BOOL) _isCellSelectableColumn: (NSInteger)columnIndex
 			     row: (NSInteger)rowIndex;
 - (BOOL) _isCellEditableColumn: (NSInteger)columnIndex
@@ -3343,7 +3345,33 @@ byExtendingSelection: (BOOL)flag
  * Providing Cells
  */
 
+/** Returns the cell that displays rowIndex of the column at columnIndex,
+ * set up as for drawing: it holds the row's object value, and the
+ * delegate has been sent -tableView:willDisplayCell:forTableColumn:row:.
+ * The cell comes from the delegate's
+ * -tableView:dataCellForTableColumn:row: or else the column's
+ * -dataCellForRow:, and is usually shared by the rows of the column.
+ * Returns nil for a view based table.
+ */
 - (NSCell *) preparedCellAtColumn: (NSInteger)columnIndex row: (NSInteger)rowIndex
+{
+  NSCell *cell = [self _dataCellAtColumn: columnIndex row: rowIndex];
+
+  if (cell != nil && rowIndex >= 0 && rowIndex < _numberOfRows)
+    {
+      NSTableColumn *tb = [_tableColumns objectAtIndex: columnIndex];
+
+      [cell setObjectValue: [self _objectValueForTableColumn: tb
+							 row: rowIndex]];
+      [self _willDisplayCell: cell forTableColumn: tb row: rowIndex];
+    }
+  return cell;
+}
+
+/* The cell for rowIndex of the column at columnIndex, as it is, without
+ * the row's value: for the callers that set the cell up themselves.
+ */
+- (NSCell *) _dataCellAtColumn: (NSInteger)columnIndex row: (NSInteger)rowIndex
 {
   NSCell *cell = nil;
 
@@ -3520,7 +3548,7 @@ byExtendingSelection: (BOOL)flag
 
   // Prepare the cell
   // NB: need to be released when no longer used
-  _editedCell = [[self preparedCellAtColumn: columnIndex row: rowIndex] copy];
+  _editedCell = [[self _dataCellAtColumn: columnIndex row: rowIndex] copy];
 
   tb = [_tableColumns objectAtIndex: columnIndex];
   [_editedCell setObjectValue: [self _objectValueForTableColumn: tb
@@ -3622,7 +3650,7 @@ static inline NSTimeInterval computePeriod(NSPoint mouseLocationWin,
   /* we should copy the cell here, as we do on editing.
      otherwise validation on a cell being edited could
      cause the cell we are selecting to get it's objectValue */
-  NSCell *cell = [[self preparedCellAtColumn: columnIndex row: rowIndex] copy];
+  NSCell *cell = [[self _dataCellAtColumn: columnIndex row: rowIndex] copy];
   NSTableColumn *tb = [_tableColumns objectAtIndex: columnIndex];
   id originalValue = RETAIN([self _objectValueForTableColumn: tb
 							 row: rowIndex]);
@@ -3983,8 +4011,8 @@ if (currentRow >= 0 && currentRow < _numberOfRows) \
 		       * Can never get here from a dragging source
 		       * so they need to track in mouse up.
 		       */
-		      NSCell *cell = [self preparedCellAtColumn: _clickedColumn
-							    row: _clickedRow];
+		      NSCell *cell = [self _dataCellAtColumn: _clickedColumn
+							 row: _clickedRow];
 
 		      [self _trackCellAtColumn: _clickedColumn
 					   row: _clickedRow
@@ -6028,7 +6056,7 @@ This method is deprecated, use -columnIndexesInRect:. */
 
   for (i = 0; i < _numberOfColumns; i++)
     {
-      if ([self preparedCellAtColumn: i row: -1] == aCell)
+      if ([self _dataCellAtColumn: i row: -1] == aCell)
 	{
 	  [self setNeedsDisplayInRect: [self rectOfColumn: i]];
 	}
@@ -6053,7 +6081,7 @@ This method is deprecated, use -columnIndexesInRect:. */
 
 	  for (j = firstVisibleRow; j < lastVisibleRow; j++)
 	    {
-	      if ([self preparedCellAtColumn: i row: j] == aCell)
+	      if ([self _dataCellAtColumn: i row: j] == aCell)
 		{
 		  rowRect = [self rectOfRow: j];
 		  [self setNeedsDisplayInRect:
@@ -6991,7 +7019,7 @@ For a more detailed explanation, -setSortDescriptors:. */
     }
   else
     {
-      NSCell *cell = [self preparedCellAtColumn: columnIndex row: rowIndex];
+      NSCell *cell = [self _dataCellAtColumn: columnIndex row: rowIndex];
 
       return [cell isSelectable];
     }
@@ -7006,7 +7034,7 @@ For a more detailed explanation, -setSortDescriptors:. */
     }
   else
     {
-      NSCell *cell = [self preparedCellAtColumn: columnIndex row: rowIndex];
+      NSCell *cell = [self _dataCellAtColumn: columnIndex row: rowIndex];
 
       return [cell isEditable];
     }
