@@ -250,7 +250,7 @@ APPKIT_EXPORT_CLASS
     unsigned line_break_mode: 3; // 6 values
 
     // 23 bits for NSCell use, 4 bits for subclass use.
-    // 5 bits remain unused.
+    // 4 bits remain unused.
     int state: 2; // 3 values but one negative
     unsigned mnemonic_location: 8;
     unsigned control_tint: 3;
@@ -267,6 +267,7 @@ APPKIT_EXPORT_CLASS
     // Set if cell uses single line mode.
     unsigned uses_single_line_mode:1;
     unsigned background_style: 2; // 3 values
+    unsigned right_to_left: 1; // user interface layout direction
   } _cell;
   NSUInteger _mouse_down_flags;
   NSUInteger _action_mask;

@@ -2923,16 +2923,19 @@ static NSColor *dtxtCol;
   return self;
 }
 
+/* The direction is kept for the application; cells draw left to right
+ * whatever it is.
+ */
 - (NSUserInterfaceLayoutDirection) userInterfaceLayoutDirection
 {
-  // FIXME
-  return NSUserInterfaceLayoutDirectionLeftToRight;
+  return _cell.right_to_left
+    ? NSUserInterfaceLayoutDirectionRightToLeft
+    : NSUserInterfaceLayoutDirectionLeftToRight;
 }
 
 - (void) setUserInterfaceLayoutDirection: (NSUserInterfaceLayoutDirection)dir
 {
-  // FIXME: implement this
-  return;
+  _cell.right_to_left = (dir == NSUserInterfaceLayoutDirectionRightToLeft);
 }
 
 - (void) setUsesSingleLineMode: (BOOL)flag
