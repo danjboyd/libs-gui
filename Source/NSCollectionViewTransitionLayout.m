@@ -22,6 +22,8 @@
    Boston, MA 02110 USA.
 */
 
+#import <Foundation/NSDictionary.h>
+#import <Foundation/NSValue.h>
 #import "AppKit/NSCollectionViewTransitionLayout.h"
 
 @implementation NSCollectionViewTransitionLayout
@@ -63,17 +65,29 @@
 {
   RELEASE(_currentLayout);
   RELEASE(_nextLayout);
+  RELEASE(_animatedValues);
   [super dealloc];
 }
 
 - (void) updateValue: (CGFloat)value forAnimatedKey: (NSCollectionViewTransitionLayoutAnimatedKey)key
 {
-  // not implemented...
+  if (key == nil)
+    {
+      return;
+    }
+  if (_animatedValues == nil)
+    {
+      _animatedValues = [[NSMutableDictionary alloc] init];
+    }
+  [_animatedValues setObject: [NSNumber numberWithDouble: value]
+                      forKey: key];
 }
 
+/* Answers the value last given for key, or 0 for a key never given one.
+ */
 - (CGFloat) valueForAnimatedKey: (NSCollectionViewTransitionLayoutAnimatedKey)key
 {
-  return 1.0;
+  return [[_animatedValues objectForKey: key] doubleValue];
 }
 
 @end

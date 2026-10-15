@@ -51,6 +51,7 @@ APPKIT_EXPORT_CLASS
   CGFloat _transitionProgress;
   NSCollectionViewLayout *_currentLayout;
   NSCollectionViewLayout *_nextLayout;
+  NSMutableDictionary *_animatedValues;
 }
 
 /**
