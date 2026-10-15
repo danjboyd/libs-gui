@@ -43,6 +43,16 @@
 
 @end
 
+/* Answers s as a quoted string in strings file format.
+ */
+static NSString *
+GSQuotedStringsEntry(NSString *s)
+{
+  s = [s stringByReplacingOccurrencesOfString: @"\\" withString: @"\\\\"];
+  s = [s stringByReplacingOccurrencesOfString: @"\"" withString: @"\\\""];
+  return [NSString stringWithFormat: @"\"%@\"", s];
+}
+
 @implementation NSDictionary (GSPrivate_DictionaryToStrings)
 
 - (NSString *) _stringsFromDictionary
@@ -53,9 +63,11 @@
 
   while ((k = [en nextObject]) != nil)
     {
-      NSString *v = [self objectForKey: k];
+      NSString *v = [[self objectForKey: k] description];
       result = [result stringByAppendingString:
-			 [NSString stringWithFormat: @"\"%@\" = \"%@\";\n", k, v]];
+			 [NSString stringWithFormat: @"%@ = %@;\n",
+				   GSQuotedStringsEntry([k description]),
+				   GSQuotedStringsEntry(v)]];
     }
 
   return result;
@@ -71,18 +83,26 @@
 
 @implementation NSString (GSPrivate_StringsToDictionary)
 
+/* Answers the dictionary of the strings file text in the receiver, or nil
+ * when the text cannot be parsed.  The text is a strings file, not a
+ * property list, so it is parsed as one.
+ */
 - (NSDictionary *) _dictionaryFromStrings
 {
-  NSError *error = nil;
-  NSDictionary *dictionary =
-    [NSPropertyListSerialization
-      propertyListWithData: [self dataUsingEncoding: NSUTF8StringEncoding]
-		   options: NSPropertyListImmutable
-		    format: NULL
-		     error: &error];
-  if (error != nil)
+  NSDictionary *dictionary = nil;
+
+  NS_DURING
     {
-      NSLog(@"Error reading strings file: %@", error);
+      dictionary = [self propertyListFromStringsFileFormat];
+    }
+  NS_HANDLER
+    {
+      dictionary = nil;
+    }
+  NS_ENDHANDLER
+  if (dictionary == nil && [self length] > 0)
+    {
+      NSLog(@"Error reading strings file: %@", self);
     }
 
   return dictionary;
