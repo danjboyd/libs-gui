@@ -1150,10 +1150,18 @@ static NSNotificationCenter *nc;
     }
 }
 
+/** <p>Returns the size of the control's cell that best fits the proposed
+    size, as the cell's -cellSizeForBounds: answers it for a rectangle of
+    that size.  A control without a cell answers the proposed size.</p>
+ */
 - (NSSize) sizeThatFits: (NSSize)size
 {
-  // FIXME: This is a stub
-  return size;
+  if (_cell == nil)
+    {
+      return size;
+    }
+  return [_cell cellSizeForBounds:
+    NSMakeRect(0.0, 0.0, size.width, size.height)];
 }
 
 @end
