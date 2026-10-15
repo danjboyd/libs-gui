@@ -173,7 +173,12 @@
 {
   if (_targetForDropOperation)
     {
-      [[NSColor selectedControlColor] set];
+      /* Frame the row in the emphasized selection colour, which Cocoa
+       * uses for drop feedback (its accent colour).  selectedControlColor
+       * is a fill behind selected text, white in the default colour
+       * scheme, so a frame in it did not show on a white row.
+       */
+      [[NSColor alternateSelectedControlColor] set];
       NSFrameRectWithWidth([self bounds], 2.0);
     }
 }
