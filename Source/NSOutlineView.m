@@ -142,6 +142,9 @@ static NSImage *unexpandable  = nil;
 @interface NSTableView (Private)
 - (NSCell *) _dataCellAtColumn: (NSInteger)columnIndex
 			   row: (NSInteger)rowIndex;
+- (NSCell *) _cellAtColumn: (NSInteger)columnIndex
+		       row: (NSInteger)rowIndex
+		  prepared: (BOOL *)prepared;
 - (void) _postColumnDidResizeNotificationForColumn: (NSTableColumn *)column
 					   oldWidth: (CGFloat)oldWidth;
 - (NSView *) _renderedViewForPath: (NSIndexPath *)path;
@@ -1634,7 +1637,9 @@ Also returns the child index relative to this parent. */
 
   // Prepare the cell
   // NB: need to be released when no longer used
-  _editedCell = [[self _dataCellAtColumn: columnIndex row: rowIndex] copy];
+  _editedCell = [[self _cellAtColumn: columnIndex
+				  row: rowIndex
+			     prepared: NULL] copy];
 
   [_editedCell setEditable: _dataSource_editable];
   tb = [_tableColumns objectAtIndex: columnIndex];

@@ -79,8 +79,9 @@
 
 @interface NSTableView (Private)
 - (CGFloat *)_columnOrigins;
-- (NSCell *) _dataCellAtColumn: (NSInteger)columnIndex
-			   row: (NSInteger)rowIndex;
+- (NSCell *) _cellAtColumn: (NSInteger)columnIndex
+		       row: (NSInteger)rowIndex
+		  prepared: (BOOL *)prepared;
 - (void) _willDisplayCell: (NSCell*)cell
 	   forTableColumn: (NSTableColumn *)tb
 		      row: (NSInteger)index;
@@ -3638,23 +3639,31 @@ static NSDictionary *titleTextAttributes[3] = {nil, nil, nil};
     {
       id item = [outlineView itemAtRow: rowIndex];
       NSTableColumn *tb = [tableColumns objectAtIndex: i];
-      NSCell *cell = [outlineView _dataCellAtColumn: i row: rowIndex];
+      BOOL prepared;
+      NSCell *cell = [outlineView _cellAtColumn: i
+					    row: rowIndex
+				       prepared: &prepared];
 
       if (i == editedColumn && rowIndex == editedRow)
         {
           [cell _setInEditing: YES];
           [cell setShowsFirstResponder: YES];
         }
-      else
+      else if (NO == prepared)
         {
 	  id value = [outlineView _objectValueForTableColumn: tb
 							 row: rowIndex];
 	  [cell setObjectValue: value];
         }
-      /* The delegate sees the cell with this row's value, as in Cocoa. */
-      [outlineView _willDisplayCell: cell
-		     forTableColumn: tb
-				row: rowIndex];
+      /* The delegate sees the cell with this row's value, as in Cocoa.
+       * A subclass's -preparedCellAtColumn:row: has set the cell up.
+       */
+      if (NO == prepared)
+        {
+          [outlineView _willDisplayCell: cell
+                         forTableColumn: tb
+                                    row: rowIndex];
+        }
 
       drawingRect = [outlineView frameOfCellAtColumn: i
 						 row: rowIndex];
