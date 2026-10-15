@@ -376,6 +376,16 @@ nsanimation_progressMarkSorter(NSAnimationProgress first, NSAnimationProgress se
   return f;
 }
 
+/** Initializes an animation with a duration of one second and the
+ * NSAnimationEaseInOut curve, the values -initWithCoder: uses when an
+ * archive has none.
+ */
+- (id) init
+{
+  return [self initWithDuration: 1.0
+                 animationCurve: NSAnimationEaseInOut];
+}
+
 - (id) initWithDuration: (NSTimeInterval)duration
 	 animationCurve: (NSAnimationCurve)curve
 {
@@ -1411,6 +1421,14 @@ nsanimation_progressMarkSorter(NSAnimationProgress first, NSAnimationProgress se
 @end // implementation _GSWindowAnimationDesc
 
 @implementation NSViewAnimation
+
+/** Initializes a view animation without view animations, with the
+ * defaults of -initWithViewAnimations:.
+ */
+- (id) init
+{
+  return [self initWithViewAnimations: nil];
+}
 
 - (id) initWithViewAnimations: (NSArray*)animations
 {
