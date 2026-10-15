@@ -232,7 +232,7 @@ APPKIT_EXPORT_CLASS
 /** Returns the NSImage named aName. The search is done in the main bundle
  *  first and then in the usual images directories.
  */
-+ (id) imageNamed: (NSString*)aName;
++ (NSImage *) imageNamed: (NSString *)aName;
 #if OS_API_VERSION(GS_API_MACOSX, GS_API_LATEST)
 #if OS_API_VERSION(GS_API_NONE, GS_API_NONE)
 + (NSImage*) _standardImageWithName: (NSString*)name;

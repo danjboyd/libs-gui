@@ -470,7 +470,7 @@ repd_for_rep(NSArray *_reps, NSImageRep *rep)
     }
 }
 
-+ (id) imageNamed: (NSString *)aName
++ (NSImage *) imageNamed: (NSString *)aName
 {
   NSImage   *image;
   NSString  *realName;
