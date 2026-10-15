@@ -35,6 +35,7 @@
 #import "AppKit/NSEvent.h"
 #import "AppKit/NSAppearance.h"
 #import "AppKit/NSFontCollection.h"
+#import "AppKit/NSWindow.h"
 #import "AppKit/NSTextFinder.h"
 #import "AppKit/NSCollectionView.h"
 #import "AppKit/NSDraggingItem.h"
@@ -52,6 +53,7 @@ APPKIT_DECLARE NSExceptionName NSAbortModalException = @"NSAbortModalException";
 APPKIT_DECLARE NSExceptionName NSAbortPrintingException = @"NSAbortPrintingException";
 APPKIT_DECLARE NSExceptionName NSAppKitIgnoredException = @"NSAppKitIgnoredException";
 APPKIT_DECLARE NSExceptionName NSAppKitVirtualMemoryException = @"NSAppKitVirtualMemoryException";
+APPKIT_DECLARE NSExceptionName NSAccessibilityException = @"NSAccessibilityException";
 APPKIT_DECLARE NSExceptionName NSBadBitmapParametersException = @"NSBadBitmapParametersException";
 APPKIT_DECLARE NSExceptionName NSBadComparisonException = @"NSBadComparisonException";
 APPKIT_DECLARE NSExceptionName NSBadRTFColorTableException = @"NSBadRTFColorTableException";
@@ -761,6 +763,13 @@ const NSAppearanceName NSAppearanceNameAccessibilityHighContrastVibrantLight = @
 const NSAppearanceName NSAppearanceNameAccessibilityHighContrastVibrantDark = @"NSAppearanceNameAccessibilityVibrantDark";
 const NSAppearanceName NSAppearanceNameLightContent = @"NSAppearanceNameLightContent";
 
+// Font collection change notification and its userInfo keys
+APPKIT_DECLARE NSString * const NSFontCollectionDidChangeNotification = @"NSFontCollectionDidChangeNotification";
+APPKIT_DECLARE NSFontCollectionUserInfoKey const NSFontCollectionActionKey = @"NSFontCollectionActionKey";
+APPKIT_DECLARE NSFontCollectionUserInfoKey const NSFontCollectionNameKey = @"NSFontCollectionNameKey";
+APPKIT_DECLARE NSFontCollectionUserInfoKey const NSFontCollectionOldNameKey = @"NSFontCollectionOldNameKey";
+APPKIT_DECLARE NSFontCollectionUserInfoKey const NSFontCollectionVisibilityKey = @"NSFontCollectionVisibilityKey";
+
 // Values for NSFontCollectionAction
 APPKIT_DECLARE NSFontCollectionActionTypeKey const NSFontCollectionWasShown = @"NSFontCollectionWasShown";
 APPKIT_DECLARE NSFontCollectionActionTypeKey const NSFontCollectionWasHidden = @"NSFontCollectionWasHidden";
@@ -805,3 +814,7 @@ __objc_gui_force_linking (void)
   extern void __objc_gui_linking (void);
   __objc_gui_linking ();
 }
+
+// The sizes of icons and of tokens (the tiles holding them), as in NeXTSTEP.
+APPKIT_DECLARE NSSize NSIconSize = {48.0, 48.0};
+APPKIT_DECLARE NSSize NSTokenSize = {64.0, 64.0};
