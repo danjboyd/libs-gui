@@ -27,6 +27,7 @@
 #import "AppKit/NSTabViewController.h"
 #import "AppKit/NSTabViewItem.h"
 #import "AppKit/NSTabView.h"
+#import "AppKit/NSToolbarItem.h"
 
 #import "GSFastEnumeration.h"
 
@@ -186,21 +187,103 @@
 }
 
 // Responding to toolbar actions...
+
+/* Answers the toolbar item identifiers of the tab view items, one per
+ * item and in the same order.  A tab's own identifier is used when it is
+ * a non-empty string that no earlier tab uses.  Otherwise, as for the
+ * empty identifiers of tabs made with +tabViewItemWithViewController:,
+ * one is made from the tab's index.  The items are kept by the tab view,
+ * so there are none before it is loaded.
+ */
+- (NSArray *) _tabViewItemIdentifiers
+{
+  NSArray *items = [self isViewLoaded] ? [[self tabView] tabViewItems] : nil;
+  NSUInteger count = [items count];
+  NSMutableArray *identifiers = [NSMutableArray arrayWithCapacity: count];
+  NSUInteger i;
+
+  for (i = 0; i < count; i++)
+    {
+      id identifier = [[items objectAtIndex: i] identifier];
+
+      if (![identifier isKindOfClass: [NSString class]]
+        || [identifier length] == 0
+        || [identifiers containsObject: identifier])
+        {
+          identifier = [NSString stringWithFormat: @"GSTabViewItem%lu",
+                                 (unsigned long)i];
+          while ([identifiers containsObject: identifier])
+            {
+              identifier = [identifier stringByAppendingString: @"_"];
+            }
+        }
+      [identifiers addObject: identifier];
+    }
+  return identifiers;
+}
+
+/* Selects the tab view item whose toolbar item identifier is the toolbar
+ * item's.
+ */
+- (void) _selectTabViewItemForToolbarItem: (id)sender
+{
+  NSUInteger idx;
+
+  idx = [[self _tabViewItemIdentifiers] indexOfObject: [sender itemIdentifier]];
+  if (idx != NSNotFound)
+    {
+      [self setSelectedTabViewItemIndex: idx];
+    }
+}
+
+/** Answers a toolbar item for the tab view item with the toolbar item
+ * identifier, with its label, that selects the tab view item.  Answers nil
+ * when no tab view item has the identifier.
+ */
 - (NSToolbarItem *)toolbar:(NSToolbar *)toolbar 
      itemForItemIdentifier:(NSToolbarItemIdentifier)itemIdentifier
      willBeInsertedIntoToolbar:(BOOL)flag
 {
-  return nil; 
+  NSUInteger idx;
+  NSTabViewItem *tvi;
+  NSToolbarItem *item;
+
+  idx = [[self _tabViewItemIdentifiers] indexOfObject: itemIdentifier];
+  if (idx == NSNotFound)
+    {
+      return nil;
+    }
+  tvi = [[self tabView] tabViewItemAtIndex: idx];
+  item = AUTORELEASE([[NSToolbarItem alloc]
+    initWithItemIdentifier: itemIdentifier]);
+  [item setLabel: [tvi label]];
+  [item setPaletteLabel: [tvi label]];
+  [item setToolTip: [tvi toolTip]];
+  [item setTarget: self];
+  [item setAction: @selector(_selectTabViewItemForToolbarItem:)];
+  return item;
 }
 
+/** Answers the identifiers of the tab view items.
+ */
 - (NSArray *)toolbarAllowedItemIdentifiers:(NSToolbar *)toolbar
 {
-  return [NSArray array];
+  return [self _tabViewItemIdentifiers];
 }
 
+/** Answers the identifiers of the tab view items.
+ */
+- (NSArray *)toolbarDefaultItemIdentifiers:(NSToolbar *)toolbar
+{
+  return [self _tabViewItemIdentifiers];
+}
+
+/** Answers the identifiers of the tab view items, as each of their
+ * toolbar items selects a tab.
+ */
 - (NSArray *)toolbarSelectableItemIdentifiers:(NSToolbar *)toolbar
 {
-  return [NSArray array];
+  return [self _tabViewItemIdentifiers];
 }
 
 // NSCoding
