@@ -184,7 +184,11 @@
  */
 - (NSString*) alternateTitle
 {
-  if (_altContents != nil)
+  if ([_altContents isKindOfClass: [NSAttributedString class]])
+    {
+      return [(NSAttributedString *)_altContents string];
+    }
+  else if (_altContents != nil)
     {
       return _altContents;
     }
@@ -339,12 +343,18 @@
     }
 }
 
+/** <p>Returns the alternate title as given to -setAttributedAlternateTitle:,
+    or else the alternate title with the cell's text attributes.</p>
+ */
 - (NSAttributedString *)attributedAlternateTitle
 {
-  // TODO
   NSDictionary *dict;
   NSAttributedString *attrStr;
 
+  if ([_altContents isKindOfClass: [NSAttributedString class]])
+    {
+      return (NSAttributedString *)_altContents;
+    }
   dict = [self _nonAutoreleasedTypingAttributes];
   attrStr = [[NSAttributedString alloc] initWithString: [self alternateTitle]
                                         attributes: dict];
@@ -353,10 +363,23 @@
   return AUTORELEASE(attrStr);
 }
 
+/** <p>Sets the alternate title to <var>aString</var>, keeping its
+    attributes, and updates the cell if it is in an NSControl.</p>
+ */
 - (void)setAttributedAlternateTitle:(NSAttributedString *)aString
 {
-  // TODO
-  [self setAlternateTitle: [aString string]];
+  /* The alternate title is kept in _altContents, as an attributed string
+   * when it is set with its attributes.
+   */
+  ASSIGNCOPY(_altContents, (NSString *)aString);
+
+  if (_control_view)
+    {
+      if ([_control_view isKindOfClass: [NSControl class]])
+        {
+          [(NSControl*)_control_view updateCell: self];
+        }
+    }
 }
 
 - (NSAttributedString *)attributedTitle
@@ -1685,7 +1708,7 @@
         }
       if ([[self alternateTitle] length] > 0)
         {
-          [aCoder encodeObject: [self alternateTitle] forKey: @"NSAlternateContents"];
+          [aCoder encodeObject: _altContents forKey: @"NSAlternateContents"];
         }
       if (_bezelColor != nil)
         {
@@ -1861,6 +1884,10 @@
           if ([alternateContents isKindOfClass:[NSString class]]) 
 	    {
               [self setAlternateTitle:alternateContents];
+	    }
+          else if ([alternateContents isKindOfClass:[NSAttributedString class]]) 
+	    {
+              [self setAttributedAlternateTitle:alternateContents];
 	    }
           else if ([alternateContents isKindOfClass:[NSImage class]]) 
 	    {
