@@ -55,17 +55,19 @@ typedef enum
 
 @interface NSString (NSStringDrawing)
 
-- (void) drawAtPoint: (NSPoint)point withAttributes: (NSDictionary*)attrs;
-- (void) drawInRect: (NSRect)rect withAttributes: (NSDictionary*)attrs;
-- (NSSize) sizeWithAttributes: (NSDictionary*)attrs;
+- (void) drawAtPoint: (NSPoint)point
+     withAttributes: (GS_GENERIC_CLASS(NSDictionary, NSAttributedStringKey, id)*)attrs;
+- (void) drawInRect: (NSRect)rect
+    withAttributes: (GS_GENERIC_CLASS(NSDictionary, NSAttributedStringKey, id)*)attrs;
+- (NSSize) sizeWithAttributes: (GS_GENERIC_CLASS(NSDictionary, NSAttributedStringKey, id)*)attrs;
 
 #if OS_API_VERSION(MAC_OS_X_VERSION_10_4, GS_API_LATEST)
 - (NSRect) boundingRectWithSize: (NSSize)size
                         options: (NSStringDrawingOptions)options
-                     attributes: (NSDictionary *)attributes;
+                     attributes: (GS_GENERIC_CLASS(NSDictionary, NSAttributedStringKey, id) *)attributes;
 - (void) drawWithRect: (NSRect)rect
               options: (NSStringDrawingOptions)options
-           attributes: (NSDictionary *)attributes;
+           attributes: (GS_GENERIC_CLASS(NSDictionary, NSAttributedStringKey, id) *)attributes;
 #endif
 
 @end

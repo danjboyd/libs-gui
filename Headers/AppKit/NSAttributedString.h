@@ -241,8 +241,8 @@ enum {
 
 @interface NSAttributedString (AppKit)
 - (BOOL) containsAttachments;
-- (NSDictionary*) fontAttributesInRange: (NSRange)range;
-- (NSDictionary*) rulerAttributesInRange: (NSRange)range;
+- (GS_GENERIC_CLASS(NSDictionary, NSAttributedStringKey, id)*) fontAttributesInRange: (NSRange)range;
+- (GS_GENERIC_CLASS(NSDictionary, NSAttributedStringKey, id)*) rulerAttributesInRange: (NSRange)range;
 - (NSUInteger) lineBreakBeforeIndex: (NSUInteger)location
                         withinRange: (NSRange)aRange;
 - (NSRange) doubleClickAtIndex: (NSUInteger)location;

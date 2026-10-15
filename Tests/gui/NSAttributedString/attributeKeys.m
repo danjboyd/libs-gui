@@ -55,6 +55,15 @@ int main()
   PASS([[s attributesAtIndex: 0 effectiveRange: NULL]
     objectForKey: @"NSKern"] != nil, "a key is the attribute's string");
 
+  {
+    GS_GENERIC_CLASS(NSDictionary, NSAttributedStringKey, id)	*attrs;
+
+    attrs = [s fontAttributesInRange: NSMakeRange(0, 3)];
+    PASS_EQUAL([attrs objectForKey: NSKernAttributeName],
+      [NSNumber numberWithInt: 2],
+      "font attribute dictionaries are keyed by NSAttributedStringKey");
+  }
+
   END_SET("AppKit attribute keys")
 
   [arp release];

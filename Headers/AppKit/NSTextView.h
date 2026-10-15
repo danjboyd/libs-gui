@@ -413,8 +413,8 @@ the text view is resizable. */
 
 
 
--(void) setSelectedTextAttributes: (NSDictionary *)attributeDictionary;
--(NSDictionary *) selectedTextAttributes;
+-(void) setSelectedTextAttributes: (GS_GENERIC_CLASS(NSDictionary, NSAttributedStringKey, id) *)attributeDictionary;
+-(GS_GENERIC_CLASS(NSDictionary, NSAttributedStringKey, id) *) selectedTextAttributes;
 
 -(void) setInsertionPointColor: (NSColor *)color;
 -(NSColor *) insertionPointColor;
@@ -422,12 +422,12 @@ the text view is resizable. */
 
 /*** Marked range ***/
 
--(void) setMarkedTextAttributes: (NSDictionary *)attributeDictionary;
--(NSDictionary *) markedTextAttributes;
+-(void) setMarkedTextAttributes: (GS_GENERIC_CLASS(NSDictionary, NSAttributedStringKey, id) *)attributeDictionary;
+-(GS_GENERIC_CLASS(NSDictionary, NSAttributedStringKey, id) *) markedTextAttributes;
 
 #if OS_API_VERSION(MAC_OS_X_VERSION_10_3, GS_API_LATEST)
-- (NSDictionary *) linkTextAttributes;
-- (void) setLinkTextAttributes: (NSDictionary *)attributeDictionary;
+- (GS_GENERIC_CLASS(NSDictionary, NSAttributedStringKey, id) *) linkTextAttributes;
+- (void) setLinkTextAttributes: (GS_GENERIC_CLASS(NSDictionary, NSAttributedStringKey, id) *)attributeDictionary;
 #endif
 
 #ifdef GNUSTEP
@@ -583,8 +583,8 @@ already been laid out. */
 /** TODO: categorize */
 
 
--(NSDictionary *) typingAttributes;
--(void) setTypingAttributes: (NSDictionary *)attrs;
+-(GS_GENERIC_CLASS(NSDictionary, NSAttributedStringKey, id) *) typingAttributes;
+-(void) setTypingAttributes: (GS_GENERIC_CLASS(NSDictionary, NSAttributedStringKey, id) *)attrs;
 
 - (void) clickedOnLink: (id)link
                atIndex: (NSUInteger)charIndex;
