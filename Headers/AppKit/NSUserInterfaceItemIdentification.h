@@ -37,8 +37,19 @@ extern "C" {
 #endif
   
 @class NSString;
-  
-typedef NSString *NSUserInterfaceItemIdentifier;
+
+#ifndef NS_TYPED_EXTENSIBLE_ENUM
+/* Defined by gnustep-base from the version that declares
+ * NSAttributedStringKey with it. */
+#define NS_TYPED_EXTENSIBLE_ENUM
+#endif
+
+/** The identifier of a user interface item.  As in Cocoa, it is a typed
+ * extensible string enumeration, which Swift imports as the
+ * NSUserInterfaceItemIdentifier structure wrapping a string
+ * (NSUserInterfaceItemIdentifier("NameCell")).
+ */
+typedef NSString *NSUserInterfaceItemIdentifier NS_TYPED_EXTENSIBLE_ENUM;
   
 @protocol NSUserInterfaceItemIdentification
 

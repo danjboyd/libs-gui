@@ -95,7 +95,6 @@ typedef NSUInteger NSCollectionViewScrollPosition;
 #endif
 
 typedef NSString *NSCollectionViewSupplementaryElementKind;
-typedef NSString *NSUserInterfaceItemIdentifier;
 
 #if OS_API_VERSION(MAC_OS_X_VERSION_10_11, GS_API_LATEST)
 @protocol NSCollectionViewElement <NSObject, NSUserInterfaceItemIdentification>
