@@ -135,6 +135,39 @@ APPKIT_EXPORT_CLASS
 
 @end
 
+/**
+ * The parameters of a search for the next or previous item of a custom
+ * rotor, passed to its item search delegate.
+ */
+APPKIT_EXPORT_CLASS
+@interface NSAccessibilityCustomRotorSearchParameters : NSObject
+{
+  NSAccessibilityCustomRotorItemResult *_currentItem;
+  NSAccessibilityCustomRotorSearchDirection _searchDirection;
+  NSString *_filterString;
+}
+
+/**
+ * The item the search starts from, or nil to start from the beginning or
+ * the end.
+ */
+- (NSAccessibilityCustomRotorItemResult *) currentItem;
+- (void) setCurrentItem: (NSAccessibilityCustomRotorItemResult *)item;
+
+/**
+ * Whether the search looks for the next or the previous item.
+ */
+- (NSAccessibilityCustomRotorSearchDirection) searchDirection;
+- (void) setSearchDirection: (NSAccessibilityCustomRotorSearchDirection)direction;
+
+/**
+ * The text the items found must match, or an empty string.
+ */
+- (NSString *) filterString;
+- (void) setFilterString: (NSString *)filterString;
+
+@end
+
 
 // Protocol...
 @protocol NSAccessibilityCustomRotorItemSearchDelegate <NSObject>

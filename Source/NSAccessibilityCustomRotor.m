@@ -162,3 +162,54 @@
 }
 
 @end
+
+// Search parameters...
+@implementation NSAccessibilityCustomRotorSearchParameters
+
+- (instancetype) init
+{
+  if ((self = [super init]) != nil)
+    {
+      _filterString = @"";
+    }
+  return self;
+}
+
+- (void) dealloc
+{
+  RELEASE(_currentItem);
+  RELEASE(_filterString);
+  [super dealloc];
+}
+
+- (NSAccessibilityCustomRotorItemResult *) currentItem
+{
+  return _currentItem;
+}
+
+- (void) setCurrentItem: (NSAccessibilityCustomRotorItemResult *)item
+{
+  ASSIGN(_currentItem, item);
+}
+
+- (NSAccessibilityCustomRotorSearchDirection) searchDirection
+{
+  return _searchDirection;
+}
+
+- (void) setSearchDirection: (NSAccessibilityCustomRotorSearchDirection)direction
+{
+  _searchDirection = direction;
+}
+
+- (NSString *) filterString
+{
+  return _filterString;
+}
+
+- (void) setFilterString: (NSString *)filterString
+{
+  ASSIGNCOPY(_filterString, filterString);
+}
+
+@end
