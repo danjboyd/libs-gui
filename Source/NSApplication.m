@@ -3818,13 +3818,28 @@ struct _DelegateWrapper
  */
 
 /**
- * OS X scripting method to return document objects being handled by
- * application.  <em>Not implemented yet under GNUstep.</em>
+ * OS X scripting method to return the open documents in the front-to-back
+ * order of their windows, as -orderedWindows gives it.  A document with
+ * several windows is placed by its frontmost one; a document with no
+ * window on screen is left out.
  */
 - (NSArray *) orderedDocuments
 {
-  // FIXME
-  return nil;
+  NSDocumentController *sdc = [NSDocumentController sharedDocumentController];
+  NSMutableArray *ret = [NSMutableArray array];
+  NSEnumerator *iter = [[self orderedWindows] objectEnumerator];
+  NSWindow *win;
+
+  while ((win = [iter nextObject]) != nil)
+    {
+      id doc = [sdc documentForWindow: win];
+
+      if (doc != nil && [ret indexOfObjectIdenticalTo: doc] == NSNotFound)
+        {
+          [ret addObject: doc];
+        }
+    }
+  return ret;
 }
 
 /**
