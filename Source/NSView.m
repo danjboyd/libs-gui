@@ -5280,37 +5280,34 @@ static NSView* findByTag(NSView *view, NSInteger aTag, NSUInteger *level)
     }
 }
 
+/* The layer contents placement and redraw policy are kept for the
+ * application; views have no CALayer yet.
+ */
 - (NSViewLayerContentsPlacement) layerContentsPlacement
 {
-  // FIXME (when views have CALayer support)
-  return NSViewLayerContentsPlacementScaleAxesIndependently;
+  return _rFlags.contents_placement;
 }
 
 - (void) setLayerContentsPlacement: (NSViewLayerContentsPlacement)placement
 {
-  // FIXME (when views have CALayer support)
-  static BOOL logged = NO;
-  if (!logged)
+  if (placement >= NSViewLayerContentsPlacementScaleAxesIndependently
+    && placement <= NSViewLayerContentsPlacementTopLeft)
     {
-      NSLog(@"warning: stub no-op implementation of -[NSView setLayerContentsPlacement:]");
-      logged = YES;
+      _rFlags.contents_placement = placement;
     }
 }
 
 - (NSViewLayerContentsRedrawPolicy) layerContentsRedrawPolicy
 {
-  // FIXME (when views have CALayer support)
-  return NSViewLayerContentsRedrawNever;
+  return _rFlags.redraw_policy;
 }
 
 - (void) setLayerContentsRedrawPolicy: (NSViewLayerContentsRedrawPolicy) pol
 {
-  // FIXME (when views have CALayer support)
-  static BOOL logged = NO;
-  if (!logged)
+  if (pol >= NSViewLayerContentsRedrawNever
+    && pol <= NSViewLayerContentsRedrawCrossfade)
     {
-      NSLog(@"warning: stub no-op implementation of -[NSView setLayerContentsRedrawPolicy:]");
-      logged = YES;
+      _rFlags.redraw_policy = pol;
     }
 }
 

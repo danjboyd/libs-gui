@@ -175,6 +175,8 @@ PACKAGE_SCOPE
     unsigned	ignores_backing:1;      /* The view does not trigger    */
                                         /* backing flush when drawn     */
     unsigned	right_to_left:1;	/* Right to left layout.	*/
+    unsigned	contents_placement:4;	/* Layer contents placement.	*/
+    unsigned	redraw_policy:3;	/* Layer contents redraw policy. */
   } _rFlags;
 
 @protected
