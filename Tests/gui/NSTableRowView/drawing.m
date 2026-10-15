@@ -73,12 +73,25 @@ main(int argc, const char **argv)
   PASS(!isWhite(rep, 10, h - 1) && isWhite(rep, 10, 5),
     "the separator is drawn along the bottom edge only");
 
+  [row setSelected: NO];
   [row setTargetForDropOperation: YES];
   img = GSDrawBeginWhite(w, h);
   [row drawDraggingDestinationFeedbackInRect: all];
   rep = GSDrawEnd(img, w, h);
   PASS(!isWhite(rep, 0, 5) && isWhite(rep, 10, 5),
     "a drop target is framed");
+
+  /* On an emphasized selection the frame differs from the selection. */
+  [row setSelected: YES];
+  img = GSDrawBeginWhite(w, h);
+  [row drawSelectionInRect: all];
+  [row drawDraggingDestinationFeedbackInRect: all];
+  rep = GSDrawEnd(img, w, h);
+  PASS(rep != nil
+    && (GSPixelChannel(rep, 0, 5, 0) != GSPixelChannel(rep, 10, 5, 0)
+      || GSPixelChannel(rep, 0, 5, 1) != GSPixelChannel(rep, 10, 5, 1)
+      || GSPixelChannel(rep, 0, 5, 2) != GSPixelChannel(rep, 10, 5, 2)),
+    "the drop frame shows on an emphasized selected row");
 
   END_SET("NSTableRowView drawing")
   return 0;
