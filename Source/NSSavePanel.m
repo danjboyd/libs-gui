@@ -1557,10 +1557,12 @@ selectCellWithString: (NSString*)title
     }
 }
 
+/** Answers YES.  A GNUstep save panel always shows its file browser;
+ * it has no collapsed form.
+ */
 - (BOOL) isExpanded
 {
-  // FIXME
-  return NO;
+  return YES;
 }
 
 //
