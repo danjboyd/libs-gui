@@ -32,7 +32,7 @@
 
 + (NSPDFPanel *) panel
 {
-  return [[self class] alloc] ;
+  return AUTORELEASE([[self alloc] init]);
 }
 
 - init
@@ -44,6 +44,13 @@
       _defaultFileName = @"";
     }
   return self;
+}
+
+- (void) dealloc
+{
+  RELEASE(_accessoryController);
+  RELEASE(_defaultFileName);
+  [super dealloc];
 }
 
 - (NSViewController *) accessoryController
