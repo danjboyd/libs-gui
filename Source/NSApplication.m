@@ -97,6 +97,25 @@
 /* The -gui thread. See the comment in initialize_gnustep_backend. */
 NSThread *GSAppKitThread;
 
+/* The event -abortModal posts to end the modal loop, which
+ * -runModalForWindow: takes off the queue again when the loop has ended.
+ */
+static NSEvent	*abortModalEvent = nil;
+
+/* The run loop modes events posted from other threads are passed on in. */
+static NSArray *
+postingModes(void)
+{
+  static NSArray	*modes = nil;
+
+  if (nil == modes)
+    {
+      modes = [[NSArray alloc] initWithObjects: NSDefaultRunLoopMode,
+	NSModalPanelRunLoopMode, NSEventTrackingRunLoopMode, nil];
+    }
+  return modes;
+}
+
 /* Notifications used to implement hide and unhide functionality. */
 static NSString	*GSHideOtherApplicationsNotification
   = @"GSHideOtherApplicationsNotification";
@@ -1665,7 +1684,11 @@ static BOOL _isAutolaunchChecked = NO;
  * or -runModalSession: .  If you wish to halt the session in response to
  * user interaction with the modal window, use -stopModalWithCode: or
  * -stopModal instead; only use this to halt the loop from elsewhere, such as
- * another thread.
+ * a timer or another thread.<br />
+ * Unlike -stopModalWithCode:, which takes effect when the modal loop next
+ * handles an event, this ends a -runModalForWindow: loop at once, as in
+ * Cocoa: it posts an event to wake the loop, which the loop removes again.
+ * Called from another thread, it is performed on the AppKit thread.
  */
 - (void) abortModal
 {
@@ -1682,7 +1705,32 @@ static BOOL _isAutolaunchChecked = NO;
     }
   [NSException raise: NSAbortModalException format: @"abortModal"];
 */
-  [self stopModalWithCode: NSRunAbortedResponse];
+  if (GSCurrentThread() != GSAppKitThread && GSAppKitThread != nil)
+    {
+      [self performSelector: _cmd
+		   onThread: GSAppKitThread
+		 withObject: nil
+	      waitUntilDone: NO
+		      modes: postingModes()];
+      return;
+    }
+  if (_session != 0 && _session->runState == NSRunContinuesResponse)
+    {
+      NSEvent	*e;
+
+      [self stopModalWithCode: NSRunAbortedResponse];
+      e = [NSEvent otherEventWithType: NSApplicationDefined
+			     location: NSZeroPoint
+			modifierFlags: 0
+			    timestamp: 0
+			 windowNumber: 0
+			      context: nil
+			      subtype: 0
+				data1: 0
+				data2: 0];
+      ASSIGN(abortModalEvent, e);
+      [self postEvent: e atStart: YES];
+    }
 }
 
 /**
@@ -1829,6 +1877,17 @@ static BOOL _isAutolaunchChecked = NO;
 	       */
 	      DPSPeekEvent(srv, NSAnyEventMask, limit, NSModalPanelRunLoopMode);
 	    }
+	}
+      if (abortModalEvent != nil)
+	{
+	  /* Take the event -abortModal posted off the queue again. */
+	  if (DPSPeekEvent(srv, NSApplicationDefinedMask, [NSDate distantPast],
+	    NSModalPanelRunLoopMode) == abortModalEvent)
+	    {
+	      DPSGetEvent(srv, NSApplicationDefinedMask, [NSDate distantPast],
+		NSModalPanelRunLoopMode);
+	    }
+	  DESTROY(abortModalEvent);
 	}
 
       [self endModalSession: theSession];
@@ -2282,11 +2341,31 @@ IF_NO_GC(NSAssert([event retainCount] > 0, NSInternalInconsistencyException));
  * Add an event to be processed by the app, either at end or at beginning
  * (next up) if flag is YES.  This provides a way to provide synthetic input
  * to an application, or, for whatever reason, to allow a real event to be
- * re-dispatched.
+ * re-dispatched.<br />
+ * As in Cocoa this may be called from any thread: from another thread the
+ * event is passed on to the AppKit thread, whose run loop is woken up.
  */
 - (void) postEvent: (NSEvent *)event atStart: (BOOL)flag
 {
+  if (GSCurrentThread() != GSAppKitThread && GSAppKitThread != nil
+    && event != nil)
+    {
+      [self performSelector: @selector(_postEventOnAppKitThread:)
+		   onThread: GSAppKitThread
+		 withObject: [NSArray arrayWithObjects: event,
+		   [NSNumber numberWithBool: flag], nil]
+	      waitUntilDone: NO
+		      modes: postingModes()];
+      return;
+    }
   DPSPostEvent(GSCurrentServer(), event, flag);
+}
+
+/* Posts an event passed on from another thread by -postEvent:atStart:. */
+- (void) _postEventOnAppKitThread: (NSArray *)eventAndFlag
+{
+  DPSPostEvent(GSCurrentServer(), [eventAndFlag objectAtIndex: 0],
+    [[eventAndFlag objectAtIndex: 1] boolValue]);
 }
 
 /**

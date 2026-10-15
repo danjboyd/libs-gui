@@ -1,14 +1,12 @@
 /* -showContextHelpForObject:locationHint: shows the help panel at the hint,
  * or centred on the screen for the zero point, which NSHelpPanel passes.
  * The panel used to be centred on the screen for every hint.  The panel is run
- * modally, so a timer records where it is, aborts the modal loop and posts
- * an event to wake it.  It
+ * modally, so a timer records where it is and aborts the modal loop.  It
  * needs the backend, so the set is skipped without it.
  */
 #include "Testing.h"
 #include <Foundation/Foundation.h>
 #include <AppKit/NSApplication.h>
-#include <AppKit/NSEvent.h>
 #include <AppKit/NSHelpManager.h>
 #include <AppKit/NSScreen.h>
 #include <AppKit/NSWindow.h>
@@ -28,18 +26,6 @@
   fired = YES;
   frame = [[NSApp modalWindow] frame];
   [NSApp abortModal];
-  /* Aborting only marks the modal session as ended; the modal loop waits
-     for an event, so post one to wake it. */
-  [NSApp postEvent: [NSEvent otherEventWithType: NSApplicationDefined
-                                       location: NSZeroPoint
-                                  modifierFlags: 0
-                                      timestamp: 0
-                                   windowNumber: 0
-                                        context: nil
-                                        subtype: 0
-                                          data1: 0
-                                          data2: 0]
-           atStart: NO];
 }
 @end
 
