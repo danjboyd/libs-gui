@@ -90,18 +90,47 @@ enum {
 };
 
 #if OS_API_VERSION(MAC_OS_X_VERSION_10_9, GS_API_LATEST)
-  typedef NSInteger NSModalResponse;
-  enum {
-    NSModalResponseOK = 1,
-    NSModalResponseCancel = 0,
-    NSModalResponseStop = -1000,
-    NSModalResponseAbort = -1001,
-    NSModalResponseContinue = -1002,
-    NSAlertFirstButtonReturn = 1000,
-    NSAlertSecondButtonReturn = 1001,
-    NSAlertThirdButtonReturn = 1002,
-  };
-  DEFINE_BLOCK_TYPE(GSNSWindowDidEndSheetCallbackBlock, void, NSModalResponse returnCode);
+/** The code a modal session or sheet ends with.  As in Cocoa, it is a
+ * typed extensible enumeration, which Swift imports as
+ * NSApplication.ModalResponse with the constants below as its members
+ * (.OK, .cancel, .alertFirstButtonReturn and so on).<br />
+ * For Clang the constants are static constants of the type, as in Cocoa,
+ * since Swift makes only those members of the type; Clang accepts them
+ * as case labels.  Other compilers get an enumeration, so the constants
+ * stay integer constant expressions.
+ */
+#ifndef NS_TYPED_EXTENSIBLE_ENUM
+/* Defined by gnustep-base from the version that declares
+ * NSAttributedStringKey with it. */
+#define NS_TYPED_EXTENSIBLE_ENUM
+#endif
+typedef NSInteger NSModalResponse NS_TYPED_EXTENSIBLE_ENUM
+  NS_SWIFT_NAME(NSApplication.ModalResponse);
+#if __has_attribute(swift_wrapper)
+static const NSModalResponse NSModalResponseOK = 1;
+static const NSModalResponse NSModalResponseCancel = 0;
+static const NSModalResponse NSModalResponseStop = -1000;
+static const NSModalResponse NSModalResponseAbort = -1001;
+static const NSModalResponse NSModalResponseContinue = -1002;
+static const NSModalResponse NSAlertFirstButtonReturn
+  NS_SWIFT_NAME(alertFirstButtonReturn) = 1000;
+static const NSModalResponse NSAlertSecondButtonReturn
+  NS_SWIFT_NAME(alertSecondButtonReturn) = 1001;
+static const NSModalResponse NSAlertThirdButtonReturn
+  NS_SWIFT_NAME(alertThirdButtonReturn) = 1002;
+#else
+enum {
+  NSModalResponseOK = 1,
+  NSModalResponseCancel = 0,
+  NSModalResponseStop = -1000,
+  NSModalResponseAbort = -1001,
+  NSModalResponseContinue = -1002,
+  NSAlertFirstButtonReturn = 1000,
+  NSAlertSecondButtonReturn = 1001,
+  NSAlertThirdButtonReturn = 1002
+};
+#endif
+DEFINE_BLOCK_TYPE(GSNSWindowDidEndSheetCallbackBlock, void, NSModalResponse returnCode);
 #endif
 
 /**
