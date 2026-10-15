@@ -542,9 +542,13 @@
   [self didChangeValueForKey: @"arrangedObjects"];
 }
 
+/** Sets the sort descriptors the arranged objects are sorted with, and
+ * rearranges the objects with them.
+ */
 - (void) setSortDescriptors: (NSArray*)desc
 {
   ASSIGNCOPY(_sort_descriptors, desc);
+  [self rearrangeObjects];
 }
 
 - (NSArray*) sortDescriptors
@@ -552,9 +556,14 @@
   return AUTORELEASE([_sort_descriptors copy]);
 }
 
+/** Sets the predicate the arranged objects are filtered with, and
+ * rearranges the objects with it.  So a search field bound to the
+ * filter predicate filters what the controller arranges as it changes.
+ */
 - (void) setFilterPredicate: (NSPredicate*)filterPredicate
 {
   ASSIGN(_filter_predicate, filterPredicate);
+  [self rearrangeObjects];
 }
 
 - (NSPredicate*) filterPredicate
