@@ -1522,7 +1522,9 @@ static NSDragOperation currentDragOperation = NSDragOperationNone;
   browserColumn = [_browserColumns objectAtIndex: columnIndex];
 
   browserColumn->_width = columnWidth;
-  // FIXME: Send a notifiaction
+  [[NSNotificationCenter defaultCenter]
+    postNotificationName: NSBrowserColumnConfigurationDidChangeNotification
+		  object: self];
 }
 
 
@@ -2442,7 +2444,26 @@ static NSDragOperation currentDragOperation = NSDragOperationNone;
 		     (@selector(browser:createRowsForColumn:inMatrix:))];
     }
 
+  /* Tell the delegate of column configuration changes, as a window
+   * tells its delegate of its notifications.
+   */
+  if (_browserDelegate != nil)
+    {
+      [[NSNotificationCenter defaultCenter]
+	removeObserver: _browserDelegate
+		  name: NSBrowserColumnConfigurationDidChangeNotification
+		object: self];
+    }
   _browserDelegate = anObject;
+  if ([_browserDelegate respondsToSelector:
+    @selector(browserColumnConfigurationDidChange:)])
+    {
+      [[NSNotificationCenter defaultCenter]
+	addObserver: _browserDelegate
+	   selector: @selector(browserColumnConfigurationDidChange:)
+	       name: NSBrowserColumnConfigurationDidChangeNotification
+	     object: self];
+    }
 }
 
 
@@ -2746,6 +2767,13 @@ static NSDragOperation currentDragOperation = NSDragOperationNone;
   [GSKeyValueBinding unbindAllForObject: self];
 
   [[NSNotificationCenter defaultCenter] removeObserver: self];
+  if (_browserDelegate != nil)
+    {
+      [[NSNotificationCenter defaultCenter]
+	removeObserver: _browserDelegate
+		  name: NSBrowserColumnConfigurationDidChangeNotification
+		object: self];
+    }
 
   if ([titleCell controlView] == self)
     {
