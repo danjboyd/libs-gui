@@ -33,6 +33,41 @@
 #import "AppKit/NSTextList.h"
 
 
+/* Answers item as a roman numeral, in upper case or lower case, or as a
+ * decimal number when it is out of the range roman numerals cover.
+ */
+static NSString *
+GSRomanNumeral(int item, BOOL upper)
+{
+  static const int values[] = {
+    1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1
+  };
+  static const char *upperDigits[] = {
+    "M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I"
+  };
+  static const char *lowerDigits[] = {
+    "m", "cm", "d", "cd", "c", "xc", "l", "xl", "x", "ix", "v", "iv", "i"
+  };
+  NSMutableString *r;
+  unsigned i;
+
+  if (item < 1 || item > 3999)
+    {
+      return [NSString stringWithFormat: @"%d", item];
+    }
+  r = [NSMutableString string];
+  for (i = 0; i < sizeof(values) / sizeof(values[0]); i++)
+    {
+      while (item >= values[i])
+        {
+          [r appendString: [NSString stringWithUTF8String:
+            (upper ? upperDigits[i] : lowerDigits[i])]];
+          item -= values[i];
+        }
+    }
+  return r;
+}
+
 @implementation NSTextList
 
 - (id) initWithMarkerFormat: (NSString *)format 
@@ -72,7 +107,7 @@
   unichar hyphen = 0x2043;
   unichar square = 0x25AA;
 
-  // FIXME: Needs optimisation and roman numbers
+  // FIXME: Needs optimisation
   // FIXME: Take _startingItemNumber into account.
   [s replaceOccurrencesOfString: @"{box}" 
      withString: [NSString stringWithCharacters: &box length: 1] 
@@ -104,6 +139,14 @@
      range: NSMakeRange(0, [s length])];
   [s replaceOccurrencesOfString: @"{decimal}" 
      withString: [NSString stringWithFormat: @"%d", item] 
+     options: 0 
+     range: NSMakeRange(0, [s length])];
+  [s replaceOccurrencesOfString: @"{lower-roman}" 
+     withString: GSRomanNumeral(item, NO)
+     options: 0 
+     range: NSMakeRange(0, [s length])];
+  [s replaceOccurrencesOfString: @"{upper-roman}" 
+     withString: GSRomanNumeral(item, YES)
      options: 0 
      range: NSMakeRange(0, [s length])];
   [s replaceOccurrencesOfString: @"{octal}" 
