@@ -1990,6 +1990,18 @@ NSRunAlertPanelRelativeToWindow(NSString *title,
   return _buttons;
 }
 
+/* The action of the buttons in -buttons.  The panel shows copies of them,
+ * so a click on one of these (such as -performClick:) ends the alert
+ * through the panel, as a click on the copy does.
+ */
+- (void) buttonAction: (id)sender
+{
+  if (_window != nil)
+    {
+      [(GSAlertPanel *)_window buttonAction: sender];
+    }
+}
+
 - (void) setShowsHelp: (BOOL)showsHelp
 {
   _shows_help = showsHelp;
