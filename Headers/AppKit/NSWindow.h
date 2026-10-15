@@ -104,47 +104,64 @@ enum {
   DEFINE_BLOCK_TYPE(GSNSWindowDidEndSheetCallbackBlock, void, NSModalResponse returnCode);
 #endif
 
+/**
+ * The style of a window, a combination of these flags: whether it has a
+ * title bar, which buttons the title bar shows, whether it can be resized,
+ * and so on.  It is an NS_OPTIONS type, as in Cocoa, so Swift imports it
+ * as an option set.
+ */
+typedef NS_OPTIONS(NSUInteger, NSWindowStyleMask)
+{
+  NSWindowStyleMaskBorderless = 0,
+  NSWindowStyleMaskTitled = 1 << 0,
+  NSWindowStyleMaskClosable = 1 << 1,
+  NSWindowStyleMaskMiniaturizable = 1 << 2,
+  NSWindowStyleMaskResizable = 1 << 3,
+  NSWindowStyleMaskUtilityWindow = 1 << 4,
+  /* Known clash: this is Cocoa's value, but GNUstep uses the same bit
+   * for NSIconWindowMask (64), and NSPanel.h gives NSDocModalWindowMask
+   * the value 32.  libs-gui and the backends treat a window with this
+   * bit as an application icon window.
+   */
+  NSWindowStyleMaskDocModalWindow = 1 << 6,
+  /* Specifies a panel that does not activate the owning application.
+   * Known clash: this is Cocoa's value, but GNUstep uses the same bit for
+   * NSMiniWindowMask (128), and libs-gui and the backends treat a window
+   * with this bit as a miniwindow.
+   */
+  NSWindowStyleMaskNonactivatingPanel = 1 << 7,
+  NSWindowStyleMaskTexturedBackground = 1 << 8,
+  NSWindowStyleMaskUnifiedTitleAndToolbar = 1 << 12,
+  NSWindowStyleMaskHUDWindow = 1 << 13,
+  NSWindowStyleMaskFullScreen = 1 << 14,
+  NSWindowStyleMaskFullSizeContentView = 1 << 15
+};
+
+/* The older names of the window style flags.  They are constants of an
+ * anonymous enumeration, so they remain integer constant expressions.
+ */
 enum {
-  NSBorderlessWindowMask = 0,
-  NSTitledWindowMask = 1,
-  NSClosableWindowMask = 1 << 1,
-  NSMiniaturizableWindowMask = 1 << 2,
-  NSResizableWindowMask = 1 << 3,
+  NSBorderlessWindowMask = NSWindowStyleMaskBorderless,
+  NSTitledWindowMask = NSWindowStyleMaskTitled,
+  NSClosableWindowMask = NSWindowStyleMaskClosable,
+  NSMiniaturizableWindowMask = NSWindowStyleMaskMiniaturizable,
+  NSResizableWindowMask = NSWindowStyleMaskResizable,
 #if OS_API_VERSION(MAC_OS_X_VERSION_10_2, GS_API_LATEST)
-  NSTexturedBackgroundWindowMask = 1 << 8,
+  NSTexturedBackgroundWindowMask = NSWindowStyleMaskTexturedBackground,
 #endif 
 #if OS_API_VERSION(MAC_OS_X_VERSION_10_4, GS_API_LATEST)
   NSUnscaledWindowMask = 1 << 11,
-  NSUnifiedTitleAndToolbarWindowMask = 1 << 12,
-#endif
-#if OS_API_VERSION(MAC_OS_X_VERSION_10_6, GS_API_LATEST)
-  NSWindowStyleMaskHUDWindow = 1 << 13,
+  NSUnifiedTitleAndToolbarWindowMask = NSWindowStyleMaskUnifiedTitleAndToolbar,
 #endif
 #if OS_API_VERSION(MAC_OS_X_VERSION_10_7, GS_API_LATEST)
-  NSFullScreenWindowMask = 1 << 14,
+  NSFullScreenWindowMask = NSWindowStyleMaskFullScreen,
 #endif
 #if OS_API_VERSION(MAC_OS_X_VERSION_10_10, GS_API_LATEST)
-  NSFullSizeContentViewWindowMask = 1 << 15,
-#endif
-#if OS_API_VERSION(MAC_OS_X_VERSION_10_12, GS_API_LATEST)
-  NSWindowStyleMaskBorderless = NSBorderlessWindowMask,
-  NSWindowStyleMaskTitled = NSTitledWindowMask,
-  NSWindowStyleMaskClosable = NSClosableWindowMask,
-  NSWindowStyleMaskMiniaturizable = NSMiniaturizableWindowMask,
-  NSWindowStyleMaskResizable = NSResizableWindowMask,
-  NSWindowStyleMaskUtilityWindow = 1 << 4,
-  NSWindowStyleMaskDocModalWindow = 1 << 6,
-  // Specifies that a panel that does not activate the owning application
-  NSWindowStyleMaskNonactivatingPanel = 1 << 7,
-  NSWindowStyleMaskTexturedBackground = NSTexturedBackgroundWindowMask,
-  NSWindowStyleMaskUnifiedTitleAndToolbar = NSUnifiedTitleAndToolbarWindowMask,
-  NSWindowStyleMaskFullScreen = NSFullScreenWindowMask,
-  NSWindowStyleMaskFullSizeContentView = NSFullSizeContentViewWindowMask,
+  NSFullSizeContentViewWindowMask = NSWindowStyleMaskFullSizeContentView,
 #endif
   NSIconWindowMask = 64,	/* GNUstep extension - app icon window	*/
   NSMiniWindowMask = 128	/* GNUstep extension - miniwindows	*/
 };
-typedef NSUInteger NSWindowStyleMask;
 
 #if OS_API_VERSION(MAC_OS_X_VERSION_10_5, GS_API_LATEST)
 enum {
@@ -387,7 +404,7 @@ PACKAGE_SCOPE
 @property (readonly) BOOL worksWhenModal;
 @property (retain) NSView *contentView;
 @property (copy) NSColor *backgroundColor;
-@property (readonly) NSUInteger styleMask;
+@property (readonly) NSWindowStyleMask styleMask;
 @property (assign) id delegate;
 @property (assign) NSWindowController *windowController;
 #if OS_API_VERSION(GS_API_MACOSX, GS_API_LATEST)
@@ -453,7 +470,7 @@ PACKAGE_SCOPE
  * Both rectangles are expressed in screen coordinates.
  */
 + (NSRect) contentRectForFrameRect: (NSRect)aRect
-			 styleMask: (NSUInteger)aStyle;
+			 styleMask: (NSWindowStyleMask)aStyle;
 
 /**
  * Returns the rectangle which would be used for the on-screen frame of
@@ -462,7 +479,7 @@ PACKAGE_SCOPE
  * Both rectangles are expressed in screen coordinates.
  */
 + (NSRect) frameRectForContentRect: (NSRect)aRect
-			 styleMask: (NSUInteger)aStyle;
+			 styleMask: (NSWindowStyleMask)aStyle;
 
 /**
  * Returns the smallest frame width that will fit the given title
@@ -470,7 +487,7 @@ PACKAGE_SCOPE
  * decorations.
  */
 + (CGFloat) minFrameWidthWithTitle: (NSString *)aTitle
-                         styleMask: (NSUInteger)aStyle;
+                         styleMask: (NSWindowStyleMask)aStyle;
 
 #if OS_API_VERSION(MAC_OS_X_VERSION_10_3, GS_API_LATEST)
 - (NSRect) contentRectForFrameRect: (NSRect)frameRect;
@@ -480,7 +497,7 @@ PACKAGE_SCOPE
  * Initializing and getting a new NSWindow object
  */
 - (id) initWithContentRect: (NSRect)contentRect
-		 styleMask: (NSUInteger)aStyle
+		 styleMask: (NSWindowStyleMask)aStyle
 		   backing: (NSBackingStoreType)bufferingType
 		     defer: (BOOL)flag;
 
@@ -491,7 +508,7 @@ PACKAGE_SCOPE
  * the window style mask.
  */
 - (id) initWithContentRect: (NSRect)contentRect
-		 styleMask: (NSUInteger)aStyle
+		 styleMask: (NSWindowStyleMask)aStyle
 		   backing: (NSBackingStoreType)bufferingType
 		     defer: (BOOL)flag
 		    screen: (NSScreen*)aScreen;
@@ -869,7 +886,7 @@ PACKAGE_SCOPE
 - (void) setContentView: (NSView*)aView;
 - (void) setBackgroundColor: (NSColor*)color;
 - (NSColor*) backgroundColor;
-- (NSUInteger) styleMask;
+- (NSWindowStyleMask) styleMask;
 #if OS_API_VERSION(GS_API_MACOSX, GS_API_LATEST)
 - (void) setHasShadow: (BOOL)hasShadow;
 - (BOOL) hasShadow;

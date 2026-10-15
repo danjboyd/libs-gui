@@ -798,7 +798,7 @@ static NSNotificationCenter *nc = nil;
 }
 
 + (NSRect) contentRectForFrameRect: (NSRect)aRect
-                         styleMask: (NSUInteger)aStyle
+                         styleMask: (NSWindowStyleMask)aStyle
 {
   if (!windowDecorator)
     {
@@ -810,7 +810,7 @@ static NSNotificationCenter *nc = nil;
 }
 
 + (NSRect) frameRectForContentRect: (NSRect)aRect
-                         styleMask: (NSUInteger)aStyle
+                         styleMask: (NSWindowStyleMask)aStyle
 {
   if (!windowDecorator)
     {
@@ -822,7 +822,7 @@ static NSNotificationCenter *nc = nil;
 }
 
 + (CGFloat) minFrameWidthWithTitle: (NSString *)aTitle
-                         styleMask: (NSUInteger)aStyle
+                         styleMask: (NSWindowStyleMask)aStyle
 {
   if (!windowDecorator)
     {
@@ -1129,7 +1129,7 @@ many times.
   </p>
 */
 - (id) initWithContentRect: (NSRect)contentRect
-                 styleMask: (NSUInteger)aStyle
+                 styleMask: (NSWindowStyleMask)aStyle
                    backing: (NSBackingStoreType)bufferingType
                      defer: (BOOL)flag
 {
@@ -1241,7 +1241,7 @@ many times.
   </p>
 */
 - (id) initWithContentRect: (NSRect)contentRect
-                 styleMask: (NSUInteger)aStyle
+                 styleMask: (NSWindowStyleMask)aStyle
                    backing: (NSBackingStoreType)bufferingType
                      defer: (BOOL)flag
                     screen: (NSScreen*)aScreen
@@ -1414,7 +1414,7 @@ titleWithRepresentedFilename(NSString *representedFilename)
     }
 }
 
-- (NSUInteger) styleMask
+- (NSWindowStyleMask) styleMask
 {
   return _styleMask;
 }

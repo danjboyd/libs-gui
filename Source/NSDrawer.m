@@ -106,7 +106,7 @@ static NSHashTable *_drawers = nil;
 }
 
 - (id) initWithContentRect: (NSRect)contentRect
-		 styleMask: (NSUInteger)aStyle
+		 styleMask: (NSWindowStyleMask)aStyle
 		   backing: (NSBackingStoreType)bufferingType
 		     defer: (BOOL)flag
 {
