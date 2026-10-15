@@ -409,12 +409,30 @@ static NSNotificationCenter *nc = nil;
 
 
 /*
- * The text storage contents as an array of attribute runs.
+ * The text storage contents as an array of attribute runs: each holds
+ * the longest range of characters that share the same attributes.
  */
 - (NSArray *)attributeRuns
 {
-  // Return nothing for now
-  return [NSArray array];
+  NSMutableArray *result = [NSMutableArray array];
+  NSUInteger len = [self length];
+  NSUInteger i = 0;
+
+  while (i < len)
+    {
+      NSRange r;
+      NSTextStorage *s;
+
+      [self attributesAtIndex: i
+        longestEffectiveRange: &r
+                      inRange: NSMakeRange(i, len - i)];
+      s = AUTORELEASE([[NSTextStorage alloc] initWithAttributedString:
+        [self attributedSubstringFromRange: r]]);
+      [result addObject: s];
+      i = NSMaxRange(r);
+    }
+
+  return [NSArray arrayWithArray: result]; // make immutable
 }
 
 /*
