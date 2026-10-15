@@ -33,6 +33,7 @@
 #import <Foundation/NSLock.h>
 #import <Foundation/NSRunLoop.h>
 #import <Foundation/NSSet.h>
+#import <Foundation/NSThread.h>
 #import <Foundation/NSGeometry.h>
 
 #import "AppKit/NSApplication.h"
@@ -951,6 +952,87 @@ GSCurrentServer(void)
 /* ----------------------------------------------------------------------- */
 /* GNUstep Event Operations */
 /* ----------------------------------------------------------------------- */
+/* Makes the run loop of the thread an event is posted on stop waiting
+ * for input once, so that a loop already blocked in the modes it is
+ * running (as when an event is posted from a timer in a modal loop) gets
+ * back to the event queue and sees the event.  It is a run loop watcher
+ * that triggers at once, removing itself when it does.  The run loop does
+ * not retain watchers, so there is one for each thread, never released.
+ */
+@interface GSPostedEventWaker : NSObject <RunLoopEvents>
+{
+@public
+  NSString	*mode;	/* The mode the waker is in, or nil. */
+}
++ (void) wakeCurrentRunLoop;
+@end
+
+@implementation GSPostedEventWaker
+
++ (void) wakeCurrentRunLoop
+{
+  NSMutableDictionary	*d = [[NSThread currentThread] threadDictionary];
+  GSPostedEventWaker	*waker = [d objectForKey: @"GSPostedEventWaker"];
+  NSRunLoop		*loop = [NSRunLoop currentRunLoop];
+  NSString		*current = [loop currentMode];
+
+  if (nil == current)
+    {
+      return;	/* The loop is not running, so it will look at the queue. */
+    }
+  if (nil == waker)
+    {
+      waker = [self new];
+      [d setObject: waker forKey: @"GSPostedEventWaker"];
+      RELEASE(waker);
+    }
+  if (waker->mode != nil)
+    {
+      if ([waker->mode isEqualToString: current])
+	{
+	  return;	/* Already waiting to trigger in this mode. */
+	}
+      [loop removeEvent: (void*)waker
+		   type: ET_TRIGGER
+		forMode: waker->mode
+		    all: YES];
+    }
+  ASSIGN(waker->mode, current);
+  [loop addEvent: (void*)waker
+	    type: ET_TRIGGER
+	 watcher: waker
+	 forMode: current];
+}
+
+- (void) dealloc
+{
+  RELEASE(mode);
+  [super dealloc];
+}
+
+- (BOOL) runLoopShouldBlock: (BOOL*)trigger
+{
+  *trigger = YES;
+  return NO;
+}
+
+- (void) receivedEvent: (void*)data
+		  type: (RunLoopEventType)type
+		 extra: (void*)extra
+	       forMode: (NSString*)aMode
+{
+  if (mode != nil)
+    {
+      [[NSRunLoop currentRunLoop] removeEvent: (void*)self
+					 type: ET_TRIGGER
+				      forMode: mode
+					  all: YES];
+      DESTROY(mode);
+    }
+}
+
+@end
+
 @implementation GSDisplayServer (EventOps)
 
 /**
@@ -1085,12 +1167,19 @@ GSCurrentServer(void)
  * whether the event is inserted at the start of the queue or appended
  * at the end.
  */
+/**
+ * Puts anEvent in the event queue, at its start if flag is YES.  If the
+ * run loop of the calling thread is running (for example when the event
+ * is posted from a timer while a modal loop waits for events) it is made
+ * to stop waiting for input, so the event is seen at once, as in Cocoa.
+ */
 - (void) postEvent: (NSEvent*)anEvent atStart: (BOOL)flag
 {
   if (flag)
     [event_queue insertObject: anEvent atIndex: 0];
   else
     [event_queue addObject: anEvent];
+  [GSPostedEventWaker wakeCurrentRunLoop];
 }
 
 - (void) _printEventQueue
