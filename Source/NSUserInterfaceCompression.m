@@ -24,86 +24,187 @@
 
 #import <Foundation/NSObject.h>
 #import <Foundation/NSCoder.h>
+#import <Foundation/NSEnumerator.h>
 #import <Foundation/NSSet.h>
 #import <Foundation/NSString.h>
 
 #import "AppKit/NSUserInterfaceCompression.h"
 
+/* An options object is a set of option identifiers; combining options
+ * combines their sets.
+ */
 @implementation NSUserInterfaceCompressionOptions
+
+/* Answers the identifiers of opts, none for nil or another kind of object.
+ */
+static NSSet *
+identifiersOf(id opts)
+{
+  if ([opts isKindOfClass: [NSUserInterfaceCompressionOptions class]])
+    {
+      return ((NSUserInterfaceCompressionOptions *)opts)->_identifiers;
+    }
+  return [NSSet set];
+}
+
+- (instancetype) _initWithIdentifiers: (NSSet *)identifiers
+{
+  if ((self = [super init]) != nil)
+    {
+      _identifiers = [identifiers copy];
+    }
+  return self;
+}
+
+- (instancetype) init
+{
+  return [self _initWithIdentifiers: [NSSet set]];
+}
 
 - (instancetype) initWithIdentifier: (NSString *)identifier
 {
-  return nil;
+  if (identifier == nil)
+    {
+      return [self init];
+    }
+  return [self _initWithIdentifiers: [NSSet setWithObject: identifier]];
 }
 
 - (instancetype) initWithCompressionOptions: (NSSet *)opts
 {
-  return nil;
+  NSMutableSet *identifiers = [NSMutableSet set];
+  NSEnumerator *e = [opts objectEnumerator];
+  NSUserInterfaceCompressionOptions *o;
+
+  while ((o = [e nextObject]) != nil)
+    {
+      [identifiers unionSet: identifiersOf(o)];
+    }
+  return [self _initWithIdentifiers: identifiers];
+}
+
+- (void) dealloc
+{
+  RELEASE(_identifiers);
+  [super dealloc];
 }
 
 - (BOOL) containsOptions: (NSUserInterfaceCompressionOptions *)opts
 {
-  return NO;
+  return [identifiersOf(opts) isSubsetOfSet: _identifiers];
 }
 
 - (BOOL) intersectsOptions: (NSUserInterfaceCompressionOptions *)opts
 {
-  return NO;
+  return [_identifiers intersectsSet: identifiersOf(opts)];
 }
 
 - (BOOL) isEmpty
 {
-  return NO;
+  return [_identifiers count] == 0;
 }
 
 - (NSUserInterfaceCompressionOptions *) optionsByAddingOptions: (NSUserInterfaceCompressionOptions *)opts
 {
-  return nil;
+  NSMutableSet *identifiers = AUTORELEASE([_identifiers mutableCopy]);
+
+  [identifiers unionSet: identifiersOf(opts)];
+  return AUTORELEASE([[[self class] alloc] _initWithIdentifiers: identifiers]);
 }
 
 - (NSUserInterfaceCompressionOptions *) optionsByRemovingOptions: (NSUserInterfaceCompressionOptions *)opts
 {
-  return nil;
+  NSMutableSet *identifiers = AUTORELEASE([_identifiers mutableCopy]);
+
+  [identifiers minusSet: identifiersOf(opts)];
+  return AUTORELEASE([[[self class] alloc] _initWithIdentifiers: identifiers]);
 }
 
 + (NSUserInterfaceCompressionOptions *) hideImagesOption
 {
-  return nil;
+  return AUTORELEASE([[self alloc]
+    initWithIdentifier: @"NSUserInterfaceCompressionOptionHideImages"]);
 }
 
 + (NSUserInterfaceCompressionOptions *) hideTextOption
 {
-  return nil;
+  return AUTORELEASE([[self alloc]
+    initWithIdentifier: @"NSUserInterfaceCompressionOptionHideText"]);
 }
 
 + (NSUserInterfaceCompressionOptions *) reduceMetricsOption
 {
-  return nil;
+  return AUTORELEASE([[self alloc]
+    initWithIdentifier: @"NSUserInterfaceCompressionOptionReduceMetrics"]);
 }
 
 + (NSUserInterfaceCompressionOptions *) breakEqualWidthsOption
 {
-  return nil;
+  return AUTORELEASE([[self alloc]
+    initWithIdentifier: @"NSUserInterfaceCompressionOptionBreakEqualWidths"]);
 }
 
 + (NSUserInterfaceCompressionOptions *) standardOptions
 {
-  return nil;
+  NSSet *all = [NSSet setWithObjects: [self hideImagesOption],
+    [self hideTextOption], [self reduceMetricsOption],
+    [self breakEqualWidthsOption], nil];
+
+  return AUTORELEASE([[self alloc] initWithCompressionOptions: all]);
 }
 
+- (BOOL) isEqual: (id)other
+{
+  if (other == self)
+    {
+      return YES;
+    }
+  if (![other isKindOfClass: [NSUserInterfaceCompressionOptions class]])
+    {
+      return NO;
+    }
+  return [_identifiers isEqualToSet: identifiersOf(other)];
+}
+
+- (NSUInteger) hash
+{
+  return [_identifiers hash];
+}
+
+/* NSIdentifiers is GNUstep's own key; Cocoa's archive format for this
+ * class is not known.
+ */
 - (void) encodeWithCoder: (NSCoder *)coder
 {
+  if ([coder allowsKeyedCoding])
+    {
+      [coder encodeObject: _identifiers forKey: @"NSIdentifiers"];
+    }
+  else
+    {
+      [coder encodeObject: _identifiers];
+    }
 }
 
 - (id) initWithCoder: (NSCoder *)coder
 {
-  self = [super init];
-  return self;
+  NSSet *identifiers;
+
+  if ([coder allowsKeyedCoding])
+    {
+      identifiers = [coder decodeObjectForKey: @"NSIdentifiers"];
+    }
+  else
+    {
+      identifiers = [coder decodeObject];
+    }
+  return [self _initWithIdentifiers:
+    (identifiers != nil) ? identifiers : [NSSet set]];
 }
 
 - (id) copyWithZone: (NSZone *)z
 {
-  return self;
+  return RETAIN(self);
 }
 
 @end

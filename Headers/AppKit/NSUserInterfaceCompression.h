@@ -38,6 +38,9 @@ extern "C" {
 
 APPKIT_EXPORT_CLASS
 @interface NSUserInterfaceCompressionOptions : NSObject <NSCopying, NSCoding>
+{
+  NSSet *_identifiers;
+}
 
 - (instancetype) initWithIdentifier: (NSString *)identifier;
 
