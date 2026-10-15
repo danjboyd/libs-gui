@@ -419,6 +419,8 @@ APPKIT_EXPORT_CLASS
   NSMenu *_oldAttachedMenu;
   int     _oldHiglightedIndex;
   NSString *_name;
+  id _contextMenuRepresentation;
+  id _tearOffMenuRepresentation;
 }
 
 #if GS_HAS_DECLARED_PROPERTIES

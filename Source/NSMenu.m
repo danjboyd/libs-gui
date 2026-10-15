@@ -456,6 +456,8 @@ static BOOL menuBarVisible = YES;
   RELEASE(_aWindow);
   RELEASE(_bWindow);
   RELEASE(_name);
+  RELEASE(_contextMenuRepresentation);
+  RELEASE(_tearOffMenuRepresentation);
 
   [super dealloc];
 }
@@ -1325,22 +1327,27 @@ static BOOL menuBarVisible = YES;
   return _view;
 }
 
+/* The context and tear-off representations are kept for the application;
+ * GNUstep shows every form of a menu through its menu representation.
+ */
 - (id) contextMenuRepresentation
 {
-  return nil;
+  return _contextMenuRepresentation;
 }
 
 - (void) setContextMenuRepresentation: (id)representation
 {
+  ASSIGN(_contextMenuRepresentation, representation);
 }
 
 - (id) tearOffMenuRepresentation
 {
-  return nil;
+  return _tearOffMenuRepresentation;
 }
 
 - (void) setTearOffMenuRepresentation: (id)representation
 {
+  ASSIGN(_tearOffMenuRepresentation, representation);
 }
 
 //
