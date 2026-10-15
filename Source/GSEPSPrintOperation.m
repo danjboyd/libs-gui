@@ -116,6 +116,13 @@
   return YES;
 }
 
+/* An EPS operation makes data for copying, not a printed document.
+ */
+- (BOOL)isCopyingOperation
+{
+  return YES;
+}
+
 - (BOOL)deliverResult
 {
   if (_data != nil && _path != nil)

@@ -94,6 +94,13 @@
   return self;
 }
 
+/* A PDF operation makes data for copying, not a printed document.
+ */
+- (BOOL)isCopyingOperation
+{
+  return YES;
+}
+
 - (NSGraphicsContext*)createContext
 {
   NSMutableDictionary *info;

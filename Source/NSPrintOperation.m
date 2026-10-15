@@ -330,6 +330,10 @@ static NSString *NSPrintOperationThreadKey = @"NSPrintOperationThreadKey";
   return NO;
 }
 
+/** Returns YES if the receiver makes EPS or PDF data for copying, as
+ * the operations made by +EPSOperationWithView:... and
+ * +PDFOperationWithView:... do, and NO if it prints.
+ */
 - (BOOL)isCopyingOperation
 {
   return NO;
