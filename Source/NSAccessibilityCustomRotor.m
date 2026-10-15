@@ -25,6 +25,17 @@
 #import "AppKit/NSAccessibilityCustomRotor.h"
 
 @implementation NSAccessibilityCustomRotor
+
++ (void) initialize
+{
+  /* Refer to the protocol, so that its protocol object exists at runtime
+   * although nothing in libs-gui adopts it.
+   */
+  if (self == [NSAccessibilityCustomRotor class])
+    {
+      (void)@protocol(NSAccessibilityCustomRotorItemLoadDelegate);
+    }
+}
   
 - (instancetype) initWithLabel: (NSString *)label
             itemSearchDelegate: (id<NSAccessibilityCustomRotorItemSearchDelegate>)delegate

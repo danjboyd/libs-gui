@@ -147,6 +147,13 @@ APPKIT_EXPORT_CLASS
 
 @end
 
+/**
+ * Adopted by objects that load the items of a custom rotor on demand.
+ * GNUstep sends it no messages.
+ */
+@protocol NSAccessibilityCustomRotorItemLoadDelegate <NSObject>
+@end
+
 
 #if	defined(__cplusplus)
 }
