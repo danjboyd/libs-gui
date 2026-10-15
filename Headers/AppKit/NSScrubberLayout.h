@@ -40,14 +40,22 @@ extern "C" {
   
 APPKIT_EXPORT_CLASS
 @interface NSScrubberLayoutAttributes : NSObject <NSCopying>
+{
+  NSInteger _itemIndex;
+  NSRect _frame;
+  CGFloat _alpha;
+}
 
 + (NSScrubberLayoutAttributes *) layoutAttributesForItemAtIndex: (NSInteger)index;
 
 - (CGFloat) alpha;
+- (void) setAlpha: (CGFloat)alpha;
 
 - (NSRect) frame;
+- (void) setFrame: (NSRect)frame;
 
 - (NSInteger) itemIndex;
+- (void) setItemIndex: (NSInteger)itemIndex;
 
 @end
   

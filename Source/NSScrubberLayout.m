@@ -28,27 +28,59 @@
 
 + (NSScrubberLayoutAttributes *) layoutAttributesForItemAtIndex: (NSInteger)index
 {
-  return nil;
+  NSScrubberLayoutAttributes *a = AUTORELEASE([[self alloc] init]);
+
+  [a setItemIndex: index];
+  return a;
+}
+
+- (instancetype) init
+{
+  if ((self = [super init]) != nil)
+    {
+      _alpha = 1.0;
+    }
+  return self;
 }
 
 - (CGFloat) alpha
 {
-  return 0.0;
+  return _alpha;
+}
+
+- (void) setAlpha: (CGFloat)alpha
+{
+  _alpha = alpha;
 }
 
 - (NSRect) frame
 {
-  return NSZeroRect;
+  return _frame;
+}
+
+- (void) setFrame: (NSRect)frame
+{
+  _frame = frame;
 }
 
 - (NSInteger) itemIndex
 {
-  return 0;
+  return _itemIndex;
+}
+
+- (void) setItemIndex: (NSInteger)itemIndex
+{
+  _itemIndex = itemIndex;
 }
 
 - (instancetype) copyWithZone: (NSZone *)z
 {
-  return nil;
+  NSScrubberLayoutAttributes *a = [[[self class] allocWithZone: z] init];
+
+  a->_itemIndex = _itemIndex;
+  a->_frame = _frame;
+  a->_alpha = _alpha;
+  return a;
 }
 
 @end
