@@ -2852,8 +2852,17 @@ static void autoresize(CGFloat oldContainerSize,
   // FIXME
   static NSRect rect;
 
-  rect = [[_window->_rectsBeingDrawn lastObject] rectValue];
-  rect = [self convertRect: rect fromView: nil];
+  if (_window == nil)
+    {
+      /* Drawing outside a window, for -cacheDisplayInRect:toBitmapImageRep:,
+       * draws everything that is visible. */
+      rect = [self _geometricVisibleRect];
+    }
+  else
+    {
+      rect = [[_window->_rectsBeingDrawn lastObject] rectValue];
+      rect = [self convertRect: rect fromView: nil];
+    }
 
   if (rects != NULL)
     {
@@ -2866,33 +2875,142 @@ static void autoresize(CGFloat oldContainerSize,
     }
 }
 
+/**
+ * Returns a new bitmap image representation, transparent, with the size
+ * of rect, suitable for -cacheDisplayInRect:toBitmapImageRep:.
+ */
 - (NSBitmapImageRep *) bitmapImageRepForCachingDisplayInRect: (NSRect)rect
 {
   NSBitmapImageRep *bitmap;
+  CGFloat scale = (_window != nil) ? [_window backingScaleFactor] : 1.0;
+  NSInteger wide = (NSInteger)ceil(NSWidth(rect) * scale);
+  NSInteger high = (NSInteger)ceil(NSHeight(rect) * scale);
 
-  [self lockFocus];
-  bitmap = [[NSBitmapImageRep alloc] initWithFocusedViewRect: rect];
-  [self unlockFocus];
+  if (wide <= 0 || high <= 0)
+    {
+      return nil;
+    }
+  bitmap = [[NSBitmapImageRep alloc] initWithBitmapDataPlanes: NULL
+                                                   pixelsWide: wide
+                                                   pixelsHigh: high
+                                                bitsPerSample: 8
+                                              samplesPerPixel: 4
+                                                     hasAlpha: YES
+                                                     isPlanar: NO
+                                               colorSpaceName: NSCalibratedRGBColorSpace
+                                                  bytesPerRow: 0
+                                                 bitsPerPixel: 0];
+  [bitmap setSize: rect.size];
 
   return AUTORELEASE(bitmap);
 }
 
+/* Draws aRect of the receiver, and then its subviews, into ctxt, whose
+ * current transformation maps window base coordinates to the device.
+ * Used by -cacheDisplayInRect:toBitmapImageRep:.  Unlike
+ * -displayRectIgnoringOpacity:inContext: this does not need the view to
+ * be in a window and leaves the window's invalid rectangles alone.
+ */
+- (void) _cacheDisplayRect: (NSRect)aRect
+                 inContext: (NSGraphicsContext *)ctxt
+{
+  NSUInteger count;
+
+  if (NSIsEmptyRect(aRect))
+    {
+      return;
+    }
+
+  [ctxt lockFocusView: self inRect: aRect];
+  if (_window != nil)
+    {
+      /* For -getRectsBeingDrawn:count: and -needsToDrawRect: */
+      [_window->_rectsBeingDrawn addObject:
+        [NSValue valueWithRect: [self convertRect: aRect toView: nil]]];
+    }
+  DPSgsave(ctxt);
+  [[self _matrixToWindow] concat];
+  [self setUpGState];
+  DPSrectclip(ctxt, NSMinX(aRect), NSMinY(aRect),
+              NSWidth(aRect), NSHeight(aRect));
+  GSWSetViewIsFlipped(ctxt, [self isFlipped]);
+  [self drawRect: aRect];
+  DPSgrestore(ctxt);
+  if (_window != nil)
+    {
+      [_window->_rectsBeingDrawn removeLastObject];
+    }
+  [ctxt unlockFocusView: self needsFlush: NO];
+
+  count = [_sub_views count];
+  if (count > 0)
+    {
+      NSView *array[count];
+      NSUInteger i;
+
+      [_sub_views getObjects: array];
+      for (i = 0; i < count; ++i)
+        {
+          NSView *subview = array[i];
+          NSRect isect;
+
+          if ([subview isHidden])
+            {
+              continue;
+            }
+          isect = NSIntersectionRect(aRect, [subview _frameExtend]);
+          if (NSIsEmptyRect(isect) == NO)
+            {
+              [subview _cacheDisplayRect: [subview convertRect: isect
+                                                      fromView: self]
+                               inContext: ctxt];
+            }
+        }
+    }
+}
+
+/**
+ * Draws rect of the receiver and its subviews into bitmap, scaled so that
+ * rect fills the bitmap.  The view need not be in a window, and what the
+ * window shows does not matter: the views draw themselves with -drawRect:
+ * into a graphics context for bitmap.  The backend must be able to draw
+ * into the bitmap's format (8 bits per sample RGBA, as made by
+ * -bitmapImageRepForCachingDisplayInRect:, always works with cairo).
+ */
 - (void) cacheDisplayInRect: (NSRect)rect 
            toBitmapImageRep: (NSBitmapImageRep *)bitmap
 {
-  NSDictionary *dict;
-  NSData *imageData;
+  NSGraphicsContext *ctxt;
+  NSAffineTransform *base;
+  NSRect wrect;
 
-  [self lockFocus];
-  dict = [GSCurrentContext() GSReadRect: rect];
-  [self unlockFocus];
-  imageData = [dict objectForKey: @"Data"];
-
-  if (imageData != nil)
+  if (bitmap == nil || NSIsEmptyRect(rect))
     {
-      // Copy the image data to the bitmap
-      memcpy([bitmap bitmapData], [imageData bytes], [imageData length]);
+      return;
     }
+  ctxt = [NSGraphicsContext graphicsContextWithBitmapImageRep: bitmap];
+  if (ctxt == nil)
+    {
+      return;
+    }
+
+  [NSGraphicsContext saveGraphicsState];
+  [NSGraphicsContext setCurrentContext: ctxt];
+
+  /* Map rect, in window base coordinates, onto the whole bitmap.  Each
+   * view then concatenates its own matrix to the window.
+   */
+  wrect = [self convertRect: rect toView: nil];
+  base = [NSAffineTransform transform];
+  [base scaleXBy: [bitmap pixelsWide] / NSWidth(wrect)
+             yBy: [bitmap pixelsHigh] / NSHeight(wrect)];
+  [base translateXBy: -NSMinX(wrect) yBy: -NSMinY(wrect)];
+  [base concat];
+
+  [self _cacheDisplayRect: rect inContext: ctxt];
+
+  [ctxt flushGraphics];
+  [NSGraphicsContext restoreGraphicsState];
 }
 
 
