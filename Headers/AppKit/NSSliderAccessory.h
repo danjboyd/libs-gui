@@ -60,6 +60,12 @@ DEFINE_BLOCK_TYPE(GSSliderAccessoryBehaviorHandler, void, NSSliderAccessory*);
   
 APPKIT_EXPORT_CLASS
 @interface NSSliderAccessoryBehavior : NSObject <NSCopying, NSCoding>
+{
+  id _target; // not retained
+  SEL _action;
+  GSSliderAccessoryBehaviorHandler _handler;
+  NSInteger _kind;
+}
 
 // Initializers
 + (NSSliderAccessoryBehavior *) behaviorWithHandler: (GSSliderAccessoryBehaviorHandler)handler;
