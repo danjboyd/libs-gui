@@ -7198,12 +7198,22 @@ For a more detailed explanation, -setSortDescriptors:. */
 
 - (BOOL) _usesVariableRowHeights
 {
-	return NO;
+  return [_delegate respondsToSelector: @selector(tableView:heightOfRow:)];
 }
 
 - (CGFloat) _rowHeightForRow: (NSInteger)rowIndex
 {
-	return _rowHeight;
+  if (rowIndex >= 0 && rowIndex < _numberOfRows
+    && [self _usesVariableRowHeights])
+    {
+      CGFloat height = [_delegate tableView: self heightOfRow: rowIndex];
+
+      if (height > 0.0)
+        {
+          return height;
+        }
+    }
+  return _rowHeight;
 }
 
 - (CGFloat) _rowsHeight
