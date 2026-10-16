@@ -1242,10 +1242,58 @@ NSWindowListForContext(NSInteger context, NSInteger size, NSInteger list[])
   NSWindowList(size, list);
 }
 
+/* Reports the memory the application's windows use, estimated as four
+ * bytes for each pixel of each window with a backing store, and describes
+ * the windows in windowDumpStream.  An application has a single context.
+ * FIXME: the window server does not report its memory, so the virtual
+ * memory reported is the same estimate.
+ */
 int
 NSGetWindowServerMemory(int context, int *virtualMemory,
 			int *windowBackingMemory, NSString **windowDumpStream)
 {
-// TODO
-  return -1;
+  NSMutableString *dump = [NSMutableString string];
+  NSInteger count = 0;
+  NSInteger i;
+  int total = 0;
+
+  NSCountWindows(&count);
+  if (count > 0)
+    {
+      NSInteger list[count];
+
+      NSWindowList(count, list);
+      for (i = 0; i < count; i++)
+	{
+	  NSWindow *window = GSWindowWithNumber(list[i]);
+	  NSSize size;
+	  int bytes = 0;
+
+	  if (window == nil)
+	    {
+	      continue;
+	    }
+	  size = [window frame].size;
+	  if ([window backingType] != NSBackingStoreNonretained)
+	    {
+	      bytes = (int)(size.width * size.height * 4);
+	    }
+	  total += bytes;
+	  [dump appendFormat: @"window %ld: %g x %g, %d bytes\n",
+		(long)list[i], size.width, size.height, bytes];
+	}
+    }
+  if (virtualMemory != NULL)
+    {
+      *virtualMemory = total;
+    }
+  if (windowBackingMemory != NULL)
+    {
+      *windowBackingMemory = total;
+    }
+  if (windowDumpStream != NULL)
+    {
+      *windowDumpStream = dump;
+    }
+  return 0;
 }
