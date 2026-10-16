@@ -30,6 +30,7 @@
 #import <Foundation/NSArchiver.h>
 #import <Foundation/NSArray.h>
 #import <Foundation/NSDictionary.h>
+#import <Foundation/NSException.h>
 #import <Foundation/NSIndexSet.h>
 #import <Foundation/NSKeyValueObserving.h>
 #import <Foundation/NSPredicate.h>
@@ -611,18 +612,73 @@ indexesBelow(NSIndexSet *set, NSUInteger count)
   return _filter_predicate;
 }
 
+/* The content index at which an object inserted at the arranged index
+ * idx goes: before the content object arranged at idx, or at the end.
+ * When the objects are neither sorted nor filtered the two indexes are
+ * the same.
+ */
+- (NSUInteger) _contentIndexForArrangedObjectIndex: (NSUInteger)idx
+{
+  NSArray	*arranged = [self arrangedObjects];
+  NSUInteger	index = NSNotFound;
+
+  if (idx < [arranged count])
+    {
+      index = [_content indexOfObjectIdenticalTo:
+	[arranged objectAtIndex: idx]];
+    }
+  if (index == NSNotFound)
+    {
+      index = [_content count];
+    }
+  return index;
+}
+
 - (void) insertObject: (id)obj
 atArrangedObjectIndex: (NSUInteger)idx
 {
-  // FIXME
-  [self addObject: obj];
+  if (idx > [[self arrangedObjects] count])
+    {
+      [NSException raise: NSRangeException
+		  format: @"-%@ index %lu beyond the arranged objects",
+	NSStringFromSelector(_cmd), (unsigned long)idx];
+    }
+  [self willChangeValueForKey: NSContentBinding];
+  [_content insertObject: obj
+		 atIndex: [self _contentIndexForArrangedObjectIndex: idx]];
+  /* Rearrange at once, so a preserved selection keeps its objects
+   * although their indexes move.
+   */
+  [self rearrangeObjects];
+  if ([self selectsInsertedObjects])
+    {
+      [self addSelectedObjects: [NSArray arrayWithObject: obj]];
+    }
+  [self didChangeValueForKey: NSContentBinding];
 }
 
 - (void) insertObjects: (NSArray*)obj
 atArrangedObjectIndexes: (NSIndexSet*)idx
 {
-  // FIXME
-  [self addObjects: obj];
+  NSUInteger	i = [idx firstIndex];
+  NSUInteger	j = 0;
+
+  if ([obj count] != [idx count])
+    {
+      [NSException raise: NSInvalidArgumentException
+		  format: @"-%@ %lu objects for %lu indexes",
+	NSStringFromSelector(_cmd), (unsigned long)[obj count],
+	(unsigned long)[idx count]];
+    }
+  /* Insert in ascending order, so each index is the object's final
+   * arranged index, as with -[NSMutableArray insertObjects:atIndexes:].
+   */
+  while (i != NSNotFound)
+    {
+      [self insertObject: [obj objectAtIndex: j++]
+   atArrangedObjectIndex: i];
+      i = [idx indexGreaterThanIndex: i];
+    }
 }
 
 - (void) removeObjectAtArrangedObjectIndex: (NSUInteger)idx
