@@ -1135,9 +1135,12 @@ selectCellWithString: (NSString*)title
 - (void) beginSheetModalForWindow:(NSWindow *)window
                 completionHandler:(GSSavePanelCompletionHandler)handler
 {
-  NSInteger result = [NSApp runModalForWindow: self
-                             relativeToWindow: window];
-  CALL_BLOCK(handler, result);
+  if (window == nil)
+    {
+      CALL_BLOCK(handler, [NSApp runModalForWindow: self]);
+      return;
+    }
+  [window beginSheet: self completionHandler: handler];
 }
 
 - (void) beginWithCompletionHandler:(GSSavePanelCompletionHandler)handler
