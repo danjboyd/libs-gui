@@ -40,8 +40,9 @@ enum
 #endif
 
 #if OS_API_VERSION(MAC_OS_X_VERSION_10_9, GS_API_LATEST)
-typedef NSInteger NSUserInterfaceLayoutOrientation;
-enum
+/* An NS_ENUM type, as in Cocoa, which Swift imports as an enumeration
+ * (.horizontal, .vertical). */
+typedef NS_ENUM(NSInteger, NSUserInterfaceLayoutOrientation)
 {
   NSUserInterfaceLayoutOrientationHorizontal = 0,
   NSUserInterfaceLayoutOrientationVertical = 1
