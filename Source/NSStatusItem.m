@@ -117,7 +117,7 @@
   // NIMP
 }
 
-- (NSInteger) sendActionOn: (NSInteger)mask
+- (NSInteger) sendActionOn: (NSEventMask)mask
 {
   NSInteger previous = _sendActionMask;
 

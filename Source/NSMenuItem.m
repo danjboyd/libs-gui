@@ -310,7 +310,7 @@ static Class imageClass;
     return _keyEquivalent;
 }
 
-- (void) setKeyEquivalentModifierMask: (NSUInteger)mask
+- (void) setKeyEquivalentModifierMask: (NSEventModifierFlags)mask
 {
   if (_keyEquivalentModifierMask == mask)
     return; // no change
@@ -318,7 +318,7 @@ static Class imageClass;
   [_menu itemChanged: self];
 }
 
-- (NSUInteger) keyEquivalentModifierMask
+- (NSEventModifierFlags) keyEquivalentModifierMask
 {
   return _keyEquivalentModifierMask;
 }

@@ -61,7 +61,7 @@ APPKIT_EXPORT_CLASS
 @property (getter=isBordered) BOOL bordered;
 @property (getter=isTransparent) BOOL transparent;
 @property (copy) NSString *keyEquivalent;
-@property NSUInteger keyEquivalentModifierMask;
+@property NSEventModifierFlags keyEquivalentModifierMask;
 #if OS_API_VERSION(GS_API_MACOSX, GS_API_LATEST)
 @property (copy) NSAttributedString *attributedTitle;
 @property (copy) NSAttributedString *attributedAlternateTitle;
@@ -171,9 +171,9 @@ APPKIT_EXPORT_CLASS
 // Setting the Key Equivalent 
 //
 - (NSString *)keyEquivalent;
-- (NSUInteger)keyEquivalentModifierMask;
+- (NSEventModifierFlags) keyEquivalentModifierMask;
 - (void)setKeyEquivalent:(NSString *)aKeyEquivalent;
-- (void)setKeyEquivalentModifierMask:(NSUInteger)mask;
+- (void) setKeyEquivalentModifierMask: (NSEventModifierFlags)mask;
 
 //
 // Handling Events and Action Messages 

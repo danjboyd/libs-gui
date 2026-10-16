@@ -356,7 +356,7 @@ APPKIT_EXPORT_CLASS
  * like NSCommandKeyMask, NSShiftKeyMask, NSControlKeyMask, and
  * NSAlternateKeyMask to specify the required key combination.
  */
-- (NSUInteger)keyEquivalentModifierMask;
+- (NSEventModifierFlags) keyEquivalentModifierMask;
 /**
  * Sets the key equivalent string that allows keyboard activation of
  * the button. When this key is pressed with the appropriate modifier
@@ -371,7 +371,7 @@ APPKIT_EXPORT_CLASS
  * appropriate flags like NSCommandKeyMask to specify which modifier
  * keys are required for the keyboard shortcut.
  */
-- (void)setKeyEquivalentModifierMask: (NSUInteger)mask;
+- (void) setKeyEquivalentModifierMask: (NSEventModifierFlags)mask;
 /**
  * Sets the font used for displaying key equivalent indicators within
  * the button. This font is used specifically for key equivalent

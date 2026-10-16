@@ -607,7 +607,7 @@
     0.</p><p>See Also: -setKeyEquivalentModifierMask:
     -keyEquivalent [NSButton-performKeyEquivalent:]</p>
  */
-- (NSUInteger) keyEquivalentModifierMask
+- (NSEventModifierFlags) keyEquivalentModifierMask
 {
   return _keyEquivalentModifierMask;
 }
@@ -632,7 +632,7 @@
     <p>See Also: -keyEquivalentModifierMask  
     -setKeyEquivalent: [NSButton-performKeyEquivalent:]</p>
 */
-- (void) setKeyEquivalentModifierMask: (NSUInteger)mask
+- (void) setKeyEquivalentModifierMask: (NSEventModifierFlags)mask
 {
   _keyEquivalentModifierMask = mask;
 }

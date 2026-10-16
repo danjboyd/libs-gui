@@ -495,7 +495,7 @@ static id buttonCellClass = nil;
     NSCommandKeyMask.</p><p>See Also: -setKeyEquivalentModifierMask:
     -keyEquivalent [NSButtonCell-setKeyEquivalentModifierMask:]</p>
  */
-- (NSUInteger) keyEquivalentModifierMask
+- (NSEventModifierFlags) keyEquivalentModifierMask
 {
   return [_cell keyEquivalentModifierMask];
 }
@@ -519,7 +519,7 @@ static id buttonCellClass = nil;
     -setKeyEquivalent: -performKeyEquivalent:
     [NSButtonCell-setKeyEquivalentModifierMask:]</p>
 */
-- (void) setKeyEquivalentModifierMask: (NSUInteger)mask
+- (void) setKeyEquivalentModifierMask: (NSEventModifierFlags)mask
 {
   [_cell setKeyEquivalentModifierMask: mask];
 }

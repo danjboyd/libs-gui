@@ -1187,7 +1187,7 @@ static NSColor *dtxtCol;
 
 /**<p>TODO Explain</p>
  */
-- (NSInteger) sendActionOn: (NSInteger)mask
+- (NSInteger) sendActionOn: (NSEventMask)mask
 {
   NSUInteger previousMask = _action_mask;
 

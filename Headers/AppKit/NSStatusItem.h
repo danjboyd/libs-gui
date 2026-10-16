@@ -36,6 +36,7 @@
 #import <AppKit/AppKitDefines.h>
 #import <Foundation/NSObject.h>
 #import <Foundation/NSGeometry.h>
+#import <AppKit/NSEvent.h>
 
 @class NSAttributedString;
 @class NSString;
@@ -69,7 +70,7 @@ APPKIT_EXPORT_CLASS
 - (CGFloat) length;
 - (NSMenu*) menu;
 - (void) popUpStatusItemMenu: (NSMenu*)menu;
-- (NSInteger) sendActionOn: (NSInteger)mask;
+- (NSInteger) sendActionOn: (NSEventMask)mask;
 - (void) setAction: (SEL)action;
 - (void) setAttributedTitle: (NSAttributedString*)title;
 - (void) setDoubleAction: (SEL)sel;

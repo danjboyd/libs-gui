@@ -790,7 +790,7 @@ static NSNotificationCenter *nc;
     return NO;
 }
 
-- (NSInteger) sendActionOn: (NSInteger)mask
+- (NSInteger) sendActionOn: (NSEventMask)mask
 {
   return [_cell sendActionOn: mask];
 }

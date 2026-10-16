@@ -34,6 +34,7 @@
 // for NSWritingDirection
 #import <AppKit/NSParagraphStyle.h>
 #import <AppKit/NSView.h>
+#import <AppKit/NSEvent.h>
 
 @class NSString;
 @class NSNotification;
@@ -452,7 +453,7 @@ APPKIT_EXPORT_CLASS
  * mask: A bitmask of event types that should trigger action sending
  * Returns: The previous event mask value
  */
-- (NSInteger)sendActionOn:(NSInteger)mask;
+- (NSInteger)sendActionOn:(NSEventMask)mask;
 
 /**
  * Sets the action selector sent to the target.

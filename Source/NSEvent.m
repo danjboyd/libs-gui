@@ -86,7 +86,7 @@ static Class eventClass;
  */
 + (NSEvent*) enterExitEventWithType: (NSEventType)type
                            location: (NSPoint)location
-                      modifierFlags: (NSUInteger)flags
+                      modifierFlags: (NSEventModifierFlags)flags
                           timestamp: (NSTimeInterval)time
                        windowNumber: (NSInteger)windowNum
                             context: (NSGraphicsContext*)context
@@ -122,7 +122,7 @@ static Class eventClass;
 
 + (NSEvent*) keyEventWithType: (NSEventType)type
                      location: (NSPoint)location
-                modifierFlags: (NSUInteger)flags
+                modifierFlags: (NSEventModifierFlags)flags
                     timestamp: (NSTimeInterval)time
                  windowNumber: (NSInteger)windowNum
                       context: (NSGraphicsContext *)context
@@ -160,7 +160,7 @@ static Class eventClass;
 
 + (NSEvent*) mouseEventWithType: (NSEventType)type
                        location: (NSPoint)location
-                  modifierFlags: (NSUInteger)flags
+                  modifierFlags: (NSEventModifierFlags)flags
                       timestamp: (NSTimeInterval)time
                    windowNumber: (NSInteger)windowNum
                         context: (NSGraphicsContext*)context
@@ -194,7 +194,7 @@ static Class eventClass;
 
 + (NSEvent*) mouseEventWithType: (NSEventType)type        
                        location: (NSPoint)location
-                  modifierFlags: (NSUInteger)flags
+                  modifierFlags: (NSEventModifierFlags)flags
                       timestamp: (NSTimeInterval)time
                    windowNumber: (NSInteger)windowNum
                         context: (NSGraphicsContext*)context        
@@ -244,7 +244,7 @@ static Class eventClass;
 
 + (NSEvent*) otherEventWithType: (NSEventType)type
                        location: (NSPoint)location
-                  modifierFlags: (NSUInteger)flags
+                  modifierFlags: (NSEventModifierFlags)flags
                       timestamp: (NSTimeInterval)time
                    windowNumber: (NSInteger)windowNum
                         context: (NSGraphicsContext*)context

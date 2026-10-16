@@ -36,6 +36,7 @@
 
 #import <Foundation/NSObject.h>
 #import <AppKit/NSUserInterfaceValidation.h>
+#import <AppKit/NSEvent.h>
 
 @class NSAttributedString;
 @class NSString;
@@ -62,7 +63,7 @@
 @property (getter=isEnabled) BOOL enabled;
 @property (readonly, getter=isSeparatorItem) BOOL separatorItem;
 @property (copy) NSString *keyEquivalent;
-@property NSUInteger keyEquivalentModifierMask;
+@property NSEventModifierFlags keyEquivalentModifierMask;
 @property (assign) NSMenu *menu;
 @property (retain) NSImage *mixedStateImage;
 @property (readonly) NSString *mnemonic;
@@ -187,7 +188,7 @@
    Returns the key equivalent mask.
    </p>
  */
-- (NSUInteger) keyEquivalentModifierMask;
+- (NSEventModifierFlags) keyEquivalentModifierMask;
 
 /**
    <p>
@@ -270,7 +271,7 @@
    key equivalent requires ALT, Control or other key modifiers.
    </p>
  */
-- (void) setKeyEquivalentModifierMask: (NSUInteger)mask;
+- (void) setKeyEquivalentModifierMask: (NSEventModifierFlags)mask;
 
 /**
    <p> Sets the menu which this item belongs to.   This method does not retain the

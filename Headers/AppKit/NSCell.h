@@ -35,6 +35,7 @@
 
 // For tint
 #import <AppKit/NSColor.h>
+#import <AppKit/NSEvent.h>
 // for NSWritingDirection
 #import <AppKit/NSParagraphStyle.h>
 // For text alignment
@@ -694,7 +695,7 @@ APPKIT_EXPORT_CLASS
 //
 - (SEL)action;
 - (BOOL)isContinuous;
-- (NSInteger)sendActionOn:(NSInteger)mask;
+- (NSInteger)sendActionOn:(NSEventMask)mask;
 - (void)setAction:(SEL)aSelector;
 - (void)setContinuous:(BOOL)flag;
 - (void)setTarget:(id)anObject;
