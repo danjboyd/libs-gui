@@ -81,9 +81,8 @@ typedef NS_ENUM(NSUInteger, NSBackingStoreType)
  *  <item> NSCompositePlusLighter</item>
  * </list>
  */
-enum _NSCompositingOperation
+typedef NS_ENUM(NSUInteger, NSCompositingOperation)
 {
- 
   NSCompositeClear,
   NSCompositeCopy,
   NSCompositeSourceOver,
@@ -103,7 +102,6 @@ enum _NSCompositingOperation
   , GSCompositeHighlight = 100
 #endif
 };
-typedef NSUInteger NSCompositingOperation;
 
 typedef int NSWindowDepth;
 
