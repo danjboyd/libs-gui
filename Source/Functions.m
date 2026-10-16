@@ -332,9 +332,28 @@ NSColor* NSReadPixel(NSPoint location)
   return color;
 }
 
+/* Copies srcRect of the graphics state srcGstate, in its coordinates, into
+ * destRect of the current graphics state, scaling it when the rectangles
+ * differ in size.
+ */
 void NSCopyBitmapFromGState(int srcGstate, NSRect srcRect, NSRect destRect)
 {
-  NSLog(@"NSCopyBitmapFromGState not implemented");
+  NSGraphicsContext *ctxt = GSCurrentContext();
+  NSBitmapImageRep *rep;
+
+  if (NSEqualSizes(srcRect.size, destRect.size))
+    {
+      NSCopyBits(srcGstate, srcRect, destRect.origin);
+      return;
+    }
+
+  /* Read the rectangle in the source graphics state, then draw it. */
+  DPSgsave(ctxt);
+  DPSsetgstate(ctxt, srcGstate);
+  rep = [[NSBitmapImageRep alloc] initWithFocusedViewRect: srcRect];
+  DPSgrestore(ctxt);
+  [rep drawInRect: destRect];
+  RELEASE(rep);
 }
 
 void NSCopyBits(NSInteger srcGstate, NSRect srcRect, NSPoint destPoint)
