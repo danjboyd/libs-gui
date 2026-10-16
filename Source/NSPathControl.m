@@ -337,13 +337,15 @@ static Class pathCellClass;
   [op setCanChooseFiles: YES];
   [op setCanChooseDirectories: YES];
   
-  if ([(id)_delegate respondsToSelector: @selector(pathCell:willPopUpMenu:)])
+  if ([(id)_delegate respondsToSelector:
+         @selector(pathControl:willDisplayOpenPanel:)])
     {
       [_delegate pathControl: self
         willDisplayOpenPanel: op];
     }
 
-  if ([(id)[_cell delegate] respondsToSelector: @selector(pathCell:willPopUpMenu:)])
+  if ([(id)[_cell delegate] respondsToSelector:
+         @selector(pathCell:willDisplayOpenPanel:)])
     {
       [[_cell delegate] pathCell: _cell
             willDisplayOpenPanel: op];
