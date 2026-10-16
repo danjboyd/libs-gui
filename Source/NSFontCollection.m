@@ -324,8 +324,16 @@ static NSLock *_fontCollectionLock = nil;
 
 - (void) _setFullFileName: (NSString *)fn
 {
-  [[self _fontCollectionAttributes] setObject: fn
-                                forKey: @"NSFontCollectionFileName"];
+  if (fn == nil)
+    {
+      [[self _fontCollectionAttributes]
+        removeObjectForKey: @"NSFontCollectionFileName"];
+    }
+  else
+    {
+      [[self _fontCollectionAttributes] setObject: fn
+                                           forKey: @"NSFontCollectionFileName"];
+    }
 }
 
 - (NSString *) _fullFileName
@@ -415,7 +423,11 @@ static NSLock *_fontCollectionLock = nil;
                          visibility: (NSFontCollectionVisibility)visibility
                               error: (NSError **)error
 {
-  NSFontCollection *collection = [_availableFontCollections objectForKey: name];
+  /* Removing the file also removes the collection from the list of
+   * available collections, so keep it until the removal is done.
+   */
+  NSFontCollection *collection
+    = AUTORELEASE(RETAIN([_availableFontCollections objectForKey: name]));
 
   return [collection _removeFile];
 }
@@ -425,7 +437,11 @@ static NSLock *_fontCollectionLock = nil;
                                toName: (NSFontCollectionName)name
                                 error: (NSError **)error
 {
-  NSFontCollection *collection = [_availableFontCollections objectForKey: aname];
+  /* Removing the file also removes the collection from the list of
+   * available collections, so keep it until it is saved again.
+   */
+  NSFontCollection *collection
+    = AUTORELEASE(RETAIN([_availableFontCollections objectForKey: aname]));
   BOOL rv = [collection _removeFile];
 
   if (rv == YES)
