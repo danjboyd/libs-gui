@@ -2462,7 +2462,10 @@ static void computeNewSelection
   if (_viewBased)
     {
       // Remove all existing row views from the table view
-      NSArray *subviews = [[self subviews] copy];
+      NSArray *subviews;
+
+      [self _removeRowViews];
+      subviews = [[self subviews] copy];
       NSEnumerator *enumerator = [subviews objectEnumerator];
       NSView *subview;
       
@@ -5197,6 +5200,7 @@ This method is deprecated, use -columnIndexesInRect:. */
   NSInteger endingColumn;
   NSInteger columnIndex;
   id dataSource = [self dataSource];
+  BOOL addedRowView = NO;
 
   // If we have no data source, there is nothing to do...
   if (dataSource == nil)
@@ -5240,7 +5244,7 @@ This method is deprecated, use -columnIndexesInRect:. */
 	{
 	  [self addSubview: rowView];
 	  [rowView setAutoresizingMask: options];
-
+	  addedRowView = YES;
 	}
       
       // Always update the frame to ensure correct positioning
@@ -5269,6 +5273,12 @@ This method is deprecated, use -columnIndexesInRect:. */
 	  newRect.origin.y -= NSMinY ([rowView frame]);
 	  [view setFrame: newRect];
 	}
+    }
+
+  // Tell the delegate once the row view has its cell views
+  if (addedRowView)
+    {
+      [self _didAddRowView: rowView forRow: rowIndex];
     }
 }
 
@@ -7462,6 +7472,44 @@ For a more detailed explanation, -setSortDescriptors:. */
     }
 
   return view;
+}
+
+- (void) _didAddRowView: (NSTableRowView *)rowView forRow: (NSInteger)row
+{
+  if ([_delegate respondsToSelector: @selector(tableView:didAddRowView:forRow:)])
+    {
+      [_delegate tableView: self didAddRowView: rowView forRow: row];
+    }
+}
+
+- (void) _didRemoveRowView: (NSTableRowView *)rowView forRow: (NSInteger)row
+{
+  if ([_delegate respondsToSelector: @selector(tableView:didRemoveRowView:forRow:)])
+    {
+      [_delegate tableView: self didRemoveRowView: rowView forRow: row];
+    }
+}
+
+/* Removes the row views shown in the table, telling the delegate of each.
+ * They stay in the row view cache.
+ */
+- (void) _removeRowViews
+{
+  NSArray *rows = [[_rowViews allKeys] sortedArrayUsingSelector:
+    @selector(compare:)];
+  NSEnumerator *enumerator = [rows objectEnumerator];
+  NSNumber *row;
+
+  while ((row = [enumerator nextObject]) != nil)
+    {
+      NSTableRowView *rowView = [_rowViews objectForKey: row];
+
+      if ([rowView superview] == self)
+	{
+	  [rowView removeFromSuperview];
+	  [self _didRemoveRowView: rowView forRow: [row integerValue]];
+	}
+    }
 }
 
 /* The row view the delegate makes for row, or nil. */

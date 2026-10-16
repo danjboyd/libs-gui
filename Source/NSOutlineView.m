@@ -155,6 +155,7 @@ static NSImage *unexpandable  = nil;
 		 clipRect: (NSRect)clipRect;
 - (void) _sendDoubleActionForColumn: (NSInteger)columnIndex;
 - (NSTableRowView *) _delegateRowViewForRow: (NSInteger)row;
+- (void) _removeRowViews;
 @end
 
 @interface NSTableColumn (Private)
@@ -841,9 +842,11 @@ static NSImage *unexpandable  = nil;
   // Refresh the views if it is view based...
   if (_viewBased)
     {
-      NSEnumerator *en = [[self subviews] objectEnumerator];
+      NSEnumerator *en;
       NSView *v = nil;
 
+      [self _removeRowViews];
+      en = [[self subviews] objectEnumerator];
       while ((v = [en nextObject]) != nil)
 	{
 	  [v removeFromSuperview];
@@ -2656,6 +2659,24 @@ Also returns the child index relative to this parent. */
   [view setFrame: drawingRect];
 
   return view;
+}
+
+- (void) _didAddRowView: (NSTableRowView *)rowView forRow: (NSInteger)row
+{
+  if ([_delegate respondsToSelector:
+    @selector(outlineView:didAddRowView:forRow:)])
+    {
+      [_delegate outlineView: self didAddRowView: rowView forRow: row];
+    }
+}
+
+- (void) _didRemoveRowView: (NSTableRowView *)rowView forRow: (NSInteger)row
+{
+  if ([_delegate respondsToSelector:
+    @selector(outlineView:didRemoveRowView:forRow:)])
+    {
+      [_delegate outlineView: self didRemoveRowView: rowView forRow: row];
+    }
 }
 
 - (NSTableRowView *) _delegateRowViewForRow: (NSInteger)row
