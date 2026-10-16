@@ -35,9 +35,10 @@
 #import <Foundation/NSCoder.h>
 
 /*
- * Options pulled from Cocoa documentation.
- */ 
-enum {
+ * Options pulled from Cocoa documentation.  An NS_OPTIONS type, as in
+ * Cocoa, which Swift imports as an option set (NSTrackingArea.Options).
+ */
+typedef NS_OPTIONS(NSUInteger, NSTrackingAreaOptions) {
     NSTrackingMouseEnteredAndExited = 0x01,
     NSTrackingMouseMoved = 0x02,
     NSTrackingCursorUpdate = 0x04,
@@ -49,7 +50,6 @@ enum {
     NSTrackingInVisibleRect = 0x200,
     NSTrackingEnabledDuringMouseDrag = 0x400
 };
-typedef NSUInteger NSTrackingAreaOptions;
 
 @class NSDictionary;
 @class GSTrackingRect;
