@@ -1958,6 +1958,12 @@ static inline NSRect buttonCellFrameFromRect(NSRect cellRect)
       else
         {
 	  if ([_dataSource respondsToSelector: 
+			       @selector(comboBox:indexOfItemWithStringValue:)])
+	    {
+	      index = [_dataSource comboBox: (NSComboBox *)[self controlView]
+		 indexOfItemWithStringValue: more];
+	    }
+	  else if ([_dataSource respondsToSelector: 
 			       @selector(comboBoxCell:indexOfItemWithStringValue:)])
 	    {
 	      index = [_dataSource comboBoxCell: self 
