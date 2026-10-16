@@ -571,7 +571,55 @@
 		 blackMapping:(NSColor *)shadowColor
 		 whiteMapping:(NSColor *)lightColor
 {
-  // TODO
+  NSString *rgb = NSCalibratedRGBColorSpace;
+  NSColor *mid = [midPointColor colorUsingColorSpaceName: rgb];
+  NSColor *black = [shadowColor colorUsingColorSpaceName: rgb];
+  NSColor *white = [lightColor colorUsingColorSpaceName: rgb];
+  NSInteger x, y;
+
+  if (mid == nil || black == nil || white == nil)
+    {
+      return;
+    }
+  /* Each pixel's gray level is mapped to a color between the black mapping
+     (at 0) and the mid point color (at midPoint), or between the mid point
+     color and the white mapping (at 1).  The pixel keeps its alpha. */
+  for (y = 0; y < _pixelsHigh; y++)
+    {
+      for (x = 0; x < _pixelsWide; x++)
+	{
+	  NSColor *c = [self colorAtX: x y: y];
+	  NSColor *gray = [c colorUsingColorSpaceName: NSCalibratedWhiteColorSpace];
+	  CGFloat level = [gray whiteComponent];
+	  NSColor *from, *to;
+	  CGFloat f;
+
+	  if (gray == nil)
+	    {
+	      continue;
+	    }
+	  if (level <= midPoint)
+	    {
+	      from = black;
+	      to = mid;
+	      f = (midPoint > 0.0) ? level / midPoint : 1.0;
+	    }
+	  else
+	    {
+	      from = mid;
+	      to = white;
+	      f = (midPoint < 1.0) ? (level - midPoint) / (1.0 - midPoint) : 0.0;
+	    }
+	  c = [NSColor colorWithCalibratedRed:
+	    [from redComponent] + f * ([to redComponent] - [from redComponent])
+	    green: [from greenComponent]
+	      + f * ([to greenComponent] - [from greenComponent])
+	    blue: [from blueComponent]
+	      + f * ([to blueComponent] - [from blueComponent])
+	    alpha: [gray alphaComponent]];
+	  [self setColor: c atX: x y: y];
+	}
+    }
 }
 
 - (id)initWithBitmapHandle:(void *)bitmap
