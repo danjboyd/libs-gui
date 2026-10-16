@@ -1669,6 +1669,7 @@ static NSColor *dtxtCol;
   NSPoint point = [controlView convertPoint: location fromView: nil];
   NSPoint last_point = point;
   BOOL mouseWentUp = NO;
+  BOOL dequeued;
   BOOL tracking;
   unsigned periodCount = 0;
 
@@ -1706,9 +1707,13 @@ static NSColor *dtxtCol;
     }
 
   NSDebugLLog(@"NSCell", @"cell get mouse events\n");
+  /* The caller may already have taken the events that followed theEvent
+   * out of the queue, as NSTableView does, so carry on from the last one.
+   */
   if (theEvent != [NSApp currentEvent])
     {
       theEvent = [NSApp currentEvent];
+      dequeued = NO;
     }
   else
     {
@@ -1716,6 +1721,7 @@ static NSColor *dtxtCol;
                                      untilDate: [NSDate distantFuture]
                                         inMode: NSEventTrackingRunLoopMode
                                        dequeue: YES];
+      dequeued = YES;
     }
 
   while (YES)
@@ -1728,6 +1734,17 @@ static NSColor *dtxtCol;
       if (eventType == NSLeftMouseUp)
         {
           NSDebugLLog(@"NSCell", @"cell mouse went up\n");
+          /* Stop at the point where the mouse went up.  A mouse up that
+           * was not taken from the queue here may be older than theEvent,
+           * when theEvent was sent straight to a view or window rather
+           * than through the application, so keep the last point then.
+           */
+          if (dequeued)
+            {
+              location = [theEvent locationInWindow];
+              last_point = point;
+              point = [controlView convertPoint: location fromView: nil];
+            }
           mouseWentUp = YES;
           break;
         }
@@ -1783,6 +1800,7 @@ static NSColor *dtxtCol;
                                      untilDate: [NSDate distantFuture]
                                         inMode: NSEventTrackingRunLoopMode
                                        dequeue: YES];
+      dequeued = YES;
     }
 
   if (tracking)
