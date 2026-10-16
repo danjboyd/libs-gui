@@ -104,20 +104,15 @@
                  didCommitSelector: (SEL)didCommitSelector
                        contextInfo: (void*)contextInfo
 {
-  unsigned c = [_editors count];
-  unsigned i;
+  BOOL didCommit = [self commitEditing];
 
-  for (i = 0; i < c; i++)
+  if (delegate != nil && didCommitSelector != NULL)
     {
-      BOOL didCommit = [[_editors objectAtIndex: i] commitEditing];
-      if (delegate != nil && didCommitSelector != NULL)
-        {
-          void (*meth)(id, SEL, id, BOOL, void*);
-          meth = (void (*)(id, SEL, id, BOOL, void*))[delegate methodForSelector: 
-                                                                   didCommitSelector];
-          if (meth)
-            meth(delegate, didCommitSelector, self, didCommit, contextInfo);
-        }
+      void (*meth)(id, SEL, id, BOOL, void*);
+      meth = (void (*)(id, SEL, id, BOOL, void*))[delegate methodForSelector: 
+                                                               didCommitSelector];
+      if (meth)
+        meth(delegate, didCommitSelector, self, didCommit, contextInfo);
     }
 }
 
