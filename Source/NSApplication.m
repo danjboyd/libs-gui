@@ -830,7 +830,8 @@ static BOOL _isAutolaunchChecked = NO;
                 [target methodSignatureForSelector: selector]]; 
   [inv setTarget: target];
   [inv setSelector: selector];
-  [inv setArgument: argument atIndex: 2];
+  [inv setArgument: &argument atIndex: 2];
+  [inv retainArguments];
   [NSThread detachNewThreadSelector: @selector(_invokeWithAutoreleasePool:) 
 	    toTarget: self 
 	    withObject: inv];
