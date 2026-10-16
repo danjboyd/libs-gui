@@ -1877,6 +1877,13 @@ static NSString *_placeholderItem = nil;
 	  [_itemsToAttributes setObject: attrs
 				 forKey: item];
 
+	  if ([_delegate respondsToSelector:
+	    @selector(collectionView:willDisplayItem:forRepresentedObjectAtIndexPath:)])
+	    {
+	      [_delegate collectionView: self
+			willDisplayItem: item
+		forRepresentedObjectAtIndexPath: path];
+	    }
 	  [self addSubview: v];
 	  NSDebugLog(@"NSCollectionView: Added item view %@ at frame %@", v, NSStringFromRect(frame));
 	}
@@ -1909,19 +1916,57 @@ static NSString *_placeholderItem = nil;
       if ((NSUInteger)[path section] == cs)
 	{
 	  NSCollectionViewItem *item = [_indexPathsToItems objectForKey: path];
+	  BOOL displayed =
+	    ([_visibleItems indexOfObjectIdenticalTo: item] != NSNotFound);
 
+	  RETAIN(item);
 	  [[item view] removeFromSuperview];
 	  [_visibleItems removeObject: item];
 	  [_itemsToAttributes removeObjectForKey: item];
 	  [_itemsToIndexPaths removeObjectForKey: item];
 	  [_indexPathsToItems removeObjectForKey: path];
+	  if (displayed)
+	    {
+	      [self _didEndDisplayingItem: item atIndexPath: path];
+	    }
+	  RELEASE(item);
 	}
     }
   END_FOR_IN(paths);
 }
 
+- (void) _didEndDisplayingItem: (NSCollectionViewItem *)item
+		   atIndexPath: (NSIndexPath *)path
+{
+  if ([_delegate respondsToSelector:
+    @selector(collectionView:didEndDisplayingItem:forRepresentedObjectAtIndexPath:)])
+    {
+      [_delegate collectionView: self
+	   didEndDisplayingItem: item
+	forRepresentedObjectAtIndexPath: path];
+    }
+}
+
 - (void) _clearMaps
 {
+  NSArray *keys = [[_indexPathsToItems keyEnumerator] allObjects];
+  NSMutableArray *paths = [NSMutableArray arrayWithCapacity: [keys count]];
+  NSMutableArray *items = [NSMutableArray arrayWithCapacity: [keys count]];
+  NSUInteger i;
+
+  // note the displayed items, to tell the delegate once they are gone...
+  FOR_IN(NSIndexPath*, path, keys)
+    {
+      NSCollectionViewItem *item = [_indexPathsToItems objectForKey: path];
+
+      if ([_visibleItems indexOfObjectIdenticalTo: item] != NSNotFound)
+	{
+	  [paths addObject: path];
+	  [items addObject: item];
+	}
+    }
+  END_FOR_IN(keys);
+
   // Remove objects from set/dict/maps
   [_visibleItems removeAllObjects];
   [_itemsToIndexPaths removeAllObjects];
@@ -1930,6 +1975,12 @@ static NSString *_placeholderItem = nil;
 
   [self setSubviews: [NSArray array]];
   [_collectionViewLayout prepareLayout];
+
+  for (i = 0; i < [paths count]; i++)
+    {
+      [self _didEndDisplayingItem: [items objectAtIndex: i]
+		      atIndexPath: [paths objectAtIndex: i]];
+    }
 
   // destroy maps...
   DESTROY(_indexPathsToItems);
