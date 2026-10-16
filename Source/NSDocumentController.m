@@ -1122,34 +1122,18 @@ static BOOL _shouldClose = YES;
                          didReviewAllSelector: (SEL)didReviewAllSelector 
                                   contextInfo: (void *)contextInfo
 {
-  NSString *cancelString = (cancellable)? ((NSString *)_(@"Cancel")) : ((NSString *)nil);
-  int result = YES;
-  
-  if (![self hasEditedDocuments]) 
-    {
-      if (delegate != nil && didReviewAllSelector != NULL)
-        {
-          void (*meth)(id, SEL, id, BOOL, void*);
-          meth = (void (*)(id, SEL, id, BOOL, void*))[delegate methodForSelector: 
-                                                                   didReviewAllSelector];
-          if (meth)
-            meth(delegate, didReviewAllSelector, self, result, contextInfo);
-        }
+  BOOL result;
 
-      return;
+  result = [self reviewUnsavedDocumentsWithAlertTitle: title
+                                          cancellable: cancellable];
+  if (delegate != nil && didReviewAllSelector != NULL)
+    {
+      void (*meth)(id, SEL, id, BOOL, void*);
+      meth = (void (*)(id, SEL, id, BOOL, void*))[delegate methodForSelector: 
+                                                               didReviewAllSelector];
+      if (meth)
+        meth(delegate, didReviewAllSelector, self, result, contextInfo);
     }
-  
-  // FIXME
-  NSBeginAlertSheet(title, 
-                    _(@"Review Unsaved"), 
-                    cancelString, 
-                    _(@"Quit Anyway"),
-                    nil,
-                    delegate, 
-                    didReviewAllSelector, 
-                    contextInfo, 
-                    _(@"You have unsaved documents"),
-                    nil);
 }
 
 - (id) duplicateDocumentWithContentsOfURL: (NSURL*)url
