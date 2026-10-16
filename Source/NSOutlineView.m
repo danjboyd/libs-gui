@@ -2191,11 +2191,33 @@ Also returns the child index relative to this parent. */
     {
       NSUserDefaults *defaults;
       NSString       *tableKey;
+      NSArray        *saved = _expandedItems;
 
+      /* The data source gives the objects to save for its items. */
+      if ([_dataSource respondsToSelector:
+	@selector(outlineView:persistentObjectForItem:)])
+	{
+	  NSMutableArray *objects;
+	  NSEnumerator   *en = [_expandedItems objectEnumerator];
+	  id             item;
+
+	  objects = [NSMutableArray arrayWithCapacity: [_expandedItems count]];
+	  while ((item = [en nextObject]) != nil)
+	    {
+	      id object = [_dataSource outlineView: self
+			   persistentObjectForItem: item];
+
+	      if (object != nil)
+		{
+		  [objects addObject: object];
+		}
+	    }
+	  saved = objects;
+	}
       defaults  = [NSUserDefaults standardUserDefaults];
       tableKey = [NSString stringWithFormat: @"NSOutlineView Expanded Items %@",
 			   _autosaveName];
-      [defaults setObject: _expandedItems  forKey: tableKey];
+      [defaults setObject: saved  forKey: tableKey];
       [defaults synchronize];
     }
 }
@@ -2215,11 +2237,22 @@ Also returns the child index relative to this parent. */
       if (config != nil)
 	{
 	  NSEnumerator *en = [config objectEnumerator];
+	  BOOL mapsObjects = [_dataSource respondsToSelector:
+	    @selector(outlineView:itemForPersistentObject:)];
 	  id item = nil;
 
 	  while ((item = [en nextObject]) != nil)
 	    {
-	      [self expandItem: item];
+	      /* The data source gives the items for the saved objects. */
+	      if (mapsObjects)
+		{
+		  item = [_dataSource outlineView: self
+			  itemForPersistentObject: item];
+		}
+	      if (item != nil)
+		{
+		  [self expandItem: item];
+		}
 	    }
 	}
     }
