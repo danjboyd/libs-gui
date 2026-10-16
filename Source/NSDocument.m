@@ -32,6 +32,8 @@
 #import <Foundation/NSError.h>
 #import <Foundation/NSException.h>
 #import <Foundation/NSFileManager.h>
+#import <Foundation/NSInvocation.h>
+#import <Foundation/NSMethodSignature.h>
 #import <Foundation/NSNotification.h>
 #import <Foundation/NSProcessInfo.h>
 #import <Foundation/NSUndoManager.h>
@@ -1412,11 +1414,50 @@ originalContentsURL: (NSURL *)orig
   pageLayout = [NSPageLayout pageLayout];
   if ([self preparePageLayout: pageLayout])
     {
+      NSInvocation *inv = nil;
+
+      /* The sheet ends with (sheet, returnCode, context), but the delegate
+       * expects (document, accepted, context), so end it in
+       * -_pageLayoutDidEnd:returnCode:contextInfo:, which sends the
+       * delegate an invocation prepared here.
+       */
+      if (delegate != nil && sel != NULL)
+        {
+          NSMethodSignature *sig = [delegate methodSignatureForSelector: sel];
+
+          if (sig != nil)
+            {
+              id doc = self;
+
+              inv = [NSInvocation invocationWithMethodSignature: sig];
+              [inv setTarget: delegate];
+              [inv setSelector: sel];
+              [inv setArgument: &doc atIndex: 2];
+              [inv setArgument: &context atIndex: 4];
+              RETAIN(inv);
+            }
+        }
       [pageLayout beginSheetWithPrintInfo: info
                   modalForWindow: [self windowForSheet]
-                  delegate: delegate
-                  didEndSelector: sel
-                  contextInfo: context];
+                  delegate: self
+                  didEndSelector: @selector(_pageLayoutDidEnd:returnCode:contextInfo:)
+                  contextInfo: inv];
+    }
+}
+
+- (void) _pageLayoutDidEnd: (NSPageLayout *)pageLayout
+                returnCode: (NSInteger)result
+               contextInfo: (void *)contextInfo
+{
+  NSInvocation *inv = (NSInvocation *)contextInfo;
+
+  if (inv != nil)
+    {
+      BOOL accepted = (result == NSOKButton);
+
+      [inv setArgument: &accepted atIndex: 3];
+      [inv invoke];
+      RELEASE(inv);
     }
 }
 
