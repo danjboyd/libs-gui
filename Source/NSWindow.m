@@ -4227,8 +4227,12 @@ checkCursorRectanglesExited(NSView *theView,  NSEvent *theEvent, NSPoint lastPoi
                   // seems to do that).
                   if (_firstResponder != v && ![v isKindOfClass: [NSButton class]])
                     {
-                      // Only try to set first responder, when the view wants it.
-                      if ([v acceptsFirstResponder] && ![self makeFirstResponder: v])
+                      // Only try to set first responder, when the view wants
+                      // it and the view hierarchy lets it.
+                      if ([v acceptsFirstResponder]
+                          && [v validateProposedFirstResponder: v
+                                                      forEvent: theEvent]
+                          && ![self makeFirstResponder: v])
                         {
                           return;
                         }

@@ -3738,6 +3738,23 @@ static NSView* findByTag(NSView *view, NSInteger aTag, NSUInteger *level)
 }
 
 /**
+ * Returns whether responder, a view in the receiver's hierarchy, may
+ * become first responder for event.  A view asks its superview, so a view
+ * can decide for the views it contains; a view without a superview
+ * answers YES.
+ */
+- (BOOL) validateProposedFirstResponder: (NSResponder *)responder
+                               forEvent: (NSEvent *)event
+{
+  if (_super_view != nil)
+    {
+      return [_super_view validateProposedFirstResponder: responder
+                                                forEvent: event];
+    }
+  return YES;
+}
+
+/**
  * Returns the subview, lowest in the receiver's hierarchy, which
  * contains aPoint, or nil if there is no such view.
  */
