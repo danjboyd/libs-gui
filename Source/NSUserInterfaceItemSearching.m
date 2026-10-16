@@ -24,6 +24,7 @@
 
 #import <Foundation/NSObject.h>
 #import <Foundation/NSCoder.h>
+#import <Foundation/NSString.h>
 
 #import "AppKit/NSApplication.h"
 #import "AppKit/NSUserInterfaceItemSearching.h"
@@ -43,7 +44,24 @@
          searchRange:(NSRange)searchRange
          foundRange:(NSRange *)foundRange
 {
-  return NO;
+  NSRange found;
+
+  if ([searchString length] == 0 || stringToSearch == nil)
+    {
+      return NO;
+    }
+  found = [stringToSearch rangeOfString: searchString
+                                options: NSCaseInsensitiveSearch
+                                  range: searchRange];
+  if (found.location == NSNotFound)
+    {
+      return NO;
+    }
+  if (foundRange != NULL)
+    {
+      *foundRange = found;
+    }
+  return YES;
 }
 
 @end
