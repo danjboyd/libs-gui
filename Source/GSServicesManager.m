@@ -685,8 +685,17 @@ static NSString         *disabledName = @".GNUstepDisabled";
 - (BOOL) application: (NSApplication*)theApp
 	openTempFile: (NSString*)file
 {
-  BOOL	result = [self application: theApp openFile: file];
+  id	del = [NSApp delegate];
+  BOOL	result;
 
+  /* A delegate that opens temporary files itself is responsible for
+   * removing them.
+   */
+  if ([del respondsToSelector: _cmd])
+    {
+      return [del application: theApp openTempFile: file];
+    }
+  result = [self application: theApp openFile: file];
   [[NSFileManager defaultManager] removeFileAtPath: file handler: nil];
 
   return result;
