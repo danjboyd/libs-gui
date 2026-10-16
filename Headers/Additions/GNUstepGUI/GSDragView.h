@@ -78,7 +78,7 @@ APPKIT_EXPORT_CLASS
   NSDragOperation dragMask;
 
   /* User specified operation mask (key modifiers).
-   * This is either a mask of type _NSDragOperation,
+   * This is either a mask of type NSDragOperation,
    * or NSDragOperationIgnoresModifiers, which
    * is defined as 0xffff
    */

@@ -39,7 +39,9 @@
 @class NSURL;
 @class NSDraggingSession;
 
-enum _NSDragOperation {
+/* An NS_OPTIONS type, as in Cocoa, which Swift imports as an option set
+ * (.copy, .link, .generic, .private, .move, .delete, .every). */
+typedef NS_OPTIONS(NSUInteger, NSDragOperation) {
   NSDragOperationNone = 0,
   NSDragOperationCopy = 1,
   NSDragOperationLink = 2,
@@ -48,10 +50,8 @@ enum _NSDragOperation {
   NSDragOperationAll = 15,
   NSDragOperationMove = 16,
   NSDragOperationDelete = 32,
-  NSDragOperationEvery = UINT_MAX  
+  NSDragOperationEvery = UINT_MAX
 };
-
-typedef NSUInteger NSDragOperation;
 
 #if OS_API_VERSION(MAC_OS_X_VERSION_10_7, GS_API_LATEST)
 typedef NSInteger NSDraggingContext;
