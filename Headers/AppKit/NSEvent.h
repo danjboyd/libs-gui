@@ -513,6 +513,86 @@ APPKIT_EXPORT_CLASS
     } event_data;
 }
 
+#if GS_HAS_DECLARED_PROPERTIES
+/*
+ * Declared properties for the accessors that Cocoa declares as properties
+ * and that are also declared as methods below.  Clients compiled without
+ * declared property support use the method declarations; property syntax
+ * (and Swift, which imports event.type and event.modifierFlags) use these.
+ */
+#if __has_feature(objc_class_property)
+@property (class, readonly) NSPoint mouseLocation;
+#endif
+@property (readonly) NSEventType type;
+@property (readonly) NSEventModifierFlags modifierFlags;
+@property (readonly) NSTimeInterval timestamp;
+@property (readonly) NSWindow *window;
+@property (readonly) NSInteger windowNumber;
+@property (readonly) NSGraphicsContext *context;
+@property (readonly) NSInteger clickCount;
+@property (readonly) NSPoint locationInWindow;
+@property (readonly) float pressure;
+@property (readonly, copy) NSString *characters;
+@property (readonly, copy) NSString *charactersIgnoringModifiers;
+@property (readonly, getter=isARepeat) BOOL ARepeat;
+@property (readonly) unsigned short keyCode;
+@property (readonly) NSInteger trackingNumber;
+@property (readonly) void *userData;
+@property (readonly) short subtype;
+@property (readonly) NSInteger data1;
+@property (readonly) NSInteger data2;
+#if OS_API_VERSION(GS_API_MACOSX, GS_API_LATEST)
+@property (readonly) NSInteger buttonNumber;
+@property (readonly) NSInteger eventNumber;
+@property (readonly) CGFloat deltaX;
+@property (readonly) CGFloat deltaY;
+@property (readonly) CGFloat deltaZ;
+#endif
+#if OS_API_VERSION(MAC_OS_X_VERSION_10_3, GS_API_LATEST)
+@property (readonly) NSEventMask associatedEventsMask;
+#endif
+#if OS_API_VERSION(MAC_OS_X_VERSION_10_4, GS_API_LATEST)
+@property (readonly) NSInteger absoluteX;
+@property (readonly) NSInteger absoluteY;
+@property (readonly) NSInteger absoluteZ;
+@property (readonly) NSEventButtonMask buttonMask;
+@property (readonly) NSUInteger capabilityMask;
+@property (readonly) NSUInteger deviceID;
+@property (readonly, getter=isEnteringProximity) BOOL enteringProximity;
+@property (readonly) NSUInteger pointingDeviceID;
+@property (readonly) NSUInteger pointingDeviceSerialNumber;
+@property (readonly) NSPointingDeviceType pointingDeviceType;
+@property (readonly) float rotation;
+@property (readonly) NSUInteger systemTabletID;
+@property (readonly) NSUInteger tabletID;
+@property (readonly) float tangentialPressure;
+@property (readonly) NSPoint tilt;
+@property (readonly) unsigned long long uniqueID;
+@property (readonly) id vendorDefined;
+@property (readonly) NSUInteger vendorID;
+@property (readonly) NSUInteger vendorPointingDeviceType;
+#endif
+#if OS_API_VERSION(MAC_OS_X_VERSION_10_5, GS_API_LATEST)
+@property (readonly) const void *eventRef;
+#if __has_feature(objc_class_property)
+@property (class, getter=isMouseCoalescingEnabled) BOOL mouseCoalescingEnabled;
+#endif
+#endif
+#if OS_API_VERSION(MAC_OS_X_VERSION_10_6, GS_API_LATEST)
+#if __has_feature(objc_class_property)
+@property (class, readonly) NSEventModifierFlags modifierFlags;
+@property (class, readonly) NSTimeInterval keyRepeatDelay;
+@property (class, readonly) NSTimeInterval keyRepeatInterval;
+@property (class, readonly) NSUInteger pressedMouseButtons;
+@property (class, readonly) NSTimeInterval doubleClickInterval;
+#endif
+#endif
+#if OS_API_VERSION(MAC_OS_X_VERSION_10_7, GS_API_LATEST)
+@property (readonly) NSEventPhase phase;
+@property (readonly) NSEventPhase momentumPhase;
+#endif
+#endif
+
 /**
  * Creates an enter/exit event for mouse tracking areas.
  * This factory method creates events that are generated when the mouse
