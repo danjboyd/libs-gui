@@ -42,6 +42,7 @@
 #import "AppKit/NSNibDeclarations.h"
 
 #import "GNUstepGUI/GSModelLoaderFactory.h"
+#import "GNUstepGUI/GSXibKeyedUnarchiver.h"
 #import "GSStoryboardTransform.h"
 #import "GSFastEnumeration.h"
 
@@ -168,6 +169,46 @@ static NSStoryboard *__mainStoryboard = nil;
 					       creator: NULL];
 }
 
+/* Answers the controller the creator block makes for the scene loaded from
+ * data, configured as the storyboard configured controller, the controller
+ * it loaded, whose view or window it takes.  The loaded controller keeps
+ * the scene's top level objects.  The block is given a coder for the
+ * scene.  If it answers nil, the loaded controller is answered.
+ */
+- (id) _controllerFromCreator: (NSStoryboardControllerCreator)block
+		forController: (id)controller
+			 data: (NSData *)data
+		     segueMap: (NSMapTable *)segueMap
+{
+  NSCoder *coder = [GSXibKeyedUnarchiver unarchiverForReadingWithData: data];
+  id created = CALL_BLOCK_RET(block, id, coder);
+
+  if (created == nil || created == controller)
+    {
+      return controller;
+    }
+  if ([created isKindOfClass: [NSWindowController class]])
+    {
+      NSWindowController *wc = (NSWindowController *)created;
+
+      [wc _setSegueMap: segueMap];
+      [wc _setStoryboard: self];
+      [wc _setOwner: NSApp];
+    }
+  else if ([created isKindOfClass: [NSViewController class]])
+    {
+      NSViewController *vc = (NSViewController *)created;
+
+      [vc _setSegueMap: segueMap];
+      [vc _setStoryboard: self];
+      if ([controller isKindOfClass: [NSViewController class]])
+	{
+	  [vc setView: [controller view]];
+	}
+    }
+  return created;
+}
+
 - (id) instantiateControllerWithIdentifier: (NSStoryboardSceneIdentifier)identifier
 				   creator: (NSStoryboardControllerCreator)block
 {
@@ -175,6 +216,7 @@ static NSStoryboard *__mainStoryboard = nil;
 
   if (identifier != nil)
     {
+      NSData *data = [_transform dataForIdentifier: identifier];
       NSMutableArray *topLevelObjects = [NSMutableArray arrayWithCapacity: 5];
       NSDictionary *table = [NSDictionary dictionaryWithObjectsAndKeys: topLevelObjects,
 					  NSNibTopLevelObjects,
@@ -182,7 +224,7 @@ static NSStoryboard *__mainStoryboard = nil;
 					  NSNibOwner,
 					  nil];
       GSModelLoader *loader = [GSModelLoaderFactory modelLoaderForFileType: @"xib"];
-      BOOL  success = [loader loadModelData: [_transform dataForIdentifier: identifier]
+      BOOL  success = [loader loadModelData: data
 			  externalNameTable: table
 				   withZone: [self zone]];
 
@@ -223,6 +265,19 @@ static NSStoryboard *__mainStoryboard = nil;
 	      }
 	  END_FOR_IN(topLevelObjects);
 
+	  // A creator block makes the controller to answer...
+	  if (block != NULL && result != nil)
+	    {
+	      result = [self _controllerFromCreator: block
+				      forController: result
+					       data: data
+					   segueMap: segueMap];
+	      if ([result isKindOfClass: [NSWindowController class]])
+		{
+		  wc = (NSWindowController *)result;
+		}
+	    }
+
 	  // Process action proxies after so we know we have the windowController...
 	  FOR_IN(id, o, topLevelObjects)
 	    if ([o isKindOfClass: [NSStoryboardSeguePerformAction class]])
@@ -256,12 +311,6 @@ static NSStoryboard *__mainStoryboard = nil;
 	{
 	  [NSException raise: NSInternalInconsistencyException
 		      format: @"Couldn't load controller scene identifier = %@", identifier];
-	}
-
-	// Execute the block if it's set...
-      if (block != NULL)
-	{
-	  CALL_BLOCK(block, self);
 	}
     }
 
