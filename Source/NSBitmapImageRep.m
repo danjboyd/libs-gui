@@ -413,7 +413,7 @@
                 samplesPerPixel: (NSInteger)samplesPerPixel
                        hasAlpha: (BOOL)alpha
                        isPlanar: (BOOL)isPlanar
-                 colorSpaceName: (NSString *)colorSpaceName
+                 colorSpaceName: (NSColorSpaceName)colorSpaceName
                     bytesPerRow: (NSInteger)rowBytes
                    bitsPerPixel: (NSInteger)pixelBits
 {
@@ -437,7 +437,7 @@
                 samplesPerPixel: (NSInteger)spp
                        hasAlpha: (BOOL)alpha
                        isPlanar: (BOOL)isPlanar
-                 colorSpaceName: (NSString*)colorSpaceName
+                 colorSpaceName: (NSColorSpaceName)colorSpaceName
                    bitmapFormat: (NSBitmapFormat)bitmapFormat 
                     bytesPerRow: (NSInteger)rowBytes
                    bitsPerPixel: (NSInteger)pixelBits

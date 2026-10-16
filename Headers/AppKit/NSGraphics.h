@@ -46,18 +46,30 @@ extern "C" {
 /*
  * Colorspace Names 
  */
-APPKIT_EXPORT NSString *NSCalibratedWhiteColorSpace; 
-APPKIT_EXPORT NSString *NSCalibratedBlackColorSpace; 
-APPKIT_EXPORT NSString *NSCalibratedRGBColorSpace;
-APPKIT_EXPORT NSString *NSDeviceWhiteColorSpace;
-APPKIT_EXPORT NSString *NSDeviceBlackColorSpace;
-APPKIT_EXPORT NSString *NSDeviceRGBColorSpace;
-APPKIT_EXPORT NSString *NSDeviceCMYKColorSpace;
-APPKIT_EXPORT NSString *NSNamedColorSpace;
-#if OS_API_VERSION(GS_API_MACOSX, GS_API_LATEST)
-APPKIT_EXPORT NSString *NSPatternColorSpace;
+#ifndef NS_TYPED_ENUM
+/* Defined by gnustep-base from the version that declares
+ * NSAttributedStringKey with NS_TYPED_EXTENSIBLE_ENUM. */
+#define NS_TYPED_ENUM
 #endif
-APPKIT_EXPORT NSString *NSCustomColorSpace;
+
+/** The name of a color space.  As in Cocoa, it is a typed string
+ * enumeration, which Swift imports as a structure wrapping a string, with
+ * the constants below as its members (.deviceRGB, .calibratedRGB, ...).
+ */
+typedef NSString *NSColorSpaceName NS_TYPED_ENUM;
+
+APPKIT_EXPORT NSColorSpaceName const NSCalibratedWhiteColorSpace;
+APPKIT_EXPORT NSColorSpaceName const NSCalibratedBlackColorSpace;
+APPKIT_EXPORT NSColorSpaceName const NSCalibratedRGBColorSpace;
+APPKIT_EXPORT NSColorSpaceName const NSDeviceWhiteColorSpace;
+APPKIT_EXPORT NSColorSpaceName const NSDeviceBlackColorSpace;
+APPKIT_EXPORT NSColorSpaceName const NSDeviceRGBColorSpace;
+APPKIT_EXPORT NSColorSpaceName const NSDeviceCMYKColorSpace;
+APPKIT_EXPORT NSColorSpaceName const NSNamedColorSpace;
+#if OS_API_VERSION(GS_API_MACOSX, GS_API_LATEST)
+APPKIT_EXPORT NSColorSpaceName const NSPatternColorSpace;
+#endif
+APPKIT_EXPORT NSColorSpaceName const NSCustomColorSpace;
 
 
 /*

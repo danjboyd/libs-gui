@@ -35,6 +35,7 @@
 #import <Foundation/NSObject.h>
 #import <AppKit/AppKitDefines.h>
 #import <AppKit/NSGraphicsContext.h>
+#import <AppKit/NSGraphics.h>
 
 @class NSString;
 @class NSArray;
@@ -124,7 +125,7 @@ APPKIT_EXPORT_CLASS
  *  </list>
  */
 - (NSInteger)bitsPerSample;
-- (NSString *)colorSpaceName;
+- (NSColorSpaceName)colorSpaceName;
 - (BOOL)hasAlpha;
 - (BOOL)isOpaque;
 - (NSInteger)pixelsHigh;
@@ -138,7 +139,7 @@ APPKIT_EXPORT_CLASS
  *  </list>
  */
 - (void)setBitsPerSample:(NSInteger)anInt;
-- (void)setColorSpaceName:(NSString *)aString;
+- (void)setColorSpaceName:(NSColorSpaceName)aString;
 - (void)setOpaque:(BOOL)flag;
 - (void)setPixelsHigh:(NSInteger)anInt;
 - (void)setPixelsWide:(NSInteger)anInt;

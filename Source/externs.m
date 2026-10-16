@@ -130,16 +130,16 @@ APPKIT_DECLARE NSString *NSImageEXIFData = @"NSImageEXIFData";  // No support ye
 APPKIT_DECLARE NSString *NSBrowserColumnConfigurationDidChangeNotification = @"NSBrowserColumnConfigurationDidChange";
 
 // NSColor Global strings
-APPKIT_DECLARE NSString *NSCalibratedWhiteColorSpace = @"NSCalibratedWhiteColorSpace";
-APPKIT_DECLARE NSString *NSCalibratedBlackColorSpace = @"NSCalibratedBlackColorSpace";
-APPKIT_DECLARE NSString *NSCalibratedRGBColorSpace = @"NSCalibratedRGBColorSpace";
-APPKIT_DECLARE NSString *NSDeviceWhiteColorSpace = @"NSDeviceWhiteColorSpace";
-APPKIT_DECLARE NSString *NSDeviceBlackColorSpace = @"NSDeviceBlackColorSpace";
-APPKIT_DECLARE NSString *NSDeviceRGBColorSpace = @"NSDeviceRGBColorSpace";
-APPKIT_DECLARE NSString *NSDeviceCMYKColorSpace = @"NSDeviceCMYKColorSpace";
-APPKIT_DECLARE NSString *NSNamedColorSpace = @"NSNamedColorSpace";
-APPKIT_DECLARE NSString *NSPatternColorSpace = @"NSPatternColorSpace";
-APPKIT_DECLARE NSString *NSCustomColorSpace = @"NSCustomColorSpace";
+APPKIT_DECLARE NSString *const NSCalibratedWhiteColorSpace = @"NSCalibratedWhiteColorSpace";
+APPKIT_DECLARE NSString *const NSCalibratedBlackColorSpace = @"NSCalibratedBlackColorSpace";
+APPKIT_DECLARE NSString *const NSCalibratedRGBColorSpace = @"NSCalibratedRGBColorSpace";
+APPKIT_DECLARE NSString *const NSDeviceWhiteColorSpace = @"NSDeviceWhiteColorSpace";
+APPKIT_DECLARE NSString *const NSDeviceBlackColorSpace = @"NSDeviceBlackColorSpace";
+APPKIT_DECLARE NSString *const NSDeviceRGBColorSpace = @"NSDeviceRGBColorSpace";
+APPKIT_DECLARE NSString *const NSDeviceCMYKColorSpace = @"NSDeviceCMYKColorSpace";
+APPKIT_DECLARE NSString *const NSNamedColorSpace = @"NSNamedColorSpace";
+APPKIT_DECLARE NSString *const NSPatternColorSpace = @"NSPatternColorSpace";
+APPKIT_DECLARE NSString *const NSCustomColorSpace = @"NSCustomColorSpace";
 
 // NSColor Global gray values
 APPKIT_DECLARE const CGFloat NSBlack = 0;

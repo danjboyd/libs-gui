@@ -447,7 +447,7 @@ implement, so we can't do that. */
   return _bitsPerSample;
 }
 
-- (NSString *) colorSpaceName
+- (NSColorSpaceName) colorSpaceName
 {
   return _colorSpace;
 }
@@ -482,7 +482,7 @@ implement, so we can't do that. */
   _bitsPerSample = anInt;
 }
 
-- (void) setColorSpaceName: (NSString *)aString
+- (void) setColorSpaceName: (NSColorSpaceName)aString
 {
   ASSIGN(_colorSpace, aString);
 }
