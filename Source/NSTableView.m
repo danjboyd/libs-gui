@@ -6150,6 +6150,14 @@ This method is deprecated, use -columnIndexesInRect:. */
     }
 }
 
+- (void) _didDragTableColumn: (NSTableColumn *)tc
+{
+  if ([_delegate respondsToSelector: @selector(tableView:didDragTableColumn:)])
+    {
+      [_delegate tableView: self didDragTableColumn: tc];
+    }
+}
+
 - (void) _clickTableColumn: (NSTableColumn *)tc
 {
   NSSortDescriptor *oldMainSortDescriptor = nil;

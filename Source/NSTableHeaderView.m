@@ -59,6 +59,7 @@
 - (CGFloat *) _columnOrigins;
 - (void) _mouseDownInHeaderOfTableColumn: (NSTableColumn *)tc;
 - (void) _clickTableColumn: (NSTableColumn *)tc;
+- (void) _didDragTableColumn: (NSTableColumn *)tc;
 @end
 
 @implementation NSTableHeaderView
@@ -711,6 +712,7 @@
                   [_tableView moveColumn: columnIndex
                               toColumn: i];
                 }
+              [_tableView _didDragTableColumn: currentColumn];
             }
           free(_cO_minus1);
           return;
