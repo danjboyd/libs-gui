@@ -396,8 +396,6 @@ static void *viewControllerAssociationKey = &viewControllerAssociationKey;
 		didCommitSelector:(SEL)didCommitSelector
 		      contextInfo:(void *)contextInfo
 {
-  // Loop over all elements of _editors
-  id editor = nil;
   BOOL res = [self commitEditing];
 
   if (delegate && [delegate respondsToSelector: didCommitSelector])
@@ -406,7 +404,7 @@ static void *viewControllerAssociationKey = &viewControllerAssociationKey;
 
       didCommit = (void (*)(id, SEL, id, BOOL, void*))[delegate methodForSelector:
 								 didCommitSelector];
-      didCommit(delegate, didCommitSelector, editor, res, contextInfo);
+      didCommit(delegate, didCommitSelector, self, res, contextInfo);
     }
 
 }
