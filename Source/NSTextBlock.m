@@ -137,17 +137,17 @@
     }
   else
     {
-      // specified in percent
+      // specified in percent, out of 100
       switch(dimension)
         {
         case NSTextBlockWidth:
         case NSTextBlockMinimumWidth:
         case NSTextBlockMaximumWidth:
-          return _value[dimension] * size.width;
+          return _value[dimension] * size.width / 100.0;
         case NSTextBlockHeight:
         case NSTextBlockMinimumHeight:
         case NSTextBlockMaximumHeight:
-          return _value[dimension] * size.height;
+          return _value[dimension] * size.height / 100.0;
         }
     }
   return 0.0;	
@@ -238,15 +238,15 @@
     }
   else
     {
-      // specified in percent
+      // specified in percent, out of 100
       switch(edge)
         {
         case NSMinXEdge:
         case NSMaxXEdge:
-          return _widthType[l][edge]*size.width;
+          return _width[l][edge] * size.width / 100.0;
         case NSMinYEdge:
         case NSMaxYEdge:
-          return _widthType[l][edge]*size.height;
+          return _width[l][edge] * size.height / 100.0;
         }
     }
   return 0.0;
