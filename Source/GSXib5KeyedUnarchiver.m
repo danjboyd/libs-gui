@@ -797,6 +797,29 @@ didStartElement: (NSString*)elementName
       NSString            *className   = nil;
       NSString            *elementType = elementName;
       NSString            *customClassName = nil;
+      NSString            *customModule = [attributes objectForKey: @"customModule"];
+
+      // A Swift class named with its module (customModule, or the module of
+      // the program for customModuleProvider="target") is registered under
+      // its module-qualified name, as on Cocoa.  Keep the bare name when no
+      // class has the qualified one, as for a class declared @objc(Name).
+      if (customModule == nil
+          && [[attributes objectForKey: @"customModuleProvider"]
+               isEqualToString: @"target"])
+        {
+          customModule = [[NSProcessInfo processInfo] processName];
+        }
+      if (customModule != nil && [NSClassSwapper isInInterfaceBuilder] == NO)
+        {
+          NSString *customClass = [attributes objectForKey: @"customClass"];
+          NSString *qualified = [NSString stringWithFormat: @"%@.%@",
+                                          customModule, customClass];
+
+          if (customClass != nil && NSClassFromString(qualified) != Nil)
+            {
+              [attributes setObject: qualified forKey: @"customClass"];
+            }
+        }
 
       // If we are in IB we don't want to handle custom classes since they are
       // not linked into the application.

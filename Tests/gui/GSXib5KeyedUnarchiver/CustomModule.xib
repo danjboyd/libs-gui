@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="21507" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+    <dependencies>
+        <deployment identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="21507"/>
+    </dependencies>
+    <objects>
+        <customObject id="-2" userLabel="File's Owner" customClass="NSApplication"/>
+        <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
+
+        <!-- Interface Builder names a Swift class by its class name and its
+             module. -->
+        <customObject id="qualified-object" customClass="ModuleObject" customModule="XibTest" customModuleProvider="target"/>
+        <customView id="qualified-view" customClass="ModuleView" customModule="XibTest">
+            <rect key="frame" x="0.0" y="0.0" width="100" height="50"/>
+        </customView>
+        <button id="qualified-button" customClass="ModuleButton" customModule="XibTest">
+            <rect key="frame" x="0.0" y="60" width="100" height="20"/>
+            <buttonCell key="cell" type="push" title="QUALIFIED" bezelStyle="rounded" id="qualified-button-cell"/>
+        </button>
+
+        <!-- customModuleProvider="target" without customModule names the
+             module of the program that loads the nib. -->
+        <customObject id="target-object" customClass="TargetObject" customModuleProvider="target"/>
+
+        <!-- A class declared @objc(BareObject) keeps its bare name. -->
+        <customObject id="bare-object" customClass="BareObject" customModule="XibTest"/>
+    </objects>
+</document>
