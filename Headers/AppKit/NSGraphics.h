@@ -56,7 +56,10 @@ extern "C" {
  * enumeration, which Swift imports as a structure wrapping a string, with
  * the constants below as its members (.deviceRGB, .calibratedRGB, ...).
  */
+#ifndef GS_NSColorSpaceName_DECLARED
+#define GS_NSColorSpaceName_DECLARED
 typedef NSString *NSColorSpaceName NS_TYPED_ENUM;
+#endif
 
 APPKIT_EXPORT NSColorSpaceName const NSCalibratedWhiteColorSpace;
 APPKIT_EXPORT NSColorSpaceName const NSCalibratedBlackColorSpace;
@@ -112,13 +115,13 @@ APPKIT_EXPORT NSString *NSDeviceSize;
  * Get Information About Color Space and Window Depth
  */
 APPKIT_EXPORT const NSWindowDepth *NSAvailableWindowDepths(void);
-APPKIT_EXPORT NSWindowDepth NSBestDepth(NSString *colorSpace, 
+APPKIT_EXPORT NSWindowDepth NSBestDepth(NSColorSpaceName colorSpace, 
 			  NSInteger bitsPerSample, NSInteger bitsPerPixel, 
 			  BOOL planar, BOOL *exactMatch);
 APPKIT_EXPORT NSInteger NSBitsPerPixelFromDepth(NSWindowDepth depth);
 APPKIT_EXPORT NSInteger NSBitsPerSampleFromDepth(NSWindowDepth depth);
-APPKIT_EXPORT NSString *NSColorSpaceFromDepth(NSWindowDepth depth);
-APPKIT_EXPORT NSInteger NSNumberOfColorComponents(NSString *colorSpaceName);
+APPKIT_EXPORT NSColorSpaceName NSColorSpaceFromDepth(NSWindowDepth depth);
+APPKIT_EXPORT NSInteger NSNumberOfColorComponents(NSColorSpaceName colorSpaceName);
 APPKIT_EXPORT BOOL NSPlanarFromDepth(NSWindowDepth depth);
 
 

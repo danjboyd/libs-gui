@@ -1309,19 +1309,19 @@ systemColorWithName(NSString *name)
 //
 // Converting to Another Color Space
 //
-- (NSString *) colorSpaceName
+- (NSColorSpaceName) colorSpaceName
 {
   [self subclassResponsibility: _cmd];
   return nil;
 }
 
-- (NSColor*) colorUsingColorSpaceName: (NSString *)colorSpace
+- (NSColor*) colorUsingColorSpaceName: (NSColorSpaceName)colorSpace
 {
   return [self colorUsingColorSpaceName: colorSpace
 				 device: nil];
 }
 
-- (NSColor*) colorUsingColorSpaceName: (NSString *)colorSpace
+- (NSColor*) colorUsingColorSpaceName: (NSColorSpaceName)colorSpace
 			       device: (NSDictionary *)deviceDescription
 {
   if (colorSpace == nil)

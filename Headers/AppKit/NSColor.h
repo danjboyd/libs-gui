@@ -41,6 +41,20 @@
 @class NSImage;
 @class NSColorSpace;
 
+#ifndef NS_TYPED_ENUM
+#define NS_TYPED_ENUM
+#endif
+
+/* The name of a color space, as NSGraphics.h declares it with the names
+ * themselves.  NSColor.h cannot import NSGraphics.h, which imports it
+ * (through NSGraphicsContext.h and NSFont.h), so whichever of the two
+ * comes first declares the type.
+ */
+#ifndef GS_NSColorSpaceName_DECLARED
+#define GS_NSColorSpaceName_DECLARED
+typedef NSString *NSColorSpaceName NS_TYPED_ENUM;
+#endif
+
 enum _NSControlTint {
     NSDefaultControlTint,
     NSBlueControlTint,
@@ -471,14 +485,14 @@ APPKIT_EXPORT_CLASS
  * Returns the name of the color space used by this color.
  * Returns: The color space name string
  */
-- (NSString *)colorSpaceName;
+- (NSColorSpaceName)colorSpaceName;
 
 /**
  * Returns a version of the color converted to the specified color space.
  * colorSpace: The target color space name
  * Returns: A new NSColor in the specified color space, or nil if conversion fails
  */
-- (NSColor *)colorUsingColorSpaceName:(NSString *)colorSpace;
+- (NSColor *)colorUsingColorSpaceName:(NSColorSpaceName)colorSpace;
 
 /**
  * Returns a version of the color converted to the specified color space and device.
@@ -486,7 +500,7 @@ APPKIT_EXPORT_CLASS
  * deviceDescription: Dictionary describing the target device characteristics
  * Returns: A new NSColor in the specified color space for the device, or nil if conversion fails
  */
-- (NSColor *)colorUsingColorSpaceName:(NSString *)colorSpace
+- (NSColor *)colorUsingColorSpaceName:(NSColorSpaceName)colorSpace
 			       device:(NSDictionary *)deviceDescription;
 #if OS_API_VERSION(MAC_OS_X_VERSION_10_4, GS_API_LATEST)
 // + (NSColor *)colorWithCIColor:(CIColor *)color;

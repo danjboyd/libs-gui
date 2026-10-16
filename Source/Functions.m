@@ -145,7 +145,7 @@ NSAvailableWindowDepths(void)
 }
 
 NSWindowDepth
-NSBestDepth(NSString *colorSpace, NSInteger bitsPerSample, NSInteger bitsPerPixel,
+NSBestDepth(NSColorSpaceName colorSpace, NSInteger bitsPerSample, NSInteger bitsPerPixel,
   BOOL planar, BOOL *exactMatch)
 {
   NSInteger		components = NSNumberOfColorComponents(colorSpace);
@@ -243,10 +243,10 @@ NSBitsPerSampleFromDepth(NSWindowDepth depth)
   return (depth & ~(bitValue));
 }
 
-NSString*
+NSColorSpaceName
 NSColorSpaceFromDepth(NSWindowDepth depth)
 {
-  NSString	*colorSpace = NSCalibratedWhiteColorSpace;
+  NSColorSpaceName	colorSpace = NSCalibratedWhiteColorSpace;
 
   /*
    * Test against each of the possible colorspace bits
@@ -281,7 +281,7 @@ NSColorSpaceFromDepth(NSWindowDepth depth)
 }
 
 NSInteger
-NSNumberOfColorComponents(NSString *colorSpaceName)
+NSNumberOfColorComponents(NSColorSpaceName colorSpaceName)
 {
   NSInteger components = 1;
 
