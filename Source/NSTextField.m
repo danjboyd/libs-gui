@@ -787,6 +787,33 @@ static Class textFieldCellClass;
    return NO;
 }
 
+- (NSArray *) textView: (NSTextView *)textView
+           completions: (NSArray *)words
+   forPartialWordRange: (NSRange)charRange
+   indexOfSelectedItem: (NSInteger *)index
+{
+  if (_delegate && [_delegate respondsToSelector:
+    @selector(control:textView:completions:forPartialWordRange:indexOfSelectedItem:)])
+    {
+      /* The control delegate method takes an int index. */
+      int	i = (index != NULL) ? (int)*index : -1;
+      NSArray	*completions;
+
+      completions = [_delegate control: self
+                              textView: textView
+                           completions: words
+                   forPartialWordRange: charRange
+                   indexOfSelectedItem: &i];
+      if (index != NULL)
+        {
+          *index = i;
+        }
+      return completions;
+    }
+
+  return nil;
+}
+
 
 //
 // Rich Text
