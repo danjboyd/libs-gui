@@ -4843,6 +4843,9 @@ checkCursorRectanglesExited(NSView *theView,  NSEvent *theEvent, NSPoint lastPoi
       case NSTabletProximity:
         // FIXME: Tablet events
         break;
+
+      default:
+        break;
     }
 }
 

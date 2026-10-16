@@ -761,6 +761,9 @@ static const char *eventTypes[] = {
         case NSTabletProximity:
           // FIXME: Tablet events
           break;
+
+        default:
+          break;
         }
     }
 }
@@ -890,6 +893,9 @@ static const char *eventTypes[] = {
         case NSTabletPoint:
         case NSTabletProximity:
           // FIXME: Tablet events
+          break;
+
+        default:
           break;
         }
     }

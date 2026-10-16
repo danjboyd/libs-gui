@@ -103,7 +103,11 @@
  </example>
  */
 
-enum _NSEventType {
+/*
+ * Event types.  An NS_ENUM type, as in Cocoa, which Swift imports as an
+ * enumeration (NSEvent.EventType).
+ */
+typedef NS_ENUM(NSUInteger, NSEventType) {
   // Note - order IS significant as ranges of values
   // are used for testing for valid event types.
   NSLeftMouseDown = 1,
@@ -176,7 +180,6 @@ enum _NSEventType {
   NSEventTypeChangeMode                = 38,
 #endif
 };
-typedef NSUInteger NSEventType;
 
 /**
  * Event masks are used to specify which types of events should be processed
