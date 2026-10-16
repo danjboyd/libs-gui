@@ -2033,7 +2033,7 @@ places where we switch.
 /*
 In the general case, we can't make any assumptions about how layout might
 interact between line frag rects. To be safe in all cases, we must
-invalidate all layout information.
+invalidate all layout information, so the actual range is the whole text.
 
 TODO:
 We could handle this by assuming that whoever calls this knows exactly what
@@ -2047,6 +2047,10 @@ by calling this incorrectly.
 		      actualCharacterRange: (NSRange *)actualRange
 {
   [self _invalidateLayoutFromContainer: 0];
+  if (actualRange != NULL)
+    {
+      *actualRange = NSMakeRange(0, [_textStorage length]);
+    }
 }
 
 
