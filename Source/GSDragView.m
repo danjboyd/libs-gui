@@ -857,7 +857,11 @@ static	GSDragView *sharedDragView = nil;
   if ([dragSource respondsToSelector:
               @selector(draggedImage:movedTo:)])
     {
-      [dragSource draggedImage: [self draggedImage] movedTo: dragPosition];
+      NSPoint point;
+
+      point.x = dragPosition.x - offset.width;
+      point.y = dragPosition.y - offset.height;
+      [dragSource draggedImage: [self draggedImage] movedTo: point];
     }
 
   //--- Determine target window ---------------------------------------------
