@@ -129,7 +129,21 @@
   NSString *dictPath = [self pathForResource: @"Help" ofType: @"plist"];
   NSDictionary *contextHelp = nil;
   id helpFile = nil;
-  
+
+  /* A full path, as NSHelpPanel stores for a help file, is loaded as it
+     is. */
+  if ([key isAbsolutePath])
+    {
+      NSAttributedString *helpstr = nil;
+
+      if ([fm fileExistsAtPath: key])
+	{
+	  helpstr = [[NSAttributedString alloc] initWithPath: key
+					  documentAttributes: NULL];
+	}
+      return TEST_AUTORELEASE (helpstr);
+    }
+
   if (dictPath && [fm fileExistsAtPath: dictPath])
     {
       contextHelp = [NSDictionary dictionaryWithContentsOfFile: dictPath];
