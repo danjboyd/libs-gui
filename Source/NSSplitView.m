@@ -86,11 +86,11 @@ static NSNotificationCenter *nc = nil;
   return self;
 }
 
-- (NSRect) _dividerRectForIndex: (NSUInteger)index
+/* The rectangle the divider after the subview at index is drawn in. */
+- (NSRect) _drawnDividerRectForIndex: (NSUInteger)index
 {
-  const SEL selector = @selector(splitView:effectiveRect:forDrawnRect:ofDividerAtIndex:);
   NSRect rect = [[[self subviews] objectAtIndex: index] frame];
-  
+
   if (_isVertical == NO)
     {
       rect.origin.y = NSMaxY (rect);
@@ -100,6 +100,28 @@ static NSNotificationCenter *nc = nil;
     {
       rect.origin.x = NSMaxX (rect);
       rect.size.width = _dividerWidth;
+    }
+  return rect;
+}
+
+/* YES if the delegate hides the divider at index: it is not drawn and
+ * can be dragged only by the additional area the delegate gives it.
+ */
+- (BOOL) _isDividerHiddenAtIndex: (NSUInteger)index
+{
+  return [_delegate respondsToSelector:
+    @selector(splitView:shouldHideDividerAtIndex:)]
+    && [_delegate splitView: self shouldHideDividerAtIndex: index];
+}
+
+- (NSRect) _dividerRectForIndex: (NSUInteger)index
+{
+  const SEL selector = @selector(splitView:effectiveRect:forDrawnRect:ofDividerAtIndex:);
+  NSRect rect = [self _drawnDividerRectForIndex: index];
+
+  if ([self _isDividerHiddenAtIndex: index])
+    {
+      return NSZeroRect;
     }
   rect = NSIntersectionRect(rect, [self visibleRect]);
   
@@ -452,6 +474,7 @@ static NSNotificationCenter *nc = nil;
   BOOL liveResize = ![[NSUserDefaults standardUserDefaults] boolForKey: @"GSUseGhostResize"];
   NSRect oldRect; //only one can be dragged at a time
   BOOL lit = NO;
+  BOOL grabbedExtra = NO;
   NSCursor *cursor;
 
   /*  if there are less the two subviews, there is nothing to do */
@@ -470,6 +493,29 @@ static NSNotificationCenter *nc = nil;
   /* find out which divider it is */
   p = [theEvent locationInWindow];
   p = [self convertPoint: p fromView: nil];
+
+  /* The delegate may give a divider an additional area that grabs it, which
+     may lie anywhere in the split view.  Grab the divider as if the press
+     were on it, keeping the press's offset from it for the resize loop. */
+  if ([_delegate respondsToSelector:
+    @selector(splitView:additionalEffectiveRectOfDividerAtIndex:)])
+    {
+      for (i = 0; (i + 1) < count; i++)
+        {
+          NSRect extra = [_delegate splitView: self
+                       additionalEffectiveRectOfDividerAtIndex: i];
+
+          if (NSPointInRect(p, extra))
+            {
+              grabbedExtra = YES;
+              r = [self _drawnDividerRectForIndex: i];
+              poffset = NSMakePoint(r.origin.x - p.x, r.origin.y - p.y);
+              p = r.origin;
+              break;
+            }
+        }
+    }
+
   for (i = 0; i < count; i++)
     {
       v = [subs objectAtIndex: i];
@@ -558,6 +604,12 @@ static NSNotificationCenter *nc = nil;
             }
           prev = v;
         }
+    }
+
+  /* A hidden divider can be dragged only by its additional area. */
+  if (grabbedExtra == NO && [self _isDividerHiddenAtIndex: offset])
+    {
+      return;
     }
 
   /* Check if the delegate wants to constrain the spliview divider to
@@ -1293,7 +1345,6 @@ static inline NSPoint centerSizeInRect(NSSize innerSize, NSRect outerRect)
 {
   NSArray *subs = [self subviews];
   NSUInteger i, count = [subs count];
-  id v;
   NSRect divRect;
 
   if ([self isOpaque])
@@ -1305,18 +1356,11 @@ static inline NSPoint centerSizeInRect(NSSize innerSize, NSRect outerRect)
   /* draw the dimples */
   for (i = 0; (i + 1) < count; i++)
     {
-      v = [subs objectAtIndex: i];
-      divRect = [v frame];
-      if (_isVertical == NO)
+      if ([self _isDividerHiddenAtIndex: i])
         {
-          divRect.origin.y = NSMaxY (divRect);
-          divRect.size.height = _dividerWidth;
+          continue;
         }
-      else
-        {
-          divRect.origin.x = NSMaxX (divRect);
-          divRect.size.width = _dividerWidth;
-        }
+      divRect = [self _drawnDividerRectForIndex: i];
       [self drawDividerInRect: divRect];
     }
 }
