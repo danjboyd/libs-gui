@@ -37,6 +37,7 @@
 #define _GNUstep_H_NSWindow
 #import <AppKit/AppKitDefines.h>
 
+#import <AppKit/NSEvent.h>
 #import <AppKit/NSGraphicsContext.h>
 #import <AppKit/NSPasteboard.h>
 #import <AppKit/NSResponder.h>
@@ -792,12 +793,12 @@ PACKAGE_SCOPE
  * Aiding event handling
  */
 - (NSEvent*) currentEvent;
-- (NSEvent*) nextEventMatchingMask: (NSUInteger)mask;
-- (NSEvent*) nextEventMatchingMask: (NSUInteger)mask
+- (NSEvent*) nextEventMatchingMask: (NSEventMask)mask;
+- (NSEvent*) nextEventMatchingMask: (NSEventMask)mask
 			 untilDate: (NSDate*)expiration
 			    inMode: (NSString*)mode
 			   dequeue: (BOOL)deqFlag;
-- (void) discardEventsMatchingMask: (NSUInteger)mask
+- (void) discardEventsMatchingMask: (NSEventMask)mask
 		       beforeEvent: (NSEvent*)lastEvent;
 - (void) postEvent: (NSEvent*)event
 	   atStart: (BOOL)flag;

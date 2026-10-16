@@ -3713,7 +3713,7 @@ checkCursorRectanglesExited(NSView *theView,  NSEvent *theEvent, NSPoint lastPoi
   return [NSApp currentEvent];
 }
 
-- (void) discardEventsMatchingMask: (NSUInteger)mask
+- (void) discardEventsMatchingMask: (NSEventMask)mask
                        beforeEvent: (NSEvent*)lastEvent
 {
   [NSApp discardEventsMatchingMask: mask beforeEvent: lastEvent];
@@ -3930,7 +3930,7 @@ checkCursorRectanglesExited(NSView *theView,  NSEvent *theEvent, NSPoint lastPoi
   return p;
 }
 
-- (NSEvent*) nextEventMatchingMask: (NSUInteger)mask
+- (NSEvent*) nextEventMatchingMask: (NSEventMask)mask
 {
   return [NSApp nextEventMatchingMask: mask
                             untilDate: [NSDate distantFuture]
@@ -3938,7 +3938,7 @@ checkCursorRectanglesExited(NSView *theView,  NSEvent *theEvent, NSPoint lastPoi
                               dequeue: YES];
 }
 
-- (NSEvent*) nextEventMatchingMask: (NSUInteger)mask
+- (NSEvent*) nextEventMatchingMask: (NSEventMask)mask
                          untilDate: (NSDate*)expiration
                             inMode: (NSString*)mode
                            dequeue: (BOOL)deqFlag

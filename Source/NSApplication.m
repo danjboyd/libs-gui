@@ -2271,7 +2271,7 @@ See -runModalForWindow:
  * See (EventType) .  Use <code>NSAnyEventMask</code> to discard everything
  * up to lastEvent.
  */
-- (void) discardEventsMatchingMask: (NSUInteger)mask
+- (void) discardEventsMatchingMask: (NSEventMask)mask
 		       beforeEvent: (NSEvent *)lastEvent
 {
   DPSDiscardEvents(GSCurrentServer(), mask, lastEvent);
@@ -2283,7 +2283,7 @@ See -runModalForWindow:
  * queue, will wait for one until expiration, returning nil if none found.
  * See (EventType) for the list of masks.
  */
-- (NSEvent*) nextEventMatchingMask: (NSUInteger)mask
+- (NSEvent*) nextEventMatchingMask: (NSEventMask)mask
 			 untilDate: (NSDate*)expiration
 			    inMode: (NSString*)mode
 			   dequeue: (BOOL)flag

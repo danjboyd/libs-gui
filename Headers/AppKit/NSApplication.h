@@ -354,9 +354,9 @@ APPKIT_EXPORT_CLASS
  * Getting, removing, and posting events
  */
 - (NSEvent*) currentEvent;
-- (void) discardEventsMatchingMask: (NSUInteger)mask
+- (void) discardEventsMatchingMask: (NSEventMask)mask
 		       beforeEvent: (NSEvent*)lastEvent;
-- (NSEvent*) nextEventMatchingMask: (NSUInteger)mask
+- (NSEvent*) nextEventMatchingMask: (NSEventMask)mask
 			 untilDate: (NSDate*)expiration
 			    inMode: (NSString*)mode
 			   dequeue: (BOOL)flag;

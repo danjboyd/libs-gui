@@ -182,6 +182,8 @@ typedef NSUInteger NSEventType;
  * Event masks are used to specify which types of events should be processed
  * or filtered. Each event type has a corresponding mask value that can be
  * combined using bitwise OR operations to create composite masks.
+ * NSEventMask is an NS_OPTIONS type, as in Cocoa, which Swift imports as
+ * an option set (NSEvent.EventTypeMask).
  *
  * Individual event masks correspond directly to event types:
  * <list>
@@ -229,7 +231,7 @@ typedef NSUInteger NSEventType;
  * </item>
  * </list>
  */
-enum {
+typedef NS_OPTIONS(unsigned long long, NSEventMask) {
   NSLeftMouseDownMask = (1 << NSLeftMouseDown),
   NSLeftMouseUpMask = (1 << NSLeftMouseUp),
   NSRightMouseDownMask = (1 << NSRightMouseDown),
@@ -284,7 +286,6 @@ enum {
                         | NSLeftMouseDraggedMask | NSMouseMovedMask
                         | NSRightMouseUpMask | NSOtherMouseUpMask)
 };
-typedef unsigned long long NSEventMask;
 
 /*
  * Convert an NSEvent Type to it's respective Event Mask
