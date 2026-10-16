@@ -404,7 +404,7 @@
     }
   
   // minimum line spacing
-  if ([delegate respondsToSelector: @selector(collectionView:layout:minimimLineSpacingForSectionAtIndex:)])
+  if ([delegate respondsToSelector: @selector(collectionView:layout:minimumLineSpacingForSectionAtIndex:)])
     {
       mls = [delegate collectionView: _collectionView
 			      layout: self
@@ -416,7 +416,7 @@
     }
   
   // minimum interitem spacing
-  if ([delegate respondsToSelector: @selector(collectionView:layout:minimimInteritemSpacingForSectionAtIndex:)])
+  if ([delegate respondsToSelector: @selector(collectionView:layout:minimumInteritemSpacingForSectionAtIndex:)])
     {
       mis = [delegate collectionView: _collectionView
 			      layout: self
