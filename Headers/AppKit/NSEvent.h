@@ -299,7 +299,11 @@ NSEventMaskFromType(NSEventType type)
   return (1 << type);
 }
 
-enum {
+/*
+ * Modifier flags.  An NS_OPTIONS type, as in Cocoa, which Swift imports as
+ * an option set (NSEvent.ModifierFlags).
+ */
+typedef NS_OPTIONS(NSUInteger, NSEventModifierFlags) {
 #if OS_API_VERSION(MAC_OS_X_VERSION_10_4, GS_API_LATEST)
   NSDeviceIndependentModifierFlagsMask = 0xffff0000U,
 #endif
@@ -322,7 +326,6 @@ enum {
   NSEventModifierFlagDeviceIndependentFlagsMask = NSDeviceIndependentModifierFlagsMask,
 #endif
 };
-typedef NSUInteger NSEventModifierFlags;
 
 
 #if OS_API_VERSION(MAC_OS_X_VERSION_10_4, GS_API_LATEST)
