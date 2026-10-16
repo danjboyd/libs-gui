@@ -121,9 +121,31 @@
   return YES;
 }
 
-- (NSData *)dataForType:(NSString *)type
+/* Answers the value held for type, first asking the type's data provider
+ * for it if there is none yet.  The item is not read from a pasteboard
+ * here, so the provider is given no pasteboard.
+ */
+- (id) _objectForType: (NSString *)type
 {
   id object = [_dataMap objectForKey: type];
+
+  if (object == nil)
+    {
+      id<NSPasteboardItemDataProvider> provider;
+
+      provider = [_providerMap objectForKey: type];
+      if (provider != nil)
+        {
+          [provider pasteboard: nil item: self provideDataForType: type];
+          object = [_dataMap objectForKey: type];
+        }
+    }
+  return object;
+}
+
+- (NSData *)dataForType:(NSString *)type
+{
+  id object = [self _objectForType: type];
   if (object == nil)
     return nil;
   if ([object isKindOfClass: [NSData class]])
@@ -137,7 +159,7 @@
 
 - (NSString *)stringForType:(NSString *)type
 {
-  id object = [_dataMap objectForKey: type];
+  id object = [self _objectForType: type];
   if ([object isKindOfClass: [NSString class]])
     return (NSString *)object;
   
@@ -150,7 +172,7 @@
 
 - (id)propertyListForType:(NSString *)type
 {
-  id object = [_dataMap objectForKey: type];
+  id object = [self _objectForType: type];
   if (![object isKindOfClass: [NSData class]])
     return object;
 
