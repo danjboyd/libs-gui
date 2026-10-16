@@ -175,27 +175,43 @@ APPKIT_EXPORT NSString *NSRulerPboard;
  */
 APPKIT_EXPORT NSString *NSPasteboardCommunicationException;
 
+#ifndef NS_TYPED_EXTENSIBLE_ENUM
+/* Defined by gnustep-base from the version that declares
+ * NSAttributedStringKey with it. */
+#define NS_TYPED_EXTENSIBLE_ENUM
+#endif
+
+/** The name of a pasteboard data type.  As in Cocoa, it is a typed
+ * extensible string enumeration, which Swift imports as a structure
+ * wrapping a string, with the NSPasteboardType... constants below as its
+ * members (.string, .fileURL, ...).
+ */
+typedef NSString *NSPasteboardType NS_TYPED_EXTENSIBLE_ENUM;
+
 #if OS_API_VERSION(MAC_OS_X_VERSION_10_6, GS_API_LATEST)
-APPKIT_EXPORT NSString *const NSPasteboardTypeString;
-APPKIT_EXPORT NSString *const NSPasteboardTypePDF;
-APPKIT_EXPORT NSString *const NSPasteboardTypeTIFF;
-APPKIT_EXPORT NSString *const NSPasteboardTypePNG;
-APPKIT_EXPORT NSString *const NSPasteboardTypeRTF;
-APPKIT_EXPORT NSString *const NSPasteboardTypeRTFD;
-APPKIT_EXPORT NSString *const NSPasteboardTypeHTML;
-APPKIT_EXPORT NSString *const NSPasteboardTypeTabularText;
-APPKIT_EXPORT NSString *const NSPasteboardTypeFont;
-APPKIT_EXPORT NSString *const NSPasteboardTypeRuler;
-APPKIT_EXPORT NSString *const NSPasteboardTypeColor;
-APPKIT_EXPORT NSString *const NSPasteboardTypeSound;
-APPKIT_EXPORT NSString *const NSPasteboardTypeMultipleTextSelection;
+APPKIT_EXPORT NSPasteboardType const NSPasteboardTypeString;
+APPKIT_EXPORT NSPasteboardType const NSPasteboardTypePDF;
+APPKIT_EXPORT NSPasteboardType const NSPasteboardTypeTIFF;
+APPKIT_EXPORT NSPasteboardType const NSPasteboardTypePNG;
+APPKIT_EXPORT NSPasteboardType const NSPasteboardTypeRTF;
+APPKIT_EXPORT NSPasteboardType const NSPasteboardTypeRTFD;
+APPKIT_EXPORT NSPasteboardType const NSPasteboardTypeHTML;
+APPKIT_EXPORT NSPasteboardType const NSPasteboardTypeTabularText;
+APPKIT_EXPORT NSPasteboardType const NSPasteboardTypeFont;
+APPKIT_EXPORT NSPasteboardType const NSPasteboardTypeRuler;
+APPKIT_EXPORT NSPasteboardType const NSPasteboardTypeColor;
+APPKIT_EXPORT NSPasteboardType const NSPasteboardTypeSound;
+APPKIT_EXPORT NSPasteboardType const NSPasteboardTypeMultipleTextSelection;
 
 #if OS_API_VERSION(MAC_OS_X_VERSION_10_7, GS_API_LATEST)
-APPKIT_EXPORT NSString *const NSPasteboardTypeTextFinderOptions;
+APPKIT_EXPORT NSPasteboardType const NSPasteboardTypeTextFinderOptions;
 #endif
 
 #if OS_API_VERSION(MAC_OS_X_VERSION_10_13, GS_API_LATEST)
-typedef NSString *NSPasteboardType;
+/** A URL, with the same data as NSURLPboardType. */
+APPKIT_EXPORT NSPasteboardType const NSPasteboardTypeURL;
+/** A file URL. */
+APPKIT_EXPORT NSPasteboardType const NSPasteboardTypeFileURL;
 #endif
 #endif
 

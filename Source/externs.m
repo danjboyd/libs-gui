@@ -258,39 +258,41 @@ APPKIT_DECLARE NSString *NSImageRepRegistryChangedNotification = @"NSImageRepReg
 
 // Pasteboard Type Globals
 APPKIT_DECLARE NSString *const NSPasteboardTypeString = @"NSStringPboardType";
-APPKIT_DECLARE NSString *const NSStringPboardType = @"NSStringPboardType";
+APPKIT_DECLARE NSString *NSStringPboardType = @"NSStringPboardType";
 
 APPKIT_DECLARE NSString *const NSPasteboardTypeColor = @"NSColorPboardType";
-APPKIT_DECLARE NSString *const NSColorPboardType = @"NSColorPboardType";
+APPKIT_DECLARE NSString *NSColorPboardType = @"NSColorPboardType";
 
 APPKIT_DECLARE NSString *const NSPasteboardTypeFont = @"NSFontPboardType";
-APPKIT_DECLARE NSString *const NSFontPboardType = @"NSFontPboardType";
+APPKIT_DECLARE NSString *NSFontPboardType = @"NSFontPboardType";
 
 APPKIT_DECLARE NSString *const NSPasteboardTypeRuler = @"NSRulerPboardType";
-APPKIT_DECLARE NSString *const NSRulerPboardType = @"NSRulerPboardType";
+APPKIT_DECLARE NSString *NSRulerPboardType = @"NSRulerPboardType";
 
 APPKIT_DECLARE NSString *const NSPasteboardTypeTabularText = @"NSTabularTextPboardType";
-APPKIT_DECLARE NSString *const NSTabularTextPboardType = @"NSTabularTextPboardType";
+APPKIT_DECLARE NSString *NSTabularTextPboardType = @"NSTabularTextPboardType";
 
 APPKIT_DECLARE NSString *const NSPasteboardTypeRTF = @"NSRTFPboardType";
-APPKIT_DECLARE NSString *const NSRTFPboardType = @"NSRTFPboardType";
+APPKIT_DECLARE NSString *NSRTFPboardType = @"NSRTFPboardType";
 
 APPKIT_DECLARE NSString *const NSPasteboardTypeRTFD = @"NSRTFDPboardType";
-APPKIT_DECLARE NSString *const NSRTFDPboardType = @"NSRTFDPboardType";
+APPKIT_DECLARE NSString *NSRTFDPboardType = @"NSRTFDPboardType";
 
 APPKIT_DECLARE NSString *const NSPasteboardTypeTIFF = @"NSTIFFPboardType";
-APPKIT_DECLARE NSString *const NSTIFFPboardType = @"NSTIFFPboardType";
+APPKIT_DECLARE NSString *NSTIFFPboardType = @"NSTIFFPboardType";
 
 APPKIT_DECLARE NSString *const NSPasteboardTypePDF = @"NSPDFPboardType";
-APPKIT_DECLARE NSString *const NSPDFPboardType = @"NSPDFPboardType";
+APPKIT_DECLARE NSString *NSPDFPboardType = @"NSPDFPboardType";
 
 APPKIT_DECLARE NSString *const NSPasteboardTypeHTML = @"NSHTMLPboardType";
-APPKIT_DECLARE NSString *const NSHTMLPboardType = @"NSHTMLPboardType";
+APPKIT_DECLARE NSString *NSHTMLPboardType = @"NSHTMLPboardType";
 
-APPKIT_DECLARE NSString *NSPasteboardTypePNG = @"NSPasteboardTypePNG";
-APPKIT_DECLARE NSString *NSPasteboardTypeSound = @"NSPasteboardTypeSound";
-APPKIT_DECLARE NSString *NSPasteboardTypeMultipleTextSelection = @"NSPasteboardTypeMultipleTextSelection";
-APPKIT_DECLARE NSString *NSPasteboardTypeTextFinderOptions = @"NSPasteboardTypeTextFinderOptions";
+APPKIT_DECLARE NSString *const NSPasteboardTypePNG = @"NSPasteboardTypePNG";
+APPKIT_DECLARE NSString *const NSPasteboardTypeSound = @"NSPasteboardTypeSound";
+APPKIT_DECLARE NSString *const NSPasteboardTypeMultipleTextSelection = @"NSPasteboardTypeMultipleTextSelection";
+APPKIT_DECLARE NSString *const NSPasteboardTypeTextFinderOptions = @"NSPasteboardTypeTextFinderOptions";
+APPKIT_DECLARE NSString *const NSPasteboardTypeURL = @"NSURLPboardType";
+APPKIT_DECLARE NSString *const NSPasteboardTypeFileURL = @"NSPasteboardTypeFileURL";
 
 APPKIT_DECLARE NSString *NSFileContentsPboardType = @"NSFileContentsPboardType";
 APPKIT_DECLARE NSString *NSFilenamesPboardType = @"NSFilenamesPboardType";

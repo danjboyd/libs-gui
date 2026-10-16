@@ -38,6 +38,7 @@
 #import <AppKit/AppKitDefines.h>
 
 #import <AppKit/NSGraphicsContext.h>
+#import <AppKit/NSPasteboard.h>
 #import <AppKit/NSResponder.h>
 
 @class NSArray;
@@ -899,7 +900,8 @@ PACKAGE_SCOPE
 	pasteboard: (NSPasteboard*)pboard
 	    source: sourceObject
 	 slideBack: (BOOL)slideFlag;
-- (void) registerForDraggedTypes: (NSArray*)newTypes;
+- (void) registerForDraggedTypes:
+  (GS_GENERIC_CLASS(NSArray, NSPasteboardType)*)newTypes;
 - (void) unregisterDraggedTypes;
 
 - (BOOL) hidesOnDeactivate;

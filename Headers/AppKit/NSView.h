@@ -40,6 +40,7 @@
 #import <AppKit/NSUserInterfaceItemIdentification.h>
 #import <AppKit/NSUserInterfaceLayout.h>
 #import <AppKit/NSLayoutConstraint.h>
+#import <AppKit/NSPasteboard.h>
 
 @class NSArray;
 @class NSAttributedString;
@@ -511,7 +512,8 @@ PACKAGE_SCOPE
 	pasteboard: (NSPasteboard*)pboard
 	    source: (id)sourceObject
 	 slideBack: (BOOL)slideFlag;
-- (void) registerForDraggedTypes: (NSArray*)newTypes;
+- (void) registerForDraggedTypes:
+  (GS_GENERIC_CLASS(NSArray, NSPasteboardType)*)newTypes;
 - (void) unregisterDraggedTypes;
 - (BOOL) shouldDelayWindowOrderingForEvent: (NSEvent*)anEvent;
 #if OS_API_VERSION(MAC_OS_X_VERSION_10_2, GS_API_LATEST)

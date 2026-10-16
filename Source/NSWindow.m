@@ -5086,7 +5086,8 @@ current key view.<br />
             slideBack: slideFlag];
 }
 
-- (void) registerForDraggedTypes: (NSArray*)newTypes
+- (void) registerForDraggedTypes:
+  (GS_GENERIC_CLASS(NSArray, NSPasteboardType)*)newTypes
 {
   [_wv registerForDraggedTypes: newTypes];
 }

@@ -4220,7 +4220,8 @@ static NSView* findByTag(NSView *view, NSInteger aTag, NSUInteger *level)
  * of any of the specified types.  You need to do this if you want
  * your view to support drag and drop.
  */
-- (void) registerForDraggedTypes: (NSArray*)newTypes
+- (void) registerForDraggedTypes:
+  (GS_GENERIC_CLASS(NSArray, NSPasteboardType)*)newTypes
 {
   NSArray	*o;
   NSArray	*t;
