@@ -301,6 +301,27 @@ static NSMapTable *installedContainers = nil;
     }
 }
 
+// A view that goes away deactivates the active constraints on it or on one of
+// its layout guides, as in Cocoa.  Constraints do not retain their items, so a
+// constraint left in the list would otherwise point at the freed view.
++ (void) _removeConstraintsForView: (NSView *)view
+{
+  NSUInteger i = [activeConstraints count];
+
+  while (i-- > 0)
+    {
+      NSLayoutConstraint *c = [activeConstraints objectAtIndex: i];
+
+      if ([self _viewForLayoutItem: [c firstItem]] == view
+        || [self _viewForLayoutItem: [c secondItem]] == view)
+        {
+          RETAIN(c);
+          [self _removeConstraint: c];
+          RELEASE(c);
+        }
+    }
+}
+
 + (void) _activateConstraint: (NSLayoutConstraint *)constraint
 {
   if ([activeConstraints indexOfObjectIdenticalTo: constraint] == NSNotFound)

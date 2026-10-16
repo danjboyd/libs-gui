@@ -91,6 +91,7 @@
 
 @interface NSLayoutConstraint (GSPrivate)
 + (void) _installPendingConstraintsForView: (NSView *)view;
++ (void) _removeConstraintsForView: (NSView *)view;
 @end
 
 /*
@@ -704,6 +705,9 @@ GSSetDragTypes(NSView* obj, NSArray *types)
 
   // Remove all key value bindings for this view.
   [GSKeyValueBinding unbindAllForObject: self];
+
+  // Deactivate the constraints on this view and its layout guides.
+  [NSLayoutConstraint _removeConstraintsForView: self];
 
   /*
    * Remove self from view chain.  Try to mimic MacOS-X behavior ...
