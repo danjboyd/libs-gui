@@ -468,16 +468,41 @@ static NSOpenPanel *_gs_gui_open_panel = nil;
             didEndSelector: (SEL)didEndSelector
                contextInfo: (void *)contextInfo
 {
-  // FIXME: This should be modeless
   [self setAllowedFileTypes: fileTypes];
   [self _setupForDirectory: path file: filename];
   if ([filename length] > 0)
     [_okButton setEnabled: YES];
+#if __has_feature(blocks)
+  {
+    /* Show the panel without a modal session, as
+       -beginWithCompletionHandler: does, and tell the delegate when the
+       panel ends with (panel, returnCode, contextInfo). */
+    __block NSOpenPanel *panel = self;
+    __block id delegate = modelessDelegate;
+    __block SEL selector = didEndSelector;
+    __block void *context = contextInfo;
+    GSSavePanelCompletionHandler handler =
+      ^(NSInteger result)
+      {
+        if (selector != NULL && [delegate respondsToSelector: selector])
+          {
+            void (*didEnd)(id, SEL, id, NSInteger, void *);
+
+            didEnd = (void (*)(id, SEL, id, NSInteger, void *))
+              [delegate methodForSelector: selector];
+            didEnd(delegate, selector, panel, result, context);
+          }
+      };
+
+    [self beginWithCompletionHandler: handler];
+  }
+#else
   [NSApp beginSheet: self
 	 modalForWindow: nil
 	 modalDelegate: modelessDelegate
 	 didEndSelector: didEndSelector
 	 contextInfo: contextInfo];
+#endif
 }
 
 - (void) ok: (id)sender
@@ -559,7 +584,14 @@ static NSOpenPanel *_gs_gui_open_panel = nil;
     }
 
   [self _updateDefaultDirectory];
-  [NSApp stopModalWithCode: NSOKButton];
+  if (self->_completionHandler == NULL)
+    [NSApp stopModalWithCode: NSOKButton];
+  else
+    {
+      CALL_BLOCK(self->_completionHandler, NSOKButton);
+      Block_release(self->_completionHandler);
+      self->_completionHandler = NULL;
+    }
   [_okButton setEnabled: NO];
   [self close];
 }
