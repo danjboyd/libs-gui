@@ -507,22 +507,52 @@
 
   if (alpha)
     {
-      unsigned char	*bData = (unsigned char*)[self bitmapData];
-      BOOL		allOpaque = YES;
-      unsigned		offset = _numColors - 1;
-      unsigned		limit = _size.height * _size.width;
-      unsigned		i;
+      BOOL		allOpaque = NO;
 
-      for (i = 0; i < limit; i++)
+      /* Scan the alpha samples of integer data with 8 or 16 bits per
+       * sample; anything else is taken to be transparent.  The alpha
+       * sample is the first of a pixel in NSAlphaFirstBitmapFormat and
+       * the last otherwise; a fully opaque sample has all its bits set.
+       */
+      if ((_bitsPerSample == 8 || _bitsPerSample == 16)
+	&& (_format & NSFloatingPointSamplesBitmapFormat) == 0)
 	{
-	  unsigned	a;
+	  unsigned	sampleBytes = _bitsPerSample / 8;
+	  unsigned	alphaIndex;
+	  unsigned	pixelBytes;
+	  NSInteger	x;
+	  NSInteger	y;
 
-	  bData += offset;
-	  a = *bData++;
-	  if (a != 255)
+	  alphaIndex = (_format & NSAlphaFirstBitmapFormat) ? 0 : _numColors - 1;
+	  pixelBytes = _isPlanar ? sampleBytes : _bitsPerPixel / 8;
+	  allOpaque = YES;
+	  for (y = 0; allOpaque && y < _pixelsHigh; y++)
 	    {
-	      allOpaque = NO;
-	      break;
+	      unsigned char	*row;
+
+	      if (_isPlanar)
+		{
+		  row = _imagePlanes[alphaIndex] + y * _bytesPerRow;
+		}
+	      else
+		{
+		  row = _imagePlanes[0] + y * _bytesPerRow
+		    + alphaIndex * sampleBytes;
+		}
+	      for (x = 0; allOpaque && x < _pixelsWide; x++)
+		{
+		  unsigned char	*a = row + x * pixelBytes;
+		  unsigned	b;
+
+		  for (b = 0; b < sampleBytes; b++)
+		    {
+		      if (a[b] != 255)
+			{
+			  allOpaque = NO;
+			  break;
+			}
+		    }
+		}
 	    }
 	}
       [self setOpaque: allOpaque];
