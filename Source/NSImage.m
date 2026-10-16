@@ -1186,7 +1186,26 @@ repd_for_rep(NSArray *_reps, NSImageRep *rep)
 				context: ctxt
 				  hints: hints];
   if (rep == nil)
-    return;
+    {
+      /* Nothing can draw the image, so ask the delegate for an image
+       * to draw in its place.
+       */
+      if ([_delegate respondsToSelector: @selector(imageDidNotDraw:inRect:)])
+	{
+	  NSImage *other = [_delegate imageDidNotDraw: self inRect: dstRect];
+
+	  if (other != nil && other != self)
+	    {
+	      [other drawInRect: dstRect
+		       fromRect: NSZeroRect
+		      operation: op
+		       fraction: delta
+		 respectFlipped: respectFlipped
+			  hints: hints];
+	    }
+	}
+      return;
+    }
 
   // Try to cache / get a cached version of the best rep
   
