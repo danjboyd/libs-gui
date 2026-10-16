@@ -59,6 +59,7 @@
 #import "AppKit/NSScroller.h"
 #import "AppKit/NSTableColumn.h"
 #import "AppKit/NSTableHeaderView.h"
+#import "AppKit/NSTableRowView.h"
 #import "AppKit/NSText.h"
 #import "AppKit/NSTextFieldCell.h"
 #import "AppKit/NSTreeController.h"
@@ -153,6 +154,7 @@ static NSImage *unexpandable  = nil;
 - (void) _drawCellViewRow: (NSInteger)rowIndex
 		 clipRect: (NSRect)clipRect;
 - (void) _sendDoubleActionForColumn: (NSInteger)columnIndex;
+- (NSTableRowView *) _delegateRowViewForRow: (NSInteger)row;
 @end
 
 @interface NSTableColumn (Private)
@@ -2654,6 +2656,15 @@ Also returns the child index relative to this parent. */
   [view setFrame: drawingRect];
 
   return view;
+}
+
+- (NSTableRowView *) _delegateRowViewForRow: (NSInteger)row
+{
+  if ([_delegate respondsToSelector: @selector(outlineView:rowViewForItem:)])
+    {
+      return [_delegate outlineView: self rowViewForItem: [self itemAtRow: row]];
+    }
+  return nil;
 }
 
 @end

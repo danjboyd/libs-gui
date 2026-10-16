@@ -7464,6 +7464,16 @@ For a more detailed explanation, -setSortDescriptors:. */
   return view;
 }
 
+/* The row view the delegate makes for row, or nil. */
+- (NSTableRowView *) _delegateRowViewForRow: (NSInteger)row
+{
+  if ([_delegate respondsToSelector: @selector(tableView:rowViewForRow:)])
+    {
+      return [_delegate tableView: self rowViewForRow: row];
+    }
+  return nil;
+}
+
 - (NSTableRowView *) rowViewAtRow: (NSInteger)row makeIfNecessary: (BOOL)flag
 {
   NSTableRowView *rv = nil;
@@ -7476,10 +7486,7 @@ For a more detailed explanation, -setSortDescriptors:. */
       rv = [_rowViews objectForKey: aRow];
       if (rv == nil && flag == YES)
 	{
-	  if ([_delegate respondsToSelector: @selector(tableView:rowViewForRow:)])
-	    {
-	      rv = [_delegate tableView: self rowViewForRow: row];
-	    }
+	  rv = [self _delegateRowViewForRow: row];
 	  if (rv == nil)
 	    {
 	      rv = AUTORELEASE([[NSTableRowView alloc] init]);
