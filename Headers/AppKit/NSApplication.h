@@ -828,7 +828,13 @@ NSUpdateDynamicServices(void);
 APPKIT_EXPORT void
 NSRegisterServicesProvider(id provider, NSString *name);
 
-APPKIT_EXPORT void 
+APPKIT_EXPORT void
+NSUnregisterServicesProvider(NSString *name);
+
+/*
+ * The old GNUstep spelling of NSUnregisterServicesProvider().
+ */
+APPKIT_EXPORT void
 NSUnRegisterServicesProvider(NSString *name);
 
 APPKIT_EXPORT int

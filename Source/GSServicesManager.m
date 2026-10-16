@@ -116,6 +116,16 @@ NSUnregisterServicesProvider(NSString *name)
 }
 
 /**
+ * The old GNUstep spelling of NSUnregisterServicesProvider(), which
+ * NSApplication.h declared without defining it.
+ */
+void
+NSUnRegisterServicesProvider(NSString *name)
+{
+  NSUnregisterServicesProvider(name);
+}
+
+/**
  * Registers a services providing object using the specified port name.<br />
  * Applications should not need to use this, as they can use the
  * [NSApplication-setServicesProvider:] method instead.  The NSApplication
