@@ -1760,7 +1760,7 @@ places where we switch.
   unsigned int pos;
 
   run = run_for_glyph_index(glyphIndex, glyphs, &pos, NULL);
-  if (run && run->glyphs && (run->head.glyph_length < glyphIndex - pos))
+  if (run && run->glyphs && (glyphIndex - pos < run->head.glyph_length))
     {
       g = &run->glyphs[glyphIndex - pos];
 
@@ -3346,7 +3346,7 @@ forStartingGlyphAtIndex: (NSUInteger)glyph
   unsigned int pos;
 
   run = run_for_glyph_index(glyphIndex, glyphs, &pos, NULL);
-  if (run && run->glyphs && (run->head.glyph_length < glyphIndex - pos))
+  if (run && run->glyphs && (glyphIndex - pos < run->head.glyph_length))
     {
       g = &run->glyphs[glyphIndex - pos];
 
