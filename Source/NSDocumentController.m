@@ -1141,8 +1141,63 @@ static BOOL _shouldClose = YES;
                               displayName: (NSString*)displayNameOrNil
                                     error: (NSError**)outError
 {
-  // FIXME: Implementation missing
-  return nil;
+  NSString *type;
+  NSURL *contents = url;
+  NSDocument *document;
+
+  type = [self typeForContentsOfURL: url error: outError];
+  if (type == nil)
+    {
+      return nil;
+    }
+
+  /* A copy is read from a new file, so that the original may change or
+   * go away; otherwise the document reads the file it is given.
+   */
+  if (duplicateByCopying)
+    {
+      NSFileManager *mgr = [NSFileManager defaultManager];
+      NSString *dir;
+      NSString *path;
+
+      if ([url isFileURL] == NO)
+        {
+          return nil;
+        }
+      dir = [NSTemporaryDirectory() stringByAppendingPathComponent:
+        [[NSProcessInfo processInfo] globallyUniqueString]];
+      path = [dir stringByAppendingPathComponent: [[url path] lastPathComponent]];
+      if ([mgr createDirectoryAtPath: dir
+         withIntermediateDirectories: YES
+                          attributes: nil
+                               error: outError] == NO
+        || [mgr copyItemAtPath: [url path] toPath: path error: outError] == NO)
+        {
+          return nil;
+        }
+      contents = [NSURL fileURLWithPath: path];
+    }
+
+  // the duplicate is an untitled document...
+  document = [self makeDocumentForURL: nil
+                    withContentsOfURL: contents
+                               ofType: type
+                                error: outError];
+  if (document == nil)
+    {
+      return nil;
+    }
+  if (displayNameOrNil != nil)
+    {
+      [document setLastComponentOfFileName: displayNameOrNil];
+    }
+  [self addDocument: document];
+  if ([self shouldCreateUI])
+    {
+      [document makeWindowControllers];
+      [document showWindows];
+    }
+  return document;
 }
 
 #ifdef OPENSTEP_ONLY
