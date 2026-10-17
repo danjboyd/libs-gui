@@ -153,18 +153,22 @@
   return [[self tabView] indexOfTabViewItem: selected];
 }
 
+/* The selected index changes whenever the tab view selects an item, so
+ * observers are told from -tabView:willSelectTabViewItem: and
+ * -tabView:didSelectTabViewItem:, not from the setter.
+ */
++ (BOOL) automaticallyNotifiesObserversForKey: (NSString *)key
+{
+  if ([key isEqualToString: @"selectedTabViewItemIndex"])
+    {
+      return NO;
+    }
+  return [super automaticallyNotifiesObserversForKey: key];
+}
+
 - (void) setSelectedTabViewItemIndex: (NSInteger)idx
 {
   [[self tabView] selectTabViewItemAtIndex: idx];
-  if (_canPropagateSelectedChildViewControllerTitle)
-    {
-      NSString *title = [[[[self tabView] tabViewItems]
-        objectAtIndex: idx] label];
-      if (title != nil)
-        {
-          [self setTitle: title];
-        }
-    }
 }
 
 // Responding to tabview actions...
@@ -177,13 +181,23 @@
 - (void)tabView:(NSTabView *)tabView
   willSelectTabViewItem:(NSTabViewItem *)tabViewItem
 {
-  // not implemented
+  [self willChangeValueForKey: @"selectedTabViewItemIndex"];
 }
 
+/* Subclasses that override this must call super, as on Cocoa. */
 - (void)tabView:(NSTabView *)tabView 
   didSelectTabViewItem:(NSTabViewItem *)tabViewItem
 {
-  // not implemented
+  if (_canPropagateSelectedChildViewControllerTitle)
+    {
+      NSString *title = [tabViewItem label];
+
+      if (title != nil)
+        {
+          [self setTitle: title];
+        }
+    }
+  [self didChangeValueForKey: @"selectedTabViewItemIndex"];
 }
 
 // Responding to toolbar actions...
