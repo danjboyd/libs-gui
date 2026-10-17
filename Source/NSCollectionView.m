@@ -2151,6 +2151,12 @@ static NSString *_placeholderItem = nil;
 - (void) moveItemAtIndexPath: (NSIndexPath *)indexPath
 		 toIndexPath: (NSIndexPath *)newIndexPath
 {
+  NSMutableIndexSet *sections = [NSMutableIndexSet indexSet];
+
+  // the data source has moved the item, so load both sections again...
+  [sections addIndex: [indexPath section]];
+  [sections addIndex: [newIndexPath section]];
+  [self reloadSections: sections];
 }
 
 - (void) deleteItemsAtIndexPaths: (NSSet *)indexPaths
@@ -2166,6 +2172,13 @@ static NSString *_placeholderItem = nil;
 - (void) moveSection: (NSInteger)section
 	   toSection: (NSInteger)newSection
 {
+  NSInteger first = MIN(section, newSection);
+  NSInteger last = MAX(section, newSection);
+
+  // every section from one index to the other has a new index...
+  [self reloadSections:
+    [NSIndexSet indexSetWithIndexesInRange:
+      NSMakeRange(first, last - first + 1)]];
 }
 
 - (void) deleteSections: (NSIndexSet *)sections
