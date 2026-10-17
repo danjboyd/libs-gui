@@ -401,14 +401,37 @@
 				  at: (NSSelection *)selection
 {
   NSData *data = [pasteboard dataForType: NSDataLinkPboardType];
-  NSArray *links = [NSUnarchiver unarchiveObjectWithData: data];
-  NSEnumerator *en = [links objectEnumerator];
+  id links = nil;
+  NSEnumerator *en;
   NSDataLink *link = nil;
 
+  if (data != nil)
+    {
+      NS_DURING
+	links = [NSUnarchiver unarchiveObjectWithData: data];
+      NS_HANDLER
+	links = nil;
+      NS_ENDHANDLER
+    }
+
+  // -[NSDataLink writeToPasteboard:] writes a single link...
+  if ([links isKindOfClass: [NSDataLink class]])
+    {
+      links = [NSArray arrayWithObject: links];
+    }
+  else if ([links isKindOfClass: [NSArray class]] == NO)
+    {
+      return nil;
+    }
+
+  en = [links objectEnumerator];
   while ((link = [en nextObject]) != nil)
     {
-      if ([link destinationSelection] == oldSelection)
+      if ([link isKindOfClass: [NSDataLink class]]
+	&& [[link destinationSelection] isEqual: oldSelection])
 	{
+	  [self addLink: link at: selection];
+	  return link;
 	}
     }
 
