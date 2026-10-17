@@ -4304,12 +4304,19 @@ static NSView* findByTag(NSView *view, NSInteger aTag, NSUInteger *level)
                         slideBack: (BOOL)slideBack
                             event: (NSEvent *)theEvent
 {
-  // FIXME: Where to get the image from?
   NSImage *anImage = nil;
-  NSPasteboard *pboard = [NSPasteboard pasteboardWithName: NSDragPboard];
+  NSPasteboard *pboard;
 
+  /* The files do not exist yet, so drag the icon of the first type. */
+  if ([typeArray count] > 0)
+    {
+      anImage = [[NSWorkspace sharedWorkspace]
+	iconForFileType: [typeArray objectAtIndex: 0]];
+    }
   if (anImage == nil)
     return NO;
+
+  pboard = [NSPasteboard pasteboardWithName: NSDragPboard];
 
   [pboard declareTypes: [NSArray arrayWithObject: NSFilesPromisePboardType] 
 	  owner: sourceObject];
