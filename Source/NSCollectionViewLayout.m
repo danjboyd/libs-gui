@@ -223,19 +223,72 @@
 
 @implementation NSCollectionViewLayoutInvalidationContext
 
+/* Answer a copy of a dictionary of index path sets by element kind, with
+   indexPaths added to the set of elementKind. */
+static NSDictionary *
+addIndexPathsOfKind(NSDictionary *dict, NSString *elementKind,
+  NSSet *indexPaths)
+{
+  NSMutableDictionary *result;
+  NSMutableSet *paths;
+
+  result = [NSMutableDictionary dictionaryWithDictionary: dict];
+  paths = [NSMutableSet setWithSet: [result objectForKey: elementKind]];
+  [paths unionSet: indexPaths];
+  [result setObject: paths forKey: elementKind];
+  return [result copy];
+}
+
+- (void) dealloc
+{
+  RELEASE(_invalidatedItemIndexPaths);
+  RELEASE(_invalidatedSupplementaryIndexPaths);
+  RELEASE(_invalidatedDecorationIndexPaths);
+  [super dealloc];
+}
+
 // Initializers
 - (void)invalidateItemsAtIndexPaths: (NSSet *)indexPaths
 {
+  NSMutableSet *paths;
+
+  if (indexPaths == nil)
+    {
+      return;
+    }
+  paths = [NSMutableSet setWithSet: _invalidatedItemIndexPaths];
+  [paths unionSet: indexPaths];
+  ASSIGNCOPY(_invalidatedItemIndexPaths, paths);
 }
 
 - (void)invalidateSupplementaryElementsOfKind: (NSCollectionViewSupplementaryElementKind)elementKind
                                  atIndexPaths: (NSSet *)indexPaths
 {
+  NSDictionary *paths;
+
+  if (elementKind == nil || indexPaths == nil)
+    {
+      return;
+    }
+  paths = addIndexPathsOfKind(_invalidatedSupplementaryIndexPaths,
+    elementKind, indexPaths);
+  RELEASE(_invalidatedSupplementaryIndexPaths);
+  _invalidatedSupplementaryIndexPaths = paths;
 }
 
 - (void)invalidateDecorationElementsOfKind: (NSCollectionViewDecorationElementKind)elementKind
                               atIndexPaths: (NSSet *)indexPaths
 {
+  NSDictionary *paths;
+
+  if (elementKind == nil || indexPaths == nil)
+    {
+      return;
+    }
+  paths = addIndexPathsOfKind(_invalidatedDecorationIndexPaths,
+    elementKind, indexPaths);
+  RELEASE(_invalidatedDecorationIndexPaths);
+  _invalidatedDecorationIndexPaths = paths;
 }
 
 // Properties
