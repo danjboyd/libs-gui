@@ -32,6 +32,7 @@
 #import "AppKit/NSGraphics.h"
 #import "AppKit/NSMenuView.h"
 #import "AppKit/NSScreen.h"
+#import "AppKit/NSStringDrawing.h"
 #import "AppKit/NSWindow.h"
 #import "GNUstepGUI/GSDisplayServer.h"
 #import "GNUstepGUI/GSTheme.h"
@@ -588,8 +589,20 @@ static inline NSRect RectWithSizeScaledByFactor(NSRect aRect, CGFloat factor)
 + (CGFloat) minFrameWidthWithTitle: (NSString *)aTitle
                          styleMask: (NSUInteger)aStyle
 {
-  /* TODO: we could at least guess... */
-  return 0.0;
+  float l, r, t, b;
+  CGFloat width;
+
+  /* The window manager draws the decorations, so this is a guess: the
+   * frame offsets and the width of the title, as for the decorations
+   * GNUstep draws itself.
+   */
+  [self offsets: &l : &r : &t : &b forStyleMask: aStyle];
+  width = l + r;
+  if (aStyle & NSTitledWindowMask)
+    {
+      width += [aTitle sizeWithAttributes: nil].width;
+    }
+  return width;
 }
 
 @end
