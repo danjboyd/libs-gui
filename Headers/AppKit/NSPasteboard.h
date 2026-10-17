@@ -43,6 +43,7 @@ extern "C" {
 @class NSArray;
 @class NSData;
 @class NSFileWrapper;
+@protocol NSPasteboardWriting;
 
 /**
  * Pasteboard contains string data as written by
@@ -263,6 +264,10 @@ APPKIT_EXPORT_CLASS
 	   forType: (NSString*)dataType;
 - (BOOL) writeFileContents: (NSString*)filename;
 - (BOOL) writeFileWrapper: (NSFileWrapper*)wrapper;
+#if OS_API_VERSION(MAC_OS_X_VERSION_10_6, GS_API_LATEST)
+- (NSInteger) clearContents;
+- (BOOL) writeObjects: (GS_GENERIC_CLASS(NSArray, id<NSPasteboardWriting>)*)objects;
+#endif
 
 //
 // Determining Types 
@@ -280,6 +285,10 @@ APPKIT_EXPORT_CLASS
 			    toFile: (NSString*)filename;
 - (NSFileWrapper*) readFileWrapper;
 - (NSString*) stringForType: (NSString*)dataType;
+#if OS_API_VERSION(MAC_OS_X_VERSION_10_6, GS_API_LATEST)
+- (NSArray*) readObjectsForClasses: (GS_GENERIC_CLASS(NSArray, Class)*)classArray
+			   options: (NSDictionary*)options;
+#endif
 
 @end
 

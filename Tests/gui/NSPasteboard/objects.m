@@ -16,14 +16,6 @@
 
 #include <AppKit/NSPasteboard.h>
 
-/* NSPasteboard.h does not declare these yet. */
-@interface NSPasteboard (Objects)
-- (NSInteger) clearContents;
-- (BOOL) writeObjects: (NSArray*)objects;
-- (NSArray*) readObjectsForClasses: (NSArray*)classArray
-			   options: (NSDictionary*)options;
-@end
-
 static NSString *textType = @"org.gnustep.test.text";
 static NSString *listType = @"org.gnustep.test.list";
 
