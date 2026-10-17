@@ -52,6 +52,7 @@
 #import "AppKit/NSClipView.h"
 #import "AppKit/NSColor.h"
 #import "AppKit/NSEvent.h"
+#import "AppKit/NSBitmapImageRep.h"
 #import "AppKit/NSImage.h"
 #import "AppKit/NSGraphics.h"
 #import "AppKit/NSKeyValueBinding.h"
@@ -5662,15 +5663,113 @@ This method is deprecated, use -columnIndexesInRect:. */
 }
 
 /* dragging rows */
+
+/* Answers an image of the cells of the rows in the columns, or in every
+ * column when cols is empty, as they are drawn in the receiver.  The rows
+ * between them are left transparent.  When there is an event, offset is
+ * set to the centre of the image relative to the event's location, in the
+ * receiver's coordinates.
+ */
+- (NSImage *) _dragImageForRows: (NSIndexSet *)rows
+		   tableColumns: (NSArray *)cols
+			  event: (NSEvent *)event
+			 offset: (NSPoint *)offset
+{
+  NSMutableArray *rects = [NSMutableArray array];
+  NSRect bounds = NSZeroRect;
+  NSUInteger row = [rows firstIndex];
+  NSMutableArray *reps;
+  NSImage *dragImage;
+  NSUInteger i;
+
+  while (row != NSNotFound)
+    {
+      NSRect rowRect;
+
+      if ((NSInteger)row >= _numberOfRows)
+	{
+	  break;
+	}
+      rowRect = [self rectOfRow: row];
+      if ([cols count] == 0)
+	{
+	  [rects addObject: [NSValue valueWithRect: rowRect]];
+	}
+      else
+	{
+	  NSEnumerator *e = [cols objectEnumerator];
+	  NSTableColumn *col;
+
+	  while ((col = [e nextObject]) != nil)
+	    {
+	      NSUInteger idx = [_tableColumns indexOfObjectIdenticalTo: col];
+
+	      if (idx != NSNotFound)
+		{
+		  [rects addObject: [NSValue valueWithRect:
+		    NSIntersectionRect(rowRect, [self rectOfColumn: idx])]];
+		}
+	    }
+	}
+      row = [rows indexGreaterThanIndex: row];
+    }
+  for (i = 0; i < [rects count]; i++)
+    {
+      bounds = NSUnionRect(bounds, [[rects objectAtIndex: i] rectValue]);
+    }
+  if (NSIsEmptyRect(bounds))
+    {
+      return AUTORELEASE([[NSImage alloc] initWithSize: NSMakeSize(8, 8)]);
+    }
+
+  reps = [NSMutableArray arrayWithCapacity: [rects count]];
+  for (i = 0; i < [rects count]; i++)
+    {
+      NSRect r = [[rects objectAtIndex: i] rectValue];
+      NSBitmapImageRep *rep = [self bitmapImageRepForCachingDisplayInRect: r];
+
+      [self cacheDisplayInRect: r toBitmapImageRep: rep];
+      [reps addObject: rep];
+    }
+
+  dragImage = AUTORELEASE([[NSImage alloc] initWithSize: bounds.size]);
+  [dragImage lockFocus];
+  for (i = 0; i < [rects count]; i++)
+    {
+      NSRect r = [[rects objectAtIndex: i] rectValue];
+
+      // the receiver is flipped and the image is not...
+      [[reps objectAtIndex: i] drawInRect:
+	NSMakeRect(NSMinX(r) - NSMinX(bounds), NSMaxY(bounds) - NSMaxY(r),
+		   NSWidth(r), NSHeight(r))];
+    }
+  [dragImage unlockFocus];
+
+  if (event != nil && offset != NULL)
+    {
+      NSPoint p = [self convertPoint: [event locationInWindow] fromView: nil];
+
+      *offset = NSMakePoint(NSMidX(bounds) - p.x, NSMidY(bounds) - p.y);
+    }
+  return dragImage;
+}
+
 - (NSImage*) dragImageForRows: (NSArray*)dragRows
 			event: (NSEvent*)dragEvent
 	      dragImageOffset: (NSPoint*)dragImageOffset
 {
-  // FIXME
-  NSImage *dragImage = [[NSImage alloc]
-			 initWithSize: NSMakeSize(8, 8)];
+  NSMutableIndexSet *rows = [NSMutableIndexSet indexSet];
+  NSEnumerator *e = [dragRows objectEnumerator];
+  NSNumber *row;
 
-  return AUTORELEASE(dragImage);
+  while ((row = [e nextObject]) != nil)
+    {
+      [rows addIndex: [row unsignedIntegerValue]];
+    }
+  return [self _dragImageForRows: rows
+		    tableColumns: nil
+			   event: dragEvent
+			  offset: dragImageOffset];
 }
 
 - (NSImage *) dragImageForRowsWithIndexes: (NSIndexSet*)rows
@@ -5678,13 +5777,20 @@ This method is deprecated, use -columnIndexesInRect:. */
 				    event: (NSEvent*)event
 				   offset: (NSPoint*)offset
 {
-  // FIXME
-  NSArray *rowArray;
+  SEL sel = @selector(dragImageForRows:event:dragImageOffset:);
 
-  rowArray = [self _indexSetToArray: rows];
-  return [self dragImageForRows: rowArray
-	       event: event
-	       dragImageOffset: offset];
+  /* A subclass may still make its image with the older method. */
+  if ([self methodForSelector: sel]
+    != [NSTableView instanceMethodForSelector: sel])
+    {
+      return [self dragImageForRows: [self _indexSetToArray: rows]
+			      event: event
+		    dragImageOffset: offset];
+    }
+  return [self _dragImageForRows: rows
+		    tableColumns: cols
+			   event: event
+			  offset: offset];
 }
 
 - (void) setDropRow: (NSInteger)row
