@@ -2102,9 +2102,32 @@ See -runModalForWindow:
       NSRect  theFrame = [theWindow frame];
       NSSize  size  = theFrame.size;
   
-      // Calculate window position...
-      point.x += (docFrame.size.width - size.width) / 2;
-      point.y += (docFrame.size.height - size.height) / 2;
+      id      delegate = [docWindow delegate];
+
+      if ([docWindow attachedSheet] == theWindow
+	&& [delegate respondsToSelector:
+	  @selector(window:willPositionSheet:usingRect:)])
+	{
+	  NSRect  rect;
+
+	  /* The delegate may move the rectangle, in the window's base
+	   * coordinates, below which the sheet appears; by default its
+	   * zero height top edge of the content view.
+	   */
+	  rect = [[docWindow contentView] frame];
+	  rect = NSMakeRect(0, NSMaxY(rect), docFrame.size.width, 0);
+	  rect = [delegate window: docWindow
+		willPositionSheet: theWindow
+			usingRect: rect];
+	  point.x += NSMidX(rect) - size.width / 2;
+	  point.y += NSMinY(rect) - size.height;
+	}
+      else
+	{
+	  // Calculate window position...
+	  point.x += (docFrame.size.width - size.width) / 2;
+	  point.y += (docFrame.size.height - size.height) / 2;
+	}
 
       NSDebugLLog(@"NSWindow", @"Positioning window %@ relative to %@ at %@", 
             NSStringFromRect(theFrame), NSStringFromRect(docFrame), NSStringFromPoint(point));
