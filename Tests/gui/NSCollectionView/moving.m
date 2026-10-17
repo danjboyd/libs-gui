@@ -1,8 +1,9 @@
 /* -[NSCollectionView moveItemAtIndexPath:toIndexPath:] and
    -moveSection:toSection: are sent after the data source has moved an item
    or a section; the collection view then shows the items at their new index
-   paths.  Both methods used to be empty, so the view kept the items it had
-   loaded at their old index paths.
+   paths.  A moved item keeps its item object and view, as on Cocoa.  Both
+   methods used to be empty, so the view kept the items it had loaded at
+   their old index paths.
    The view uses the theme and font backend, so the set is skipped when the
    backend is unavailable.
 */
@@ -49,6 +50,13 @@
 }
 @end
 
+static NSCollectionViewItem *
+itemAt(NSCollectionView *cv, NSInteger item, NSInteger section)
+{
+  return [cv itemAtIndexPath:
+    [NSIndexPath indexPathForItem: item inSection: section]];
+}
+
 static id
 objectAt(NSCollectionView *cv, NSInteger item, NSInteger section)
 {
@@ -65,6 +73,9 @@ main(int argc, char **argv)
   Source *source;
   NSMutableArray *first;
   NSMutableArray *second;
+  NSCollectionViewItem *a;
+  NSCollectionViewItem *x;
+  NSCollectionViewItem *y;
 
   START_SET("NSCollectionView moving items and sections")
 
@@ -90,6 +101,9 @@ main(int argc, char **argv)
   [cv setDataSource: source];
   [cv reloadData];
   PASS_EQUAL(objectAt(cv, 0, 0), @"a", "the first item is loaded");
+  a = itemAt(cv, 0, 0);
+  x = itemAt(cv, 0, 1);
+  y = itemAt(cv, 1, 1);
 
   /* Move "a" to the end of its section. */
   [first removeObjectAtIndex: 0];
@@ -100,6 +114,14 @@ main(int argc, char **argv)
     "the item after a moved item takes its index path");
   PASS_EQUAL(objectAt(cv, 2, 0), @"a",
     "a moved item is at its new index path");
+  PASS(itemAt(cv, 2, 0) == a, "a moved item keeps its item object");
+  PASS_EQUAL([cv indexPathForItem: a],
+    [NSIndexPath indexPathForItem: 2 inSection: 0],
+    "a moved item answers its new index path");
+  /* The flow layout counts reflowed rows as it is asked, so the frame it
+     gives an index path changes from one call to the next; check only
+     that the view stays in the collection view. */
+  PASS([[a view] superview] == cv, "a moved item's view stays in the view");
 
   /* Move "x" to the start of the first section. */
   [second removeObjectAtIndex: 0];
@@ -108,6 +130,7 @@ main(int argc, char **argv)
 	      toIndexPath: [NSIndexPath indexPathForItem: 0 inSection: 0]];
   PASS_EQUAL(objectAt(cv, 0, 0), @"x",
     "an item moved to another section is at its new index path");
+  PASS(itemAt(cv, 0, 0) == x, "an item moved to another section is kept");
   PASS_EQUAL(objectAt(cv, 0, 1), @"y",
     "the section an item left shows its remaining items");
   PASS(objectAt(cv, 1, 1) == nil,
@@ -119,6 +142,7 @@ main(int argc, char **argv)
   [cv moveSection: 1 toSection: 0];
   PASS_EQUAL(objectAt(cv, 0, 0), @"y",
     "a moved section's items are at its new index");
+  PASS(itemAt(cv, 0, 0) == y, "a moved section keeps its items");
   PASS_EQUAL(objectAt(cv, 0, 1), @"x",
     "the displaced section's items are at its new index");
   PASS([[cv visibleItems] count] == 5,

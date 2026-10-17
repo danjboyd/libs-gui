@@ -2172,15 +2172,149 @@ static NSString *_placeholderItem = nil;
 {
 }
 
+/* Answers the loaded items of a section in the order of their index
+ * paths, or nil when an item of the section is not loaded.
+ */
+- (NSMutableArray *) _loadedItemsInSection: (NSInteger)section
+{
+  NSArray *paths = [[_indexPathsToItems keyEnumerator] allObjects];
+  NSMutableArray *items = [NSMutableArray array];
+  NSUInteger count = 0;
+  NSUInteger i;
+
+  FOR_IN(NSIndexPath*, path, paths)
+    {
+      if ([path section] == section)
+	{
+	  count++;
+	}
+    }
+  END_FOR_IN(paths);
+
+  for (i = 0; i < count; i++)
+    {
+      NSCollectionViewItem *item = [_indexPathsToItems objectForKey:
+	[NSIndexPath indexPathForItem: i inSection: section]];
+
+      if (item == nil)
+	{
+	  return nil;
+	}
+      [items addObject: item];
+    }
+  return items;
+}
+
+/* Gives each loaded item in the arrays of sections, keyed by section
+ * number, the index path of its place in its array, and moves its view to
+ * the frame the layout gives that index path.
+ */
+- (void) _relocateItemsInSections: (NSDictionary *)sections
+{
+  NSEnumerator *e = [sections keyEnumerator];
+  NSNumber *section;
+
+  // forget every old index path first, as items may swap places...
+  while ((section = [e nextObject]) != nil)
+    {
+      NSArray *items = [sections objectForKey: section];
+
+      FOR_IN(NSCollectionViewItem*, item, items)
+	{
+	  NSIndexPath *old = [_itemsToIndexPaths objectForKey: item];
+
+	  if (old != nil
+	    && [_indexPathsToItems objectForKey: old] == item)
+	    {
+	      [_indexPathsToItems removeObjectForKey: old];
+	    }
+	}
+      END_FOR_IN(items);
+    }
+
+  e = [sections keyEnumerator];
+  while ((section = [e nextObject]) != nil)
+    {
+      NSArray *items = [sections objectForKey: section];
+      NSUInteger i;
+
+      for (i = 0; i < [items count]; i++)
+	{
+	  NSCollectionViewItem *item = [items objectAtIndex: i];
+	  NSIndexPath *path = [NSIndexPath indexPathForItem: i
+						 inSection: [section integerValue]];
+	  NSView *v = [item view];
+	  NSEnumerator *se = [[v subviews] objectEnumerator];
+	  NSView *sub;
+
+	  [_indexPathsToItems setObject: item forKey: path];
+	  [_itemsToIndexPaths setObject: path forKey: item];
+	  while ((sub = [se nextObject]) != nil)
+	    {
+	      if ([sub isKindOfClass: [_GSCollectionViewItemTrackingView class]])
+		{
+		  [(_GSCollectionViewItemTrackingView *)sub setIndexPath: path];
+		}
+	    }
+	  if (_collectionViewLayout != nil)
+	    {
+	      NSCollectionViewLayoutAttributes *attrs =
+		[self layoutAttributesForItemAtIndexPath: path];
+	      NSRect frame = [attrs frame];
+
+	      frame.size = [attrs size];
+	      [v setFrame: frame];
+	      [v setHidden: [attrs isHidden]];
+	      [v setAlphaValue: [attrs alpha]];
+	      if (attrs != nil)
+		{
+		  [_itemsToAttributes setObject: attrs forKey: item];
+		}
+	    }
+	}
+    }
+  [self _updateParentViewFrame];
+  [self setNeedsDisplay: YES];
+}
+
 - (void) moveItemAtIndexPath: (NSIndexPath *)indexPath
 		 toIndexPath: (NSIndexPath *)newIndexPath
 {
-  NSMutableIndexSet *sections = [NSMutableIndexSet indexSet];
+  NSInteger from = [indexPath section];
+  NSInteger to = [newIndexPath section];
+  NSMutableArray *source = [self _loadedItemsInSection: from];
+  NSMutableArray *destination;
+  NSCollectionViewItem *item;
 
-  // the data source has moved the item, so load both sections again...
-  [sections addIndex: [indexPath section]];
-  [sections addIndex: [newIndexPath section]];
-  [self reloadSections: sections];
+  destination = (from == to) ? source : [self _loadedItemsInSection: to];
+
+  /* The data source has moved the item.  Move the loaded item, so that it
+   * keeps its view and state, or load both sections again when the item
+   * or a neighbour is not loaded.
+   */
+  if (source == nil || destination == nil
+    || (NSUInteger)[indexPath item] >= [source count]
+    || (NSUInteger)[newIndexPath item]
+      > [destination count] - ((from == to) ? 1 : 0))
+    {
+      NSMutableIndexSet *sections = [NSMutableIndexSet indexSet];
+
+      [sections addIndex: from];
+      [sections addIndex: to];
+      [self reloadSections: sections];
+      return;
+    }
+
+  item = RETAIN([source objectAtIndex: [indexPath item]]);
+  [source removeObjectAtIndex: [indexPath item]];
+  [destination insertObject: item atIndex: [newIndexPath item]];
+  RELEASE(item);
+
+  [self _relocateItemsInSections:
+    [NSDictionary dictionaryWithObjectsAndKeys:
+      source, [NSNumber numberWithInteger: from],
+      destination, [NSNumber numberWithInteger: to],
+      nil]];
 }
 
 - (void) deleteItemsAtIndexPaths: (NSSet *)indexPaths
@@ -2198,11 +2332,40 @@ static NSString *_placeholderItem = nil;
 {
   NSInteger first = MIN(section, newSection);
   NSInteger last = MAX(section, newSection);
+  NSMutableArray *order = [NSMutableArray array];
+  NSMutableDictionary *sections = [NSMutableDictionary dictionary];
+  NSInteger s;
+  id moved;
 
-  // every section from one index to the other has a new index...
-  [self reloadSections:
-    [NSIndexSet indexSetWithIndexesInRange:
-      NSMakeRange(first, last - first + 1)]];
+  /* The data source has moved the section.  Move the loaded items of every
+   * section from one index to the other, or load those sections again when
+   * one is not loaded.
+   */
+  for (s = first; s <= last; s++)
+    {
+      NSMutableArray *items = [self _loadedItemsInSection: s];
+
+      if (items == nil)
+	{
+	  [self reloadSections:
+	    [NSIndexSet indexSetWithIndexesInRange:
+	      NSMakeRange(first, last - first + 1)]];
+	  return;
+	}
+      [order addObject: items];
+    }
+
+  moved = RETAIN([order objectAtIndex: section - first]);
+  [order removeObjectAtIndex: section - first];
+  [order insertObject: moved atIndex: newSection - first];
+  RELEASE(moved);
+
+  for (s = first; s <= last; s++)
+    {
+      [sections setObject: [order objectAtIndex: s - first]
+		   forKey: [NSNumber numberWithInteger: s]];
+    }
+  [self _relocateItemsInSections: sections];
 }
 
 - (void) deleteSections: (NSIndexSet *)sections
