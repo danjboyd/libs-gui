@@ -1650,6 +1650,30 @@ static NSString *_placeholderItem = nil;
 - (void) scrollToItemsAtIndexPaths: (NSSet *)indexPaths
 		    scrollPosition: (NSCollectionViewScrollPosition)scrollPosition
 {
+  NSRect rect = NSZeroRect;
+
+  // the items are scrolled into view; the position is not honoured...
+  FOR_IN(NSIndexPath*, path, indexPaths)
+    {
+      NSCollectionViewItem *item = [_indexPathsToItems objectForKey: path];
+      NSRect frame;
+
+      if (item != nil)
+	{
+	  frame = [[item view] frame];
+	}
+      else
+	{
+	  frame = [[self layoutAttributesForItemAtIndexPath: path] frame];
+	}
+      rect = NSUnionRect(rect, frame);
+    }
+  END_FOR_IN(indexPaths);
+
+  if (NSIsEmptyRect(rect) == NO)
+    {
+      [self scrollRectToVisible: rect];
+    }
 }
 
 /* Creating Collection view Items */
