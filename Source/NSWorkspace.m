@@ -1996,8 +1996,48 @@ withAppBundleIdentifier: (NSString *)bundleIdentifier
 additionalEventParamDescriptor: (NSAppleEventDescriptor *)descriptor
 launchIdentifiers: (NSArray **)identifiers
 {
-  // FIXME
-  return NO;
+  NSString	*appPath = nil;
+  NSEnumerator	*e;
+  NSURL		*url;
+  BOOL		flag;
+  BOOL		ok = YES;
+
+  /* GNUstep has no launch identifiers. */
+  if (identifiers != NULL)
+    {
+      *identifiers = nil;
+    }
+  if (bundleIdentifier != nil)
+    {
+      appPath = [self absolutePathForAppBundleWithIdentifier: bundleIdentifier];
+      if (appPath == nil)
+	{
+	  return NO;
+	}
+    }
+  flag = (options & NSWorkspaceLaunchWithoutActivation) ? NO : YES;
+
+  /* A file is opened with the application, any other URL as -openURL:
+   * opens it.
+   */
+  e = [urls objectEnumerator];
+  while ((url = [e nextObject]) != nil)
+    {
+      if (appPath != nil && [url isFileURL])
+	{
+	  if ([self openFile: [url path]
+	     withApplication: appPath
+	       andDeactivate: flag] == NO)
+	    {
+	      ok = NO;
+	    }
+	}
+      else if ([self openURL: url] == NO)
+	{
+	  ok = NO;
+	}
+    }
+  return ok;
 }
 
 /**
