@@ -5608,8 +5608,22 @@ other than copy/paste or dragging. */
 - (NSDragOperation) dragOperationForDraggingInfo: (id <NSDraggingInfo>)dragInfo 
                                             type: (NSString *)type
 {
-  //TODO
-  return NSDragOperationCopy | NSDragOperationGeneric;
+  NSDragOperation mask = [dragInfo draggingSourceOperationMask];
+
+  /* Nothing can be dropped on a text view that cannot be edited.  Text
+   * dragged within the view is moved: -performDragOperation: removes it
+   * from where it was when the operation includes NSDragOperationGeneric.
+   * Anything else is copied.
+   */
+  if ([self isEditable] == NO)
+    {
+      return NSDragOperationNone;
+    }
+  if ([dragInfo draggingSource] == self)
+    {
+      return mask & (NSDragOperationMove | NSDragOperationGeneric);
+    }
+  return mask & (NSDragOperationCopy | NSDragOperationGeneric);
 }
 
 - (NSImage *) dragImageForSelectionWithEvent: (NSEvent *)event
