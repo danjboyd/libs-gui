@@ -1276,11 +1276,46 @@ static BOOL flip_hack;
     }
 }
 
+/* The packed glyphs are as NSConvertGlyphsToPackedGlyphs() writes them in
+ * the receiver's -glyphPacking: a byte with the number of glyphs, then each
+ * glyph's bytes, most significant first.
+ */
 - (void) getAdvancements: (NSSizeArray)advancements
          forPackedGlyphs: (const void*)glyphs
                    count: (NSUInteger)count
 {
-  // FIXME
+  const unsigned char *packed = (const unsigned char *)glyphs + 1;
+  NSMultibyteGlyphPacking packing = [self glyphPacking];
+  NSUInteger size;
+  NSUInteger i;
+
+  switch (packing)
+    {
+      case NSOneByteGlyphPacking:
+        size = 1;
+        break;
+      case NSTwoByteGlyphPacking:
+        size = 2;
+        break;
+      case NSFourByteGlyphPacking:
+        size = 4;
+        break;
+      default:
+        // FIXME: the EUC packings are not supported
+        return;
+    }
+
+  for (i = 0; i < count; i++)
+    {
+      NSGlyph g = 0;
+      NSUInteger j;
+
+      for (j = 0; j < size; j++)
+        {
+          g = (g << 8) | *packed++;
+        }
+      advancements[i] = [self advancementForGlyph: g];
+    }
 }
 
 - (void) getBoundingRects: (NSRectArray)bounds
