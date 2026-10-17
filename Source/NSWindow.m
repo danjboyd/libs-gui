@@ -6149,9 +6149,39 @@ current key view.<br />
   return 1.0;
 }
 
+/**
+ * Answers the number of the frontmost visible window whose frame contains
+ * point, in screen coordinates, among the windows below the window
+ * numbered windowNumber, or among all windows when windowNumber is 0.
+ * Answers 0 when there is none.  Only the application's own windows are
+ * known.
+ */
 + (NSInteger)windowNumberAtPoint:(NSPoint)point
      belowWindowWithWindowNumber:(NSInteger)windowNumber
 {
+  NSArray	*windows = GSOrderedWindows();
+  NSUInteger	count = [windows count];
+  NSUInteger	i = 0;
+
+  if (windowNumber != 0)
+    {
+      while (i < count
+	&& [[windows objectAtIndex: i] windowNumber] != windowNumber)
+	{
+	  i++;
+	}
+      // start below the window, or find nothing if it is not ordered in...
+      i++;
+    }
+  for (; i < count; i++)
+    {
+      NSWindow	*w = [windows objectAtIndex: i];
+
+      if ([w isVisible] && NSMouseInRect(point, [w frame], NO))
+	{
+	  return [w windowNumber];
+	}
+    }
   return 0;
 }
 
