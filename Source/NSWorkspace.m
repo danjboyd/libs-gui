@@ -1786,8 +1786,44 @@ inFileViewerRootedAtPath: (NSString*)rootFullpath
          forFile: (NSString *)fullPath
          options: (NSWorkspaceIconCreationOptions)options
 {
-  // FIXME
-  return NO;
+  NSFileManager	*mgr = [NSFileManager defaultManager];
+  NSString	*pngPath;
+  NSString	*tiffPath;
+  BOOL		isDir = NO;
+  NSData	*data;
+
+  /* Only a directory has an icon of its own: the .dir.png or .dir.tiff
+   * inside it that -iconForFile: reads.  The .dir.png comes first, so it
+   * is removed when the icon is set or removed.
+   */
+  if ([mgr fileExistsAtPath: fullPath isDirectory: &isDir] == NO
+    || isDir == NO)
+    {
+      return NO;
+    }
+  pngPath = [fullPath stringByAppendingPathComponent: @".dir.png"];
+  tiffPath = [fullPath stringByAppendingPathComponent: @".dir.tiff"];
+
+  if ([mgr fileExistsAtPath: pngPath]
+    && [mgr removeFileAtPath: pngPath handler: nil] == NO)
+    {
+      return NO;
+    }
+  if (image == nil)
+    {
+      if ([mgr fileExistsAtPath: tiffPath])
+	{
+	  return [mgr removeFileAtPath: tiffPath handler: nil];
+	}
+      return YES;
+    }
+
+  data = [image TIFFRepresentation];
+  if (data == nil)
+    {
+      return NO;
+    }
+  return [data writeToFile: tiffPath atomically: YES];
 }
 
 /**
