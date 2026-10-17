@@ -5626,14 +5626,48 @@ other than copy/paste or dragging. */
   return mask & (NSDragOperationCopy | NSDragOperationGeneric);
 }
 
+/* Answers an image of the selected glyphs, drawn without the selection
+ * highlight, and sets origin to the image's lower left corner in the
+ * receiver's coordinates.  Answers nil when nothing is selected.
+ */
 - (NSImage *) dragImageForSelectionWithEvent: (NSEvent *)event
 				      origin: (NSPoint *)origin
 {
+  NSRange range = [self selectedRange];
+  NSRange glyphs;
+  NSPoint containerOrigin = [self textContainerOrigin];
+  NSRect rect;
+  NSImage *image;
+
   if (origin)
     *origin = NSMakePoint(0, 0);
 
-  // FIXME
-  return nil;
+  if (range.length == 0 || _layoutManager == nil)
+    return nil;
+
+  glyphs = [_layoutManager glyphRangeForCharacterRange: range
+				  actualCharacterRange: NULL];
+  rect = [_layoutManager boundingRectForGlyphRange: glyphs
+				   inTextContainer: _textContainer];
+  rect = NSIntegralRect(NSOffsetRect(rect, containerOrigin.x,
+    containerOrigin.y));
+  if (NSIsEmptyRect(rect))
+    return nil;
+
+  image = AUTORELEASE([[NSImage alloc] initWithSize: rect.size]);
+  // the glyphs are laid out top down, as in the receiver...
+  [image setFlipped: YES];
+  [image lockFocus];
+  [_layoutManager drawGlyphsForGlyphRange: glyphs
+				  atPoint: NSMakePoint(
+				    containerOrigin.x - NSMinX(rect),
+				    containerOrigin.y - NSMinY(rect))];
+  [image unlockFocus];
+  [image setFlipped: NO];
+
+  if (origin)
+    *origin = NSMakePoint(NSMinX(rect), NSMaxY(rect));
+  return image;
 }
 
 - (BOOL) dragSelectionWithEvent: (NSEvent *)event
@@ -5659,6 +5693,9 @@ other than copy/paste or dragging. */
 
   [self writeSelectionToPasteboard: pboard types: types];
 
+  // drag the selection's image from where the selection is...
+  if (image != nil)
+    location = point;
   [self dragImage: image at: location offset: mouseOffset event: event  
 	pasteboard: pboard source: self slideBack: slideBack];
 
