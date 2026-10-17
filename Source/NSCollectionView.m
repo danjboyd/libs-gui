@@ -2283,6 +2283,16 @@ static NSString *_placeholderItem = nil;
 - (void) performBatchUpdates: (GSCollectionViewPerformBatchUpdatesBlock) updates
 	   completionHandler: (GSCollectionViewCompletionHandlerBlock) completionHandler
 {
+  // the view does not animate, so the updates are finished once loaded...
+  if (updates != NULL)
+    {
+      CALL_NON_NULL_BLOCK_NO_ARGS(updates);
+    }
+  [self reloadData];
+  if (completionHandler != NULL)
+    {
+      CALL_NON_NULL_BLOCK(completionHandler, YES);
+    }
 }
 
 @end
