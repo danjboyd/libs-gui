@@ -533,6 +533,7 @@
 #import <Foundation/NSNotification.h>
 #import <Foundation/NSException.h>
 #import <Foundation/NSInvocation.h>
+#import <Foundation/NSKeyedArchiver.h>
 #import <Foundation/NSLock.h>
 #import <Foundation/NSPathUtilities.h>
 #import <Foundation/NSPortCoder.h>
@@ -1575,10 +1576,164 @@ static  NSMapTable              *mimeMap = NULL;
   return ok;
 }
 
+/** Clears the receiver's contents and makes the application its owner.
+ * Answers the new change count.
+ */
+- (NSInteger) clearContents
+{
+  return [self declareTypes: [NSArray array] owner: nil];
+}
+
+/* Write a value an NSPasteboardWriting object gave for a type. */
+- (BOOL) _writePasteboardPropertyList: (id)value forType: (NSString*)type
+{
+  if ([value isKindOfClass: [NSData class]])
+    {
+      return [self setData: value forType: type];
+    }
+  if ([value isKindOfClass: [NSString class]])
+    {
+      return [self setString: value forType: type];
+    }
+  if (value != nil)
+    {
+      return [self setPropertyList: value forType: type];
+    }
+  return NO;
+}
+
+/** Adds the types of the objects, which conform to NSPasteboardWriting,
+ * to the receiver and writes the value each object gives for its types.
+ * Call -clearContents first to replace the contents.<br />
+ * The pasteboard holds a single item, so an object's value for a type
+ * an earlier object also writes is ignored.  A promised type
+ * (NSPasteboardWritingPromised) is asked for at once.
+ */
 - (BOOL) writeObjects: (NSArray*)objects
 {
-  // FIXME: not implemented
-  return NO;
+  NSMutableArray	*types = [NSMutableArray array];
+  NSMutableArray	*writers = [NSMutableArray array];
+  NSEnumerator		*e = [objects objectEnumerator];
+  id			obj;
+  NSUInteger		i;
+  BOOL			ok = NO;
+
+  while ((obj = [e nextObject]) != nil)
+    {
+      NSEnumerator	*te;
+      NSString		*type;
+
+      if ([obj respondsToSelector: @selector(writableTypesForPasteboard:)] == NO)
+	{
+	  continue;
+	}
+      te = [[obj writableTypesForPasteboard: self] objectEnumerator];
+      while ((type = [te nextObject]) != nil)
+	{
+	  if ([types containsObject: type] == NO)
+	    {
+	      [types addObject: type];
+	      [writers addObject: obj];
+	    }
+	}
+    }
+  if ([types count] == 0)
+    {
+      return NO;
+    }
+
+  [self addTypes: types owner: nil];
+  for (i = 0; i < [types count]; i++)
+    {
+      NSString	*type = [types objectAtIndex: i];
+
+      obj = [writers objectAtIndex: i];
+      if ([obj respondsToSelector:
+	@selector(writingOptionsForType:pasteboard:)])
+	{
+	  /* Nothing is written lazily, so a promised type is asked for
+	     like any other. */
+	  [obj writingOptionsForType: type pasteboard: self];
+	}
+      if ([self _writePasteboardPropertyList:
+	[obj pasteboardPropertyListForType: type] forType: type])
+	{
+	  ok = YES;
+	}
+    }
+  return ok;
+}
+
+/** Answers objects of the first of the classes, which conform to
+ * NSPasteboardReading, that can read a type the receiver holds, made from
+ * the receiver's value for that type, in the form the class asks for with
+ * +readingOptionsForType:pasteboard:.  The pasteboard holds a single item,
+ * so the array holds at most one object.  The options are not used.
+ */
+- (NSArray*) readObjectsForClasses: (NSArray*)classArray
+			   options: (NSDictionary*)options
+{
+  NSEnumerator	*e = [classArray objectEnumerator];
+  Class		cls;
+
+  while ((cls = [e nextObject]) != Nil)
+    {
+      NSString			*type;
+      NSPasteboardReadingOptions	readingOptions = NSPasteboardReadingAsData;
+      id			value;
+      id			object = nil;
+
+      if ([cls respondsToSelector: @selector(readableTypesForPasteboard:)] == NO)
+	{
+	  continue;
+	}
+      type = [self availableTypeFromArray:
+	[cls readableTypesForPasteboard: self]];
+      if (type == nil)
+	{
+	  continue;
+	}
+
+      if ([cls respondsToSelector: @selector(readingOptionsForType:pasteboard:)])
+	{
+	  readingOptions = [cls readingOptionsForType: type pasteboard: self];
+	}
+      if (readingOptions & NSPasteboardReadingAsKeyedArchive)
+	{
+	  NSData	*data = [self dataForType: type];
+
+	  if (data != nil)
+	    {
+	      object = [NSKeyedUnarchiver unarchiveObjectWithData: data];
+	    }
+	}
+      else
+	{
+	  if (readingOptions & NSPasteboardReadingAsString)
+	    {
+	      value = [self stringForType: type];
+	    }
+	  else if (readingOptions & NSPasteboardReadingAsPropertyList)
+	    {
+	      value = [self propertyListForType: type];
+	    }
+	  else
+	    {
+	      value = [self dataForType: type];
+	    }
+	  if (value != nil && [cls instancesRespondToSelector:
+	    @selector(initWithPasteboardPropertyList:ofType:)])
+	    {
+	      object = AUTORELEASE([[cls alloc]
+		initWithPasteboardPropertyList: value ofType: type]);
+	    }
+	}
+      if (object != nil)
+	{
+	  return [NSArray arrayWithObject: object];
+	}
+    }
+  return [NSArray array];
 }
 
 /**
