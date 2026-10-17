@@ -749,11 +749,23 @@ static GSFontEnumerator *sharedEnumerator = nil;
   return NSMakePoint (advance.width, advance.height);
 }
 
+/* The origin at which to draw aGlyph so that its bounding rectangle is
+ * centred on aRect, in the same coordinates as aRect.
+ */
+- (NSPoint) _positionOfGlyph: (NSGlyph)aGlyph
+	      centredOnRect: (NSRect)aRect
+{
+  NSRect glyphRect = [self boundingRectForGlyph: aGlyph];
+
+  return NSMakePoint(NSMidX(aRect) - NSMidX(glyphRect),
+		     NSMidY(aRect) - NSMidY(glyphRect));
+}
+
 - (NSPoint) positionOfGlyph: (NSGlyph)aGlyph
 	       forCharacter: (unichar)aChar
 	     struckOverRect: (NSRect)aRect
 {
-  return NSZeroPoint;
+  return [self _positionOfGlyph: aGlyph centredOnRect: aRect];
 }
 
 - (NSPoint) positionOfGlyph: (NSGlyph)aGlyph
@@ -761,9 +773,10 @@ static GSFontEnumerator *sharedEnumerator = nil;
 	       metricsExist: (BOOL *)flag
 {
   if (flag)
-    *flag = NO;
+    *flag = YES;
 
-  return NSZeroPoint;
+  return [self _positionOfGlyph: aGlyph
+		  centredOnRect: [self boundingRectForGlyph: baseGlyph]];
 }
 
 - (NSPoint) positionOfGlyph: (NSGlyph)aGlyph
@@ -771,9 +784,9 @@ static GSFontEnumerator *sharedEnumerator = nil;
 	       metricsExist: (BOOL *)flag
 {
   if (flag)
-    *flag = NO;
+    *flag = YES;
 
-  return NSZeroPoint;
+  return [self _positionOfGlyph: aGlyph centredOnRect: aRect];
 }
 
 - (NSPoint) positionOfGlyph: (NSGlyph)aGlyph
