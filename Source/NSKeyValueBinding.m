@@ -137,6 +137,7 @@
 static NSRecursiveLock *bindingLock = nil;
 static NSMapTable *classTable = NULL;      //available bindings
 static NSMapTable *objectTable = NULL;     //bound bindings
+static NSMapTable *placeholderTable = NULL; //default placeholders
 
 typedef enum {
   GSBindingOperationAnd = 0,
@@ -162,6 +163,8 @@ void GSBindingInvokeAction(NSString *targetKey, NSString *argumentKey,
           NSObjectMapValueCallBacks, 128);
       objectTable = NSCreateMapTable(NSNonRetainedObjectMapKeyCallBacks,
           NSObjectMapValueCallBacks, 128);
+      placeholderTable = NSCreateMapTable(NSNonOwnedPointerMapKeyCallBacks,
+          NSObjectMapValueCallBacks, 16);
     }
 }
 
@@ -299,6 +302,7 @@ void GSBindingInvokeAction(NSString *targetKey, NSString *argumentKey,
   NSMutableDictionary *bindings;
   
   src = source;
+  ASSIGNCOPY(bindingName, binding);
   if (options == nil)
     {
       info = [[NSDictionary alloc] initWithObjectsAndKeys:
@@ -339,6 +343,7 @@ void GSBindingInvokeAction(NSString *targetKey, NSString *argumentKey,
 - (void)dealloc
 {
   DESTROY(info);
+  DESTROY(bindingName);
   src = nil; 
   [super dealloc];
 }
@@ -422,29 +427,43 @@ void GSBindingInvokeAction(NSString *targetKey, NSString *argumentKey,
     }
 }
 
+/* The placeholder for a marker (nil for a null value): the one in the
+ * options, else the default placeholder of the bound object's class for
+ * the marker and the binding, else fallback.
+ */
+- (id) placeholderForMarker: (id)marker
+                     option: (NSString *)optionKey
+                    options: (NSDictionary *)options
+                   fallback: (id)fallback
+{
+  id placeholder = [options objectForKey: optionKey];
+
+  if (placeholder == nil && bindingName != nil)
+    {
+      placeholder = [[src class] defaultPlaceholderForMarker: marker
+                                                 withBinding: bindingName];
+    }
+  return (placeholder != nil) ? placeholder : fallback;
+}
+
 - (id) transformValue: (id)value withOptions: (NSDictionary *)options
 {
   NSString *valueTransformerName;
   NSValueTransformer *valueTransformer;
-  NSString *placeholder;
 
   if (value == NSMultipleValuesMarker)
     {
-      placeholder = [options objectForKey: NSMultipleValuesPlaceholderBindingOption];
-      if (placeholder == nil)
-        {
-          placeholder = @"Multiple Values";
-        }
-      return placeholder;
+      return [self placeholderForMarker: value
+                   option: NSMultipleValuesPlaceholderBindingOption
+                   options: options
+                   fallback: @"Multiple Values"];
     }
   if (value == NSNoSelectionMarker)
     {
-      placeholder = [options objectForKey: NSNoSelectionPlaceholderBindingOption];
-      if (placeholder == nil)
-        {
-          placeholder = @"No Selection";
-        }
-      return placeholder;
+      return [self placeholderForMarker: value
+                   option: NSNoSelectionPlaceholderBindingOption
+                   options: options
+                   fallback: @"No Selection"];
     }
   if (value == NSNotApplicableMarker)
     {
@@ -455,19 +474,17 @@ void GSBindingInvokeAction(NSString *targetKey, NSString *argumentKey,
                       format: @"This binding does not accept not applicable keys"];
         }
 
-      placeholder = [options objectForKey:
-        NSNotApplicablePlaceholderBindingOption];
-      if (placeholder == nil)
-        {
-          placeholder = @"Not Applicable";
-        }
-      return placeholder;
+      return [self placeholderForMarker: value
+                   option: NSNotApplicablePlaceholderBindingOption
+                   options: options
+                   fallback: @"Not Applicable"];
     }
   if (value == nil || value == [NSNull null])
     {
-      placeholder = [options objectForKey:
-        NSNullPlaceholderBindingOption];
-      return placeholder;
+      return [self placeholderForMarker: nil
+                   option: NSNullPlaceholderBindingOption
+                   options: options
+                   fallback: nil];
     }
 
   valueTransformerName = [options objectForKey:
@@ -598,6 +615,72 @@ void GSBindingInvokeAction(NSString *targetKey, NSString *argumentKey,
                         context: (void *)context
 {
   [self setValueFor: (NSString*)context];
+}
+
+@end
+
+@implementation NSObject (NSPlaceholder)
+
+/* The default placeholders are kept by class, binding and marker; NSNull
+ * stands for the nil marker of a null value.  A class has the default
+ * placeholders of its superclasses unless it sets its own.
+ */
++ (id) defaultPlaceholderForMarker: (id)marker
+                       withBinding: (NSString *)binding
+{
+  id key = (marker == nil) ? (id)[NSNull null] : marker;
+  id placeholder = nil;
+  Class c;
+
+  [GSKeyValueBinding class];
+  [bindingLock lock];
+  for (c = self; c != Nil && placeholder == nil; c = [c superclass])
+    {
+      NSDictionary *bindings = NSMapGet(placeholderTable, (void *)c);
+
+      placeholder = [[bindings objectForKey: binding] objectForKey: key];
+    }
+  RETAIN(placeholder);
+  [bindingLock unlock];
+  return AUTORELEASE(placeholder);
+}
+
++ (void) setDefaultPlaceholder: (id)placeholder
+                     forMarker: (id)marker
+                   withBinding: (NSString *)binding
+{
+  id key = (marker == nil) ? (id)[NSNull null] : marker;
+  NSMutableDictionary *bindings;
+  NSMutableDictionary *markers;
+
+  if (binding == nil)
+    {
+      return;
+    }
+  [GSKeyValueBinding class];
+  [bindingLock lock];
+  bindings = NSMapGet(placeholderTable, (void *)self);
+  if (bindings == nil)
+    {
+      bindings = [NSMutableDictionary new];
+      NSMapInsert(placeholderTable, (void *)self, (void *)bindings);
+      RELEASE(bindings);
+    }
+  markers = [bindings objectForKey: binding];
+  if (markers == nil)
+    {
+      markers = [NSMutableDictionary dictionary];
+      [bindings setObject: markers forKey: binding];
+    }
+  if (placeholder == nil)
+    {
+      [markers removeObjectForKey: key];
+    }
+  else
+    {
+      [markers setObject: placeholder forKey: key];
+    }
+  [bindingLock unlock];
 }
 
 @end

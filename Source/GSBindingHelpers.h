@@ -41,6 +41,7 @@
 @public
   NSDictionary *info;
   id src;
+  NSString *bindingName;
   BOOL inReverseSet;
 }
 
