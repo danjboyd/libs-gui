@@ -2241,8 +2241,55 @@ static NSString *_placeholderItem = nil;
 
 /* Inserting, Moving and Deleting Items */
 
+/* Answers the sections of INDEXPATHS.  */
+- (NSIndexSet *) _sectionsOfIndexPaths: (NSSet *)indexPaths
+{
+  NSMutableIndexSet *sections = [NSMutableIndexSet indexSet];
+
+  FOR_IN(NSIndexPath*, path, indexPaths)
+    {
+      [sections addIndex: [path section]];
+    }
+  END_FOR_IN(indexPaths);
+  return sections;
+}
+
+/* Loads the sections from FIRST on again after the data source has
+ * inserted or deleted sections: the sections the view has loaded there
+ * are unloaded, and the sections the data source now has are loaded.
+ */
+- (void) _reloadSectionsFrom: (NSUInteger)first
+{
+  NSArray *paths = [[_indexPathsToItems keyEnumerator] allObjects];
+  NSInteger last = [self numberOfSections] - 1;
+  NSInteger cs;
+
+  FOR_IN(NSIndexPath*, path, paths)
+    {
+      if ([path section] > last)
+	{
+	  last = [path section];
+	}
+    }
+  END_FOR_IN(paths);
+
+  for (cs = first; cs <= last; cs++)
+    {
+      [self _unloadSectionAtIndex: cs];
+    }
+  last = [self numberOfSections] - 1;
+  for (cs = first; cs <= last; cs++)
+    {
+      [self _loadSectionAtIndex: cs];
+    }
+  [self _updateParentViewFrame];
+}
+
+/* The data source has inserted items at INDEXPATHS: load their sections
+ * again.  */
 - (void) insertItemsAtIndexPaths: (NSSet *)indexPaths
 {
+  [self reloadSections: [self _sectionsOfIndexPaths: indexPaths]];
 }
 
 /* Answers the loaded items of a section in the order of their index
@@ -2390,14 +2437,23 @@ static NSString *_placeholderItem = nil;
       nil]];
 }
 
+/* The data source has deleted the items at INDEXPATHS: load their
+ * sections again.  */
 - (void) deleteItemsAtIndexPaths: (NSSet *)indexPaths
 {
+  [self reloadSections: [self _sectionsOfIndexPaths: indexPaths]];
 }
 
 /* Inserting, Moving, Deleting and Collapsing Sections */
 
+/* The data source has inserted SECTIONS: the sections from the first of
+ * them on are loaded again.  */
 - (void) insertSections: (NSIndexSet *)sections
 {
+  if ([sections count] > 0)
+    {
+      [self _reloadSectionsFrom: [sections firstIndex]];
+    }
 }
 
 - (void) moveSection: (NSInteger)section
@@ -2441,8 +2497,14 @@ static NSString *_placeholderItem = nil;
   [self _relocateItemsInSections: sections];
 }
 
+/* The data source has deleted SECTIONS: the sections from the first of
+ * them on are loaded again.  */
 - (void) deleteSections: (NSIndexSet *)sections
 {
+  if ([sections count] > 0)
+    {
+      [self _reloadSectionsFrom: [sections firstIndex]];
+    }
 }
 
 // 10.12 method...
