@@ -1713,12 +1713,71 @@ static NSString *_placeholderItem = nil;
     }
 }
 
+/* Answers a new instance of the class or the first top-level object of
+ * KIND in the nib registered for IDENTIFIER and KIND, or nil when neither
+ * is registered.  Classes are made with -init when KIND is
+ * GSNoSupplementaryElement (items) and with -initWithFrame: otherwise
+ * (views).
+ */
+- (id) _makeRegisteredObjectOfKind: (NSCollectionViewSupplementaryElementKind)kind
+			withIdentifier: (NSUserInterfaceItemIdentifier)identifier
+			   objectClass: (Class)objectClass
+{
+  Class cls;
+  NSNib *nib;
+
+  if (identifier == nil)
+    {
+      return nil;
+    }
+
+  cls = [[_registeredClasses objectForKey: kind] objectForKey: identifier];
+  if (cls != Nil)
+    {
+      if (kind == GSNoSupplementaryElement)
+	{
+	  return AUTORELEASE([[cls alloc] init]);
+	}
+      return AUTORELEASE([[cls alloc] initWithFrame: NSZeroRect]);
+    }
+
+  nib = [[_registeredNibs objectForKey: kind] objectForKey: identifier];
+  if (nib != nil)
+    {
+      NSArray *topLevelObjects = nil;
+
+      /* NSNib needs an owner; the item or view is a top-level object.  */
+      if ([nib instantiateWithOwner: self topLevelObjects: &topLevelObjects])
+	{
+	  FOR_IN(id, object, topLevelObjects)
+	    {
+	      if ([object isKindOfClass: objectClass])
+		{
+		  return object;
+		}
+	    }
+	  END_FOR_IN(topLevelObjects);
+	}
+      NSLog(@"NSCollectionView: nib %@ for identifier %@ has no %@",
+	    nib, identifier, NSStringFromClass(objectClass));
+    }
+
+  return nil;
+}
+
+/* Answers an item made from the class or nib registered for IDENTIFIER, as
+ * a data source's -collectionView:itemForRepresentedObjectAtIndexPath:
+ * asks for it.  Without a registration the item is a plain item with an
+ * empty view.
+ */
 - (NSCollectionViewItem *) makeItemWithIdentifier: (NSUserInterfaceItemIdentifier)identifier
 				     forIndexPath: (NSIndexPath *)indexPath
 {
-  NSCollectionViewItem *item = [_dataSource collectionView: self
-					    itemForRepresentedObjectAtIndexPath: indexPath];
+  NSCollectionViewItem *item;
 
+  item = [self _makeRegisteredObjectOfKind: GSNoSupplementaryElement
+			    withIdentifier: identifier
+			       objectClass: [NSCollectionViewItem class]];
   if (item != nil)
     {
       [self _instantiateWithItem: item];
@@ -1732,23 +1791,19 @@ static NSString *_placeholderItem = nil;
       RELEASE(view);
     }
 
-  if (item != nil)
-    {
-      // Add to maps...
-      [_itemsToIndexPaths setObject: indexPath
-			     forKey: item];
-      [_indexPathsToItems setObject: item
-			     forKey: indexPath];
-    }
-
   return item;
 }
 
+/* Answers a view made from the class or nib registered for ELEMENTKIND and
+ * IDENTIFIER, or nil when neither is registered.
+ */
 - (NSView *) makeSupplementaryViewOfKind: (NSCollectionViewSupplementaryElementKind)elementKind
 			  withIdentifier: (NSUserInterfaceItemIdentifier)identifier
 			    forIndexPath: (NSIndexPath *)indexPath
 {
-  return nil;
+  return [self _makeRegisteredObjectOfKind: elementKind
+			    withIdentifier: identifier
+			       objectClass: [NSView class]];
 }
 
 - (void) registerClass: (Class)itemClass
@@ -1853,8 +1908,26 @@ static NSString *_placeholderItem = nil;
 /* Reloading Content */
 - (void) _loadItemAtIndexPath: (NSIndexPath *)path
 {
-  NSCollectionViewItem *item = [self makeItemWithIdentifier: nil
-					       forIndexPath: path];
+  NSCollectionViewItem *item = nil;
+
+  /* The data source makes the item, usually with
+   * -makeItemWithIdentifier:forIndexPath:.  */
+  if ([_dataSource respondsToSelector:
+    @selector(collectionView:itemForRepresentedObjectAtIndexPath:)])
+    {
+      item = [_dataSource collectionView: self
+	itemForRepresentedObjectAtIndexPath: path];
+    }
+  if (item != nil)
+    {
+      [self _instantiateWithItem: item];
+    }
+  else
+    {
+      item = [self makeItemWithIdentifier: nil forIndexPath: path];
+    }
+  [_itemsToIndexPaths setObject: path forKey: item];
+  [_indexPathsToItems setObject: item forKey: path];
 
   NSDebugLog(@"NSCollectionView _loadItemAtIndexPath:%@ item=%@ view=%@", path, item, [item view]);
 
