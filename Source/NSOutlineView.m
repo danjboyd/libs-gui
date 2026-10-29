@@ -1093,23 +1093,49 @@ static NSImage *unexpandable  = nil;
     }
 }
 
+/* Widens the outline column when the widest of its rows, with the row's
+ * indentation and disclosure image, does not fit.  A row's width is the
+ * size of a copy of its data cell holding the row's value, not the
+ * column's frame, so the column does not grow again on the next draw; the
+ * copy keeps the measuring from the cell -preparedCellAtColumn:row: and
+ * the delegate prepare for drawing.
+ */
+- (void) _autoresizeOutlineColumn
+{
+  CGFloat imageWidth = [collapsed size].width;
+  CGFloat widest = 0.0;
+  NSInteger index;
+
+  if (_outlineTableColumn == nil)
+    {
+      return;
+    }
+  for (index = 0; index < _numberOfRows; index++)
+    {
+      NSCell *cell = [[_outlineTableColumn dataCellForRow: index] copy];
+      CGFloat length;
+
+      [cell setObjectValue: [self _objectValueForTableColumn: _outlineTableColumn
+							 row: index]];
+      length = [cell cellSize].width
+	+ [self levelForRow: index] * _indentationPerLevel + 5.0 + imageWidth;
+      RELEASE(cell);
+      if (widest < length)
+	{
+	  widest = length;
+	}
+    }
+  if (widest > [_outlineTableColumn width])
+    {
+      [_outlineTableColumn setWidth: widest];
+    }
+}
+
 - (void) drawRect: (NSRect)aRect
 {
-  NSInteger index = 0;
-
   if (_autoResizesOutlineColumn)
     {
-      CGFloat widest = 0;
-      for (index = 0; index < _numberOfRows; index++)
-	{
-	  CGFloat offset = [self levelForRow: index] *
-	    [self indentationPerLevel];
-	  NSRect drawingRect = [self frameOfCellAtColumn: 0
-				     row: index];
-	  CGFloat length = drawingRect.size.width + offset;
-	  if (widest < length) widest = length;
-	}
-      // [_outlineTableColumn setWidth: widest];
+      [self _autoresizeOutlineColumn];
     }
 
   [super drawRect: aRect];
