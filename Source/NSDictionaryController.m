@@ -172,8 +172,11 @@ GSQuotedStringsEntry(NSString *s)
 
 - (void) _setup
 {
-  // Values may already have been set
-  ASSIGN(_contentDictionary, [NSMutableDictionary dictionary]);
+  /* -initWithContent: has already set the content through -setContent:.  */
+  if (_contentDictionary == nil)
+    {
+      ASSIGN(_contentDictionary, [NSMutableDictionary dictionary]);
+    }
   ASSIGN(_includedKeys, [NSArray array]);
   ASSIGN(_excludedKeys, [NSArray array]);
   ASSIGN(_initialKey, [NSString stringWithString: @"key"]);

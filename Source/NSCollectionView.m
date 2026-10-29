@@ -342,9 +342,12 @@ static NSString *_placeholderItem = nil;
   _itemsToIndexPaths = RETAIN([NSMapTable strongToStrongObjectsMapTable]);
   _indexPathsToItems = RETAIN([NSMapTable strongToStrongObjectsMapTable]);
 
-  // Registered nib/class
-  _registeredNibs = RETAIN([NSMapTable weakToStrongObjectsMapTable]);
-  _registeredClasses = RETAIN([NSMapTable weakToStrongObjectsMapTable]);
+  /* Registered nibs and classes, by kind and identifier.  The kind and
+   * identifier strings and the nibs are retained, as on Cocoa: a
+   * registration made with a string that is then released, as Swift's
+   * bridged strings are, is kept.  */
+  _registeredNibs = RETAIN([NSMapTable strongToStrongObjectsMapTable]);
+  _registeredClasses = RETAIN([NSMapTable strongToStrongObjectsMapTable]);
 
   _allowReload = YES;
 }
@@ -1713,12 +1716,71 @@ static NSString *_placeholderItem = nil;
     }
 }
 
+/* Answers a new instance of the class or the first top-level object of
+ * KIND in the nib registered for IDENTIFIER and KIND, or nil when neither
+ * is registered.  Classes are made with -init when KIND is
+ * GSNoSupplementaryElement (items) and with -initWithFrame: otherwise
+ * (views).
+ */
+- (id) _makeRegisteredObjectOfKind: (NSCollectionViewSupplementaryElementKind)kind
+			withIdentifier: (NSUserInterfaceItemIdentifier)identifier
+			   objectClass: (Class)objectClass
+{
+  Class cls;
+  NSNib *nib;
+
+  if (identifier == nil)
+    {
+      return nil;
+    }
+
+  cls = [[_registeredClasses objectForKey: kind] objectForKey: identifier];
+  if (cls != Nil)
+    {
+      if (kind == GSNoSupplementaryElement)
+	{
+	  return AUTORELEASE([[cls alloc] init]);
+	}
+      return AUTORELEASE([[cls alloc] initWithFrame: NSZeroRect]);
+    }
+
+  nib = [[_registeredNibs objectForKey: kind] objectForKey: identifier];
+  if (nib != nil)
+    {
+      NSArray *topLevelObjects = nil;
+
+      /* NSNib needs an owner; the item or view is a top-level object.  */
+      if ([nib instantiateWithOwner: self topLevelObjects: &topLevelObjects])
+	{
+	  FOR_IN(id, object, topLevelObjects)
+	    {
+	      if ([object isKindOfClass: objectClass])
+		{
+		  return object;
+		}
+	    }
+	  END_FOR_IN(topLevelObjects);
+	}
+      NSLog(@"NSCollectionView: nib %@ for identifier %@ has no %@",
+	    nib, identifier, NSStringFromClass(objectClass));
+    }
+
+  return nil;
+}
+
+/* Answers an item made from the class or nib registered for IDENTIFIER, as
+ * a data source's -collectionView:itemForRepresentedObjectAtIndexPath:
+ * asks for it.  Without a registration the item is a plain item with an
+ * empty view.
+ */
 - (NSCollectionViewItem *) makeItemWithIdentifier: (NSUserInterfaceItemIdentifier)identifier
 				     forIndexPath: (NSIndexPath *)indexPath
 {
-  NSCollectionViewItem *item = [_dataSource collectionView: self
-					    itemForRepresentedObjectAtIndexPath: indexPath];
+  NSCollectionViewItem *item;
 
+  item = [self _makeRegisteredObjectOfKind: GSNoSupplementaryElement
+			    withIdentifier: identifier
+			       objectClass: [NSCollectionViewItem class]];
   if (item != nil)
     {
       [self _instantiateWithItem: item];
@@ -1732,23 +1794,19 @@ static NSString *_placeholderItem = nil;
       RELEASE(view);
     }
 
-  if (item != nil)
-    {
-      // Add to maps...
-      [_itemsToIndexPaths setObject: indexPath
-			     forKey: item];
-      [_indexPathsToItems setObject: item
-			     forKey: indexPath];
-    }
-
   return item;
 }
 
+/* Answers a view made from the class or nib registered for ELEMENTKIND and
+ * IDENTIFIER, or nil when neither is registered.
+ */
 - (NSView *) makeSupplementaryViewOfKind: (NSCollectionViewSupplementaryElementKind)elementKind
 			  withIdentifier: (NSUserInterfaceItemIdentifier)identifier
 			    forIndexPath: (NSIndexPath *)indexPath
 {
-  return nil;
+  return [self _makeRegisteredObjectOfKind: elementKind
+			    withIdentifier: identifier
+			       objectClass: [NSView class]];
 }
 
 - (void) registerClass: (Class)itemClass
@@ -1776,12 +1834,12 @@ static NSString *_placeholderItem = nil;
   t = [_registeredClasses objectForKey: kind];
   if (t == nil)
     {
-      t = [NSMapTable weakToWeakObjectsMapTable];
+      t = [NSMapTable strongToStrongObjectsMapTable];
       [_registeredClasses setObject: t
 			     forKey: kind];
     }
 
-  [t setObject: viewClass forKey: [identifier copy]];
+  [t setObject: viewClass forKey: AUTORELEASE([identifier copy])];
 }
 
 - (void) registerNib: (NSNib *)nib
@@ -1793,12 +1851,12 @@ static NSString *_placeholderItem = nil;
   t = [_registeredNibs objectForKey: kind];
   if (t == nil)
     {
-      t = [NSMapTable weakToWeakObjectsMapTable];
+      t = [NSMapTable strongToStrongObjectsMapTable];
       [_registeredNibs setObject: t
 			  forKey: kind];
     }
 
-  [t setObject: nib forKey: [identifier copy]];
+  [t setObject: nib forKey: AUTORELEASE([identifier copy])];
 }
 
 /* Providing the collection view's data */
@@ -1853,8 +1911,26 @@ static NSString *_placeholderItem = nil;
 /* Reloading Content */
 - (void) _loadItemAtIndexPath: (NSIndexPath *)path
 {
-  NSCollectionViewItem *item = [self makeItemWithIdentifier: nil
-					       forIndexPath: path];
+  NSCollectionViewItem *item = nil;
+
+  /* The data source makes the item, usually with
+   * -makeItemWithIdentifier:forIndexPath:.  */
+  if ([_dataSource respondsToSelector:
+    @selector(collectionView:itemForRepresentedObjectAtIndexPath:)])
+    {
+      item = [_dataSource collectionView: self
+	itemForRepresentedObjectAtIndexPath: path];
+    }
+  if (item != nil)
+    {
+      [self _instantiateWithItem: item];
+    }
+  else
+    {
+      item = [self makeItemWithIdentifier: nil forIndexPath: path];
+    }
+  [_itemsToIndexPaths setObject: path forKey: item];
+  [_indexPathsToItems setObject: item forKey: path];
 
   NSDebugLog(@"NSCollectionView _loadItemAtIndexPath:%@ item=%@ view=%@", path, item, [item view]);
 
@@ -2168,8 +2244,55 @@ static NSString *_placeholderItem = nil;
 
 /* Inserting, Moving and Deleting Items */
 
+/* Answers the sections of INDEXPATHS.  */
+- (NSIndexSet *) _sectionsOfIndexPaths: (NSSet *)indexPaths
+{
+  NSMutableIndexSet *sections = [NSMutableIndexSet indexSet];
+
+  FOR_IN(NSIndexPath*, path, indexPaths)
+    {
+      [sections addIndex: [path section]];
+    }
+  END_FOR_IN(indexPaths);
+  return sections;
+}
+
+/* Loads the sections from FIRST on again after the data source has
+ * inserted or deleted sections: the sections the view has loaded there
+ * are unloaded, and the sections the data source now has are loaded.
+ */
+- (void) _reloadSectionsFrom: (NSUInteger)first
+{
+  NSArray *paths = [[_indexPathsToItems keyEnumerator] allObjects];
+  NSInteger last = [self numberOfSections] - 1;
+  NSInteger cs;
+
+  FOR_IN(NSIndexPath*, path, paths)
+    {
+      if ([path section] > last)
+	{
+	  last = [path section];
+	}
+    }
+  END_FOR_IN(paths);
+
+  for (cs = first; cs <= last; cs++)
+    {
+      [self _unloadSectionAtIndex: cs];
+    }
+  last = [self numberOfSections] - 1;
+  for (cs = first; cs <= last; cs++)
+    {
+      [self _loadSectionAtIndex: cs];
+    }
+  [self _updateParentViewFrame];
+}
+
+/* The data source has inserted items at INDEXPATHS: load their sections
+ * again.  */
 - (void) insertItemsAtIndexPaths: (NSSet *)indexPaths
 {
+  [self reloadSections: [self _sectionsOfIndexPaths: indexPaths]];
 }
 
 /* Answers the loaded items of a section in the order of their index
@@ -2317,14 +2440,23 @@ static NSString *_placeholderItem = nil;
       nil]];
 }
 
+/* The data source has deleted the items at INDEXPATHS: load their
+ * sections again.  */
 - (void) deleteItemsAtIndexPaths: (NSSet *)indexPaths
 {
+  [self reloadSections: [self _sectionsOfIndexPaths: indexPaths]];
 }
 
 /* Inserting, Moving, Deleting and Collapsing Sections */
 
+/* The data source has inserted SECTIONS: the sections from the first of
+ * them on are loaded again.  */
 - (void) insertSections: (NSIndexSet *)sections
 {
+  if ([sections count] > 0)
+    {
+      [self _reloadSectionsFrom: [sections firstIndex]];
+    }
 }
 
 - (void) moveSection: (NSInteger)section
@@ -2368,8 +2500,14 @@ static NSString *_placeholderItem = nil;
   [self _relocateItemsInSections: sections];
 }
 
+/* The data source has deleted SECTIONS: the sections from the first of
+ * them on are loaded again.  */
 - (void) deleteSections: (NSIndexSet *)sections
 {
+  if ([sections count] > 0)
+    {
+      [self _reloadSectionsFrom: [sections firstIndex]];
+    }
 }
 
 // 10.12 method...
