@@ -342,9 +342,12 @@ static NSString *_placeholderItem = nil;
   _itemsToIndexPaths = RETAIN([NSMapTable strongToStrongObjectsMapTable]);
   _indexPathsToItems = RETAIN([NSMapTable strongToStrongObjectsMapTable]);
 
-  // Registered nib/class
-  _registeredNibs = RETAIN([NSMapTable weakToStrongObjectsMapTable]);
-  _registeredClasses = RETAIN([NSMapTable weakToStrongObjectsMapTable]);
+  /* Registered nibs and classes, by kind and identifier.  The kind and
+   * identifier strings and the nibs are retained, as on Cocoa: a
+   * registration made with a string that is then released, as Swift's
+   * bridged strings are, is kept.  */
+  _registeredNibs = RETAIN([NSMapTable strongToStrongObjectsMapTable]);
+  _registeredClasses = RETAIN([NSMapTable strongToStrongObjectsMapTable]);
 
   _allowReload = YES;
 }
@@ -1831,12 +1834,12 @@ static NSString *_placeholderItem = nil;
   t = [_registeredClasses objectForKey: kind];
   if (t == nil)
     {
-      t = [NSMapTable weakToWeakObjectsMapTable];
+      t = [NSMapTable strongToStrongObjectsMapTable];
       [_registeredClasses setObject: t
 			     forKey: kind];
     }
 
-  [t setObject: viewClass forKey: [identifier copy]];
+  [t setObject: viewClass forKey: AUTORELEASE([identifier copy])];
 }
 
 - (void) registerNib: (NSNib *)nib
@@ -1848,12 +1851,12 @@ static NSString *_placeholderItem = nil;
   t = [_registeredNibs objectForKey: kind];
   if (t == nil)
     {
-      t = [NSMapTable weakToWeakObjectsMapTable];
+      t = [NSMapTable strongToStrongObjectsMapTable];
       [_registeredNibs setObject: t
 			  forKey: kind];
     }
 
-  [t setObject: nib forKey: [identifier copy]];
+  [t setObject: nib forKey: AUTORELEASE([identifier copy])];
 }
 
 /* Providing the collection view's data */

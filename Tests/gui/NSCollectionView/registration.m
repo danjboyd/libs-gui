@@ -150,6 +150,31 @@ main(int argc, char **argv)
 			  forIndexPath: path] == nil,
     "a kind with no registration makes no supplementary view");
 
+  /* A registration made with strings and a nib that are released before
+     the item or view is made is kept.  */
+  {
+    NSAutoreleasePool *inner = [NSAutoreleasePool new];
+    NSString *kind = [NSString stringWithFormat: @"%@", @"TransientKind"];
+    NSString *identifier = [NSString stringWithFormat: @"%@", @"transient"];
+
+    [cv registerClass: [RegisteredHeader class]
+      forSupplementaryViewOfKind: kind
+	      withIdentifier: identifier];
+    [cv registerNib: AUTORELEASE([[NSNib alloc]
+      initWithNibData: [itemXib dataUsingEncoding: NSUTF8StringEncoding]
+	       bundle: nil])
+      forItemWithIdentifier: identifier];
+    [inner release];
+  }
+  header = [cv makeSupplementaryViewOfKind: @"TransientKind"
+			    withIdentifier: @"transient"
+			      forIndexPath: path];
+  PASS([header isKindOfClass: [RegisteredHeader class]],
+    "a registration made with a released kind string is kept");
+  item = [cv makeItemWithIdentifier: @"transient" forIndexPath: path];
+  PASS(NSWidth([[item view] frame]) == 70.0,
+    "a registered nib is kept after its creator releases it");
+
   source = AUTORELEASE([Source new]);
   [cv setCollectionViewLayout:
     AUTORELEASE([[NSCollectionViewFlowLayout alloc] init])];
