@@ -29,6 +29,7 @@
 #import "AppKit/NSInputManager.h"
 #import "AppKit/NSInputServer.h"
 #import "AppKit/NSText.h"
+#import "AppKit/NSTextInputClient.h"
 #import "AppKit/NSHelpManager.h"
 
 /* For NSBeep () */
@@ -818,7 +819,19 @@ static NSInputManager *currentInputManager = nil;
 
 - (void) insertText: (id)aString
 {
-  [_currentClient insertText: aString];
+  id client = _currentClient;
+
+  /* A client that adopts NSTextInputClient is sent the method that
+     protocol declares, with no range to replace.  */
+  if ([client conformsToProtocol: @protocol(NSTextInputClient)])
+    {
+      [client insertText: aString
+        replacementRange: NSMakeRange(NSNotFound, 0)];
+    }
+  else
+    {
+      [_currentClient insertText: aString];
+    }
 }
 
 @end
