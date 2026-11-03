@@ -35,8 +35,12 @@
 #import <Foundation/NSAttributedString.h>
 #import <Foundation/NSString.h>
 
+#import <AppKit/NSColor.h>
 #import <AppKit/NSEvent.h>
+#import <AppKit/NSGraphics.h>
 #import <AppKit/NSImage.h>
+#import <AppKit/NSMenu.h>
+#import <AppKit/NSView.h>
 #import <AppKit/NSStatusItem.h>
 #import <AppKit/NSMenuItem.h>
 #import <AppKit/NSView.h>
@@ -82,9 +86,16 @@
   return _doubleAction;
 }
 
+/* Draws the background of a custom status item view: the selected menu
+ * item colour when FLAG is YES, as a highlighted menu title, and nothing,
+ * which leaves the bar showing through, otherwise.  */
 - (void) drawStatusBarBackgroundInRect: (NSRect)rect withHighlight: (BOOL)flag
 {
-  // NIMP
+  if (flag)
+    {
+      [[NSColor selectedMenuItemColor] set];
+      NSRectFill(rect);
+    }
 }
 
 - (BOOL) highlightMode
@@ -112,9 +123,18 @@
   return [_menuItem submenu];
 }
 
+/* Updates MENU, which asks its delegate first, and pops it up below the
+ * item's view.  Without a system tray the item has no view on screen, so
+ * the menu is only updated.  */
 - (void) popUpStatusItemMenu: (NSMenu*)menu
 {
-  // NIMP
+  [menu update];
+  if ([_view window] != nil)
+    {
+      [menu popUpMenuPositioningItem: nil
+			  atLocation: NSMakePoint(0, 0)
+			      inView: _view];
+    }
 }
 
 - (NSInteger) sendActionOn: (NSEventMask)mask
