@@ -508,6 +508,15 @@ setPath(NSBrowser *browser, NSString *path)
 	  [_delegate panel: self
 	    directoryDidChange: pathToColumn(_browser, column)];
 	}
+      if ([_delegate respondsToSelector:
+	@selector(panel:didChangeToDirectoryURL:)])
+	{
+	  NSString *directory = [pathToColumn(_browser, column)
+	    stringByAppendingPathComponent: [selectedCell stringValue]];
+
+	  [_delegate panel: self
+	    didChangeToDirectoryURL: [NSURL fileURLWithPath: directory]];
+	}
 
       if ([[[_form cellAtIndex: 0] stringValue] length] > 0)
 	{
@@ -1435,6 +1444,15 @@ selectCellWithString: (NSString*)title
   if (_delegateHasValidNameFilter)
     if (![_delegate panel: self isValidFilename: [self filename]])
       return;
+  if ([_delegate respondsToSelector: @selector(panel:validateURL:error:)])
+    {
+      NSError *error = nil;
+
+      if (![_delegate panel: self validateURL: [self URL] error: &error])
+	{
+	  return;
+	}
+    }
 
   [self _updateDefaultDirectory];
 
@@ -1917,6 +1935,13 @@ createRowsForColumn: (NSInteger)column
 	    [cell setLeaf: NO];
 	  else
 	    [cell setLeaf: YES];
+
+	  /* The delegate may show a file but not let it be chosen.  */
+	  if ([_delegate respondsToSelector: @selector(panel:shouldEnableURL:)])
+	    {
+	      [cell setEnabled: [_delegate panel: self
+		shouldEnableURL: [NSURL fileURLWithPath: pathAndFile]]];
+	    }
 
 	  addedRows++;
 	}
