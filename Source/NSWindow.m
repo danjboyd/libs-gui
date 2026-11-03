@@ -183,6 +183,8 @@ static GSWindowAnimationDelegate *animationDelegate;
 - (NSView *) _borderView;
 - (NSScreen *) _screenForFrame: (NSRect)frame;
 - (void) _moveChildWindowsByOffset: (NSSize)offset;
+- (void) _askWantsPeriodicDraggingUpdates: (NSView *)view;
+- (BOOL) _wantsPeriodicDraggingUpdates;
 @end
 
 @interface NSDrawer (GNUstepPrivate)
@@ -211,6 +213,32 @@ static GSWindowAnimationDelegate *animationDelegate;
       [self enableFlushWindow];
       [self flushWindowIfNeeded];
     }
+}
+
+/* Ask the destination a drag just entered whether it wants draggingUpdated:
+   while the pointer rests, the way GSPerformDragSelector picks it.  */
+- (void) _askWantsPeriodicDraggingUpdates: (NSView *)view
+{
+  SEL sel = @selector(wantsPeriodicDraggingUpdates);
+  id target = view;
+
+  if (target == _wv)
+    {
+      target = [_delegate respondsToSelector: sel] ? _delegate : (id)self;
+    }
+  _f.wants_periodic_dragging_updates = YES;
+  if ([target respondsToSelector: sel])
+    {
+      _f.wants_periodic_dragging_updates
+        = [target wantsPeriodicDraggingUpdates] ? 1 : 0;
+    }
+}
+
+/* Whether the destination under the drag wants draggingUpdated: while the
+   pointer rests.  GSDragView asks before each periodic update.  */
+- (BOOL) _wantsPeriodicDraggingUpdates
+{
+  return _f.wants_periodic_dragging_updates;
 }
 
 - (void) _moveChildWindowsByOffset: (NSSize)offset
@@ -4764,6 +4792,7 @@ checkCursorRectanglesExited(NSView *theView,  NSEvent *theEvent, NSPoint lastPoi
                       NSDebugLLog(@"NSDragging", @"Dragging entered");
                       GSPerformDragSelector(v, @selector(draggingEntered:),
                         dragInfo, action);
+                      [self _askWantsPeriodicDraggingUpdates: v];
                     }
                   else
                     {

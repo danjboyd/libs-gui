@@ -67,6 +67,10 @@
 - (void) _setCid: (void *)val;
 @end
 
+@interface NSWindow (GNUstepPrivate)
+- (BOOL) _wantsPeriodicDraggingUpdates;
+@end
+
 @interface GSDragView (Private)
 - (void) _setupWindowFor: (NSImage*)anImage
 	   mousePosition: (NSPoint)mPoint
@@ -820,6 +824,12 @@ static	GSDragView *sharedDragView = nil;
         }
       else if (destWindow)
         {
+	  /* A local destination that answered NO to
+	     -wantsPeriodicDraggingUpdates only hears about motion.  */
+	  if ([destWindow _wantsPeriodicDraggingUpdates] == NO)
+	    {
+	      break;
+	    }
 	  [self _sendLocalEvent: GSAppKitDraggingUpdate
                          action: dragMask & operationMask
                        position: newPosition
