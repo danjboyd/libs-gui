@@ -1129,6 +1129,28 @@ static BOOL menuBarVisible = YES;
       || ([keyEquivalent length] > 0 && [[NSCharacterSet controlCharacterSet] characterIsMember:[keyEquivalent characterAtIndex:0]]))
     relevantModifiersMask |= NSShiftKeyMask;
 
+  /* A delegate that answers for the menu's key equivalents, as a lazily
+   * filled menu's does, is asked instead of searching the items.  */
+  if ([_delegate respondsToSelector:
+    @selector(menuHasKeyEquivalent:forEvent:target:action:)])
+    {
+      id target = nil;
+      SEL action = NULL;
+
+      if (![_delegate menuHasKeyEquivalent: self
+				  forEvent: theEvent
+				    target: &target
+				    action: &action])
+	{
+	  return NO;
+	}
+      if (action != NULL)
+	{
+	  [NSApp sendAction: action to: target from: self];
+	}
+      return YES;
+    }
+
   if (![self _isVisible] && _delegate)
     {
       // Need to enable items as the automatic mechanism is switched off for invisible menus 
@@ -1479,6 +1501,25 @@ static BOOL menuBarVisible = YES;
                   controlViewWindow: w
                       preferredEdge: NSMinYEdge
                        selectedItem: selectedItem];
+
+  /* Keep the menu inside the rectangle the delegate confines it to; an
+   * empty rectangle leaves it where the theme put it.  */
+  if ([_delegate respondsToSelector: @selector(confinementRectForMenu:onScreen:)])
+    {
+      NSRect confinement = [_delegate confinementRectForMenu: self
+						   onScreen: [w screen]];
+
+      if (!NSIsEmptyRect(confinement))
+	{
+	  NSRect frame = [[self window] frame];
+
+	  frame.origin.x = MAX(NSMinX(confinement),
+	    MIN(NSMinX(frame), NSMaxX(confinement) - NSWidth(frame)));
+	  frame.origin.y = MAX(NSMinY(confinement),
+	    MIN(NSMinY(frame), NSMaxY(confinement) - NSHeight(frame)));
+	  [[self window] setFrameOrigin: frame.origin];
+	}
+    }
 }
 
 - (void) popUpMenuPositionItem: (NSMenuItem *)item
