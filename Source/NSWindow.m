@@ -3377,7 +3377,11 @@ checkCursorRectanglesExited(NSView *theView,  NSEvent *theEvent, NSPoint lastPoi
 
   _f.is_miniaturized = NO;
   [self makeKeyAndOrderFront: self];
-  [self _didDeminiaturize: sender];
+  /* -_didDeminiaturize: is for a window the window manager deminiaturized
+     by itself; it does nothing once the flag is clear, so post here.  */
+  [[NSNotificationCenter defaultCenter]
+    postNotificationName: NSWindowDidDeminiaturizeNotification
+		  object: self];
 }
 
 /**
