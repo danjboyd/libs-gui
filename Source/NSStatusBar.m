@@ -55,9 +55,17 @@
   [super dealloc];
 }
 
+/* Answers the shared status bar.  The X11 backends have no system tray
+ * for it, so its items are kept but not displayed.  */
 + (NSStatusBar*) systemStatusBar
 {
-  return nil;
+  static NSStatusBar *systemStatusBar = nil;
+
+  if (systemStatusBar == nil)
+    {
+      systemStatusBar = [[NSStatusBar alloc] init];
+    }
+  return systemStatusBar;
 }
 
 - (BOOL) isVertical
