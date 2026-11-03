@@ -75,6 +75,10 @@ static inline void _setFloatValue (NSTextField *field, float size)
 
 static NSText *sizeFieldText = nil;
 
+/* The modes the responder chain last reported as valid for the (shared)
+   font panel.  */
+static NSUInteger validModes = NSFontPanelStandardModesMask;
+
 static float sizes[] = {4.0, 6.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0,
 			14.0, 16.0, 18.0, 24.0, 36.0, 48.0, 64.0};
 
@@ -199,6 +203,7 @@ autoresize(CGFloat oldContainerSize, CGFloat newContainerSize,
 
 - (void) _getOriginalSize;
 - (id)_initWithoutGModel;
+- (void) _updateValidModes;
 
 - (BOOL) _includeFont: (NSString *)fontName  delegate: (id)delegate;
 @end
@@ -446,6 +451,19 @@ autoresize(CGFloat oldContainerSize, CGFloat newContainerSize,
 - (BOOL) worksWhenModal
 {
   return YES;
+}
+
+/** <p>Overrides the NSWindow method to ask the responder chain which
+    modes the panel should offer each time the panel is ordered in.</p>
+    <p>See Also: -validModesForFontPanel: (NSObject)</p>
+ */
+- (void) orderWindow: (NSWindowOrderingMode)place relativeTo: (NSInteger)otherWin
+{
+  if (place != NSWindowOut)
+    {
+      [self _updateValidModes];
+    }
+  [super orderWindow: place relativeTo: otherWin];
 }
 
 /** <p>Returns the NSFontPanel's accessory view.</p>
@@ -888,6 +906,27 @@ autoresize(CGFloat oldContainerSize, CGFloat newContainerSize,
 }
 
 
+/* Ask the first object in the responder chain that implements
+   -validModesForFontPanel: which modes the panel should offer, and enable
+   the face and size controls to match.  All modes are valid when no
+   responder implements it.  */
+- (void) _updateValidModes
+{
+  NSView *contentView = [self contentView];
+  id target = [NSApp targetForAction: @selector(validModesForFontPanel:)];
+
+  validModes = NSFontPanelStandardModesMask;
+  if (target != nil)
+    {
+      validModes = [target validModesForFontPanel: self];
+    }
+
+  [[contentView viewWithTag: NSFPSizeField]
+    setEnabled: (validModes & NSFontPanelSizeModeMask) != 0];
+  [[contentView viewWithTag: NSFPFaceBrowser] reloadColumn: 0];
+  [[contentView viewWithTag: NSFPSizeBrowser] reloadColumn: 0];
+}
+
 - (void) _togglePreview: (id)sender
 {
   _preview = (sender == nil) ? YES : [sender state];
@@ -1289,12 +1328,14 @@ static int score_difference(int weight1, int traits1,
 	  {
 	    value = [[_faceList objectAtIndex: row] objectAtIndex: 1];
 	  }
+	[cell setEnabled: (validModes & NSFontPanelFaceModeMask) != 0];
 	break;
       }
     case NSFPSizeBrowser:
     default:
       {
 	value = [NSString stringWithFormat: @"%d", (int) sizes[row]];
+	[cell setEnabled: (validModes & NSFontPanelSizeModeMask) != 0];
       }
     }
 
