@@ -396,6 +396,14 @@ static float menuBarHeight = 0.0;
   if (index == _highlightedItemIndex)
     return;
 
+  if ([[_attachedMenu delegate] respondsToSelector:
+    @selector(menu:willHighlightItem:)])
+    {
+      [[_attachedMenu delegate] menu: _attachedMenu
+		   willHighlightItem: (index == -1) ? nil
+				      : (NSMenuItem *)[_attachedMenu itemAtIndex: index]];
+    }
+
   // Unhighlight old
   if (_highlightedItemIndex != -1)
     {
