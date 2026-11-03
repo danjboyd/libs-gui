@@ -108,6 +108,11 @@
 static GSToolTips *toolTipVisible = nil;
 static id<GSWindowDecorator> windowDecorator = nil;
 
+/* The window asking the window server to place it.  The server reports the
+   new frame back before -placewindow:: returns, and that report is not a
+   resize by the server.  */
+static NSWindow *placingWindow = nil;
+
 
 BOOL GSViewAcceptsDrag(NSView *v, id<NSDraggingInfo> dragInfo);
 
@@ -2388,7 +2393,11 @@ titleWithRepresentedFilename(NSString *representedFilename)
 {
   if (_windowNum)
     {
+      NSWindow *outer = placingWindow;
+
+      placingWindow = self;
       [GSServerForWindow(self) placewindow: frameRect : _windowNum];
+      placingWindow = outer;
     }
   else
     {
@@ -4499,9 +4508,24 @@ checkCursorRectanglesExited(NSView *theView,  NSEvent *theEvent, NSPoint lastPoi
                    is stored in the event location field. */
                 newFrame.origin = [theEvent locationInWindow];
 
-                /* FIXME: For a user resize we should call windowWillResize:toSize:
-                   on the delegate.
-                 */
+                /* The window server resized the window, usually for the
+                   user: let the delegate change the size, keeping the top
+                   edge where it is, and give the server the answer.  */
+                if (placingWindow != self
+                  && [_delegate respondsToSelector:
+                    @selector(windowWillResize:toSize:)])
+                  {
+                    NSSize size = [_delegate windowWillResize: self
+                                                       toSize: newFrame.size];
+
+                    if (NSEqualSizes(size, newFrame.size) == NO)
+                      {
+                        newFrame.origin.y += newFrame.size.height - size.height;
+                        newFrame.size = size;
+                        [self setFrame: newFrame display: YES];
+                        break;
+                      }
+                  }
                 _frame = newFrame;
                 newFrame.origin = NSZeroPoint;
                 [_wv setFrame: newFrame];
