@@ -167,7 +167,12 @@ static NSInputManager *currentInputManager = nil;
     {
       NSString *modifier = [components objectAtIndex: i];
       
-      if ([modifier isEqualToString: @"Control"] 
+      if ([modifier isEqualToString: @"Command"]
+          || [modifier isEqualToString: @"Cmd"])
+        {
+          flags |= NSCommandKeyMask;
+        }
+      else if ([modifier isEqualToString: @"Control"] 
           || [modifier isEqualToString: @"Ctrl"] 
           || [modifier isEqualToString: @"C"])
         {
@@ -501,6 +506,7 @@ static NSInputManager *currentInputManager = nil;
       NSUInteger flags = [theEvent modifierFlags] & (NSShiftKeyMask 
                                                    | NSAlternateKeyMask 
                                                    | NSControlKeyMask
+                                                   | NSCommandKeyMask
                                                    | NSNumericPadKeyMask);
       BOOL isFunctionKey = ([theEvent modifierFlags] & NSFunctionKeyMask) 
         == NSFunctionKeyMask;
@@ -547,11 +553,22 @@ static NSInputManager *currentInputManager = nil;
               break;
             }
 
-          /* Look up the character in the current keybindings table.  */
+          /* Look up the character in the current keybindings table.
+           * A keystroke with Command that has no binding of its own is
+           * looked up without Command, as it was before Command-
+           * bindings could be written, so Command-LeftArrow still moves
+           * left unless something binds it.  */
           found = [_currentBindingTable lookupKeyStroke: character
                                         modifiers: adaptedFlags
                                         returningActionIn: &action
                                         tableIn: &table];
+          if (!found && (adaptedFlags & NSCommandKeyMask))
+            {
+              found = [_currentBindingTable lookupKeyStroke: character
+                                            modifiers: adaptedFlags & ~NSCommandKeyMask
+                                            returningActionIn: &action
+                                            tableIn: &table];
+            }
           
           if (found)
             {
