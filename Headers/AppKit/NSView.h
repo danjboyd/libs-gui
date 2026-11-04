@@ -842,6 +842,56 @@ PACKAGE_SCOPE
 @end
 #endif
 
+#if OS_API_VERSION(MAC_OS_X_VERSION_10_7, GS_API_LATEST)
+@interface NSView (Backing)
+/**
+ * Converts between the receiver's coordinates and pixels of its backing store,
+ * which differ by the window's user space scale factor.
+ */
+- (NSPoint) convertPointToBacking: (NSPoint)aPoint;
+- (NSPoint) convertPointFromBacking: (NSPoint)aPoint;
+- (NSSize) convertSizeToBacking: (NSSize)aSize;
+- (NSSize) convertSizeFromBacking: (NSSize)aSize;
+- (NSRect) convertRectToBacking: (NSRect)aRect;
+- (NSRect) convertRectFromBacking: (NSRect)aRect;
+@end
+#endif
+
+#if OS_API_VERSION(MAC_OS_X_VERSION_10_5, GS_API_LATEST)
+@class NSTrackingArea;
+
+@interface NSView (TrackingAreas)
+/**
+ * Adds a tracking area, which sends its owner -mouseEntered: and -mouseExited:
+ * through a tracking rectangle of the receiver.  Other options, such as
+ * NSTrackingMouseMoved and NSTrackingCursorUpdate, are not acted on.
+ */
+- (void) addTrackingArea: (NSTrackingArea *)trackingArea;
+- (void) removeTrackingArea: (NSTrackingArea *)trackingArea;
+- (NSArray *) trackingAreas;
+/**
+ * Sent when the receiver's size changes, for a subclass to replace tracking
+ * areas that depend on it.  This implementation does nothing.
+ */
+- (void) updateTrackingAreas;
+@end
+#endif
+
+#if OS_API_VERSION(MAC_OS_X_VERSION_10_10, GS_API_LATEST)
+@interface NSView (AccessibilityProperties)
+/**
+ * The values an assistive technology would ask for.  They are only kept, as
+ * GNUstep has no bridge to one yet.
+ */
+- (NSString *) accessibilityLabel;
+- (void) setAccessibilityLabel: (NSString *)label;
+- (NSString *) accessibilityRole;
+- (void) setAccessibilityRole: (NSString *)role;
+- (BOOL) isAccessibilityElement;
+- (void) setAccessibilityElement: (BOOL)flag;
+@end
+#endif
+
 #if OS_API_VERSION(MAC_OS_X_VERSION_10_5, GS_API_LATEST)
 /*
  * Core Animation support methods.  More methods will be added here as more are implemented.
