@@ -424,19 +424,23 @@
 
 - (NSString *)alternateMnemonic
 {
-  // TODO
-  return @"";
+  NSUInteger location = [self alternateMnemonicLocation];
+  NSString *c = [self alternateTitle];
+
+  if ((location == NSNotFound) || location >= [c length])
+    return @"";
+
+  return [c substringWithRange: NSMakeRange (location, 1)];
 }
 
 - (NSUInteger)alternateMnemonicLocation
 {
-  // TODO
-  return NSNotFound;
+  return _altMnemonicLocation == 0 ? NSNotFound : _altMnemonicLocation - 1;
 }
 
 - (void)setAlternateMnemonicLocation:(NSUInteger)location
 {
-  // TODO
+  _altMnemonicLocation = location == NSNotFound ? 0 : location + 1;
 }
 
 - (void)setAlternateTitleWithMnemonic:(NSString *)aString

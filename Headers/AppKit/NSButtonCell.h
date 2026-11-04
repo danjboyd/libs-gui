@@ -151,6 +151,8 @@ APPKIT_EXPORT_CLASS
   NSColor *_backgroundColor;
   NSColor *_bezelColor;
   NSColor *_contentTintColor;
+  // The alternate title's mnemonic location plus one; 0 means there is none.
+  NSUInteger _altMnemonicLocation;
   // Think of the following as a BOOL ivars
 #define _buttoncell_is_transparent _cell.subclass_bool_one
 #define _image_dims_when_disabled _cell.subclass_bool_two
