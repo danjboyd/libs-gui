@@ -504,6 +504,19 @@ APPKIT_EXPORT_CLASS
  */
 - (void) setContentTintColor: (NSColor *)color;
 #endif
+#if OS_API_VERSION(MAC_OS_VERSION_11_0, GS_API_LATEST)
+/**
+ * Returns YES when the button's action is destructive, such as deleting
+ * or discarding something.  A theme may draw such a button differently.
+ * <p>NSButton has this property in Cocoa; NSButtonCell carries it here
+ * because the cell draws the button.</p>
+ */
+- (BOOL) hasDestructiveAction;
+/**
+ * Sets whether the button's action is destructive.  The default is NO.
+ */
+- (void) setHasDestructiveAction: (BOOL)flag;
+#endif
 #if OS_API_VERSION(MAC_OS_X_VERSION_10_4, GS_API_LATEST)
 /**
  * Draws the button's bezel (border and background) within the specified

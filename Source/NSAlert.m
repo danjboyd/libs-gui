@@ -362,6 +362,7 @@ setButton(NSView* content, NSButton *control, NSButton *template)
       [control setKeyEquivalentModifierMask:
 		 [template keyEquivalentModifierMask]];
       [control setTag: [template tag]];
+      [control setHasDestructiveAction: [template hasDestructiveAction]];
       [control sizeToFit];
       if (!useControl(control))
 	{

@@ -202,6 +202,13 @@ APPKIT_EXPORT_CLASS
 - (void) setContentTintColor: (NSColor *)color;
 #endif
 
+#if OS_API_VERSION(MAC_OS_VERSION_11_0, GS_API_LATEST)
+//
+// Destructive action
+//
+@property BOOL hasDestructiveAction;
+#endif
+
 @end
 
 #endif // _GNUstep_H_NSButton

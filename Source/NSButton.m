@@ -650,6 +650,17 @@ static id buttonCellClass = nil;
   [self setNeedsDisplay: YES];
 }
 
+- (BOOL) hasDestructiveAction
+{
+  return [(NSButtonCell *)_cell hasDestructiveAction];
+}
+
+- (void) setHasDestructiveAction: (BOOL)flag
+{
+  [(NSButtonCell *)_cell setHasDestructiveAction: flag];
+  [self setNeedsDisplay: YES];
+}
+
 // Implement 10.7+ radio button behavior
 - (void) _flipState: (NSButton *)b
 {
