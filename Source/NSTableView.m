@@ -3694,6 +3694,9 @@ static inline NSTimeInterval computePeriod(NSPoint mouseLocationWin,
   id originalValue = RETAIN([self _objectValueForTableColumn: tb
 							 row: rowIndex]);
   [cell setObjectValue: originalValue];
+  /* The cell may hold the value in another form than the data source does:
+     a popup holds an index.  So only what tracking changed gets written. */
+  id trackedValue = RETAIN([cell objectValue]);
   NSRect cellFrame = [self frameOfCellAtColumn: columnIndex
 					   row: rowIndex];
   [cell setHighlighted: YES];
@@ -3712,7 +3715,9 @@ static inline NSTimeInterval computePeriod(NSPoint mouseLocationWin,
       id newValue = [cell objectValue];
 
       /* don't check editability that only pertains to editColumn:... */
-      if (originalValue != newValue
+      if (trackedValue != newValue
+	  && ![trackedValue isEqual: newValue]
+	  && originalValue != newValue
 	  && ![originalValue isEqual: newValue])
 	{
 	  [self _setObjectValue: newValue
@@ -3720,6 +3725,7 @@ static inline NSTimeInterval computePeriod(NSPoint mouseLocationWin,
 			row: rowIndex];
 	}
     }
+  RELEASE(trackedValue);
   RELEASE(originalValue);
   [cell setHighlighted: NO];
   [self setNeedsDisplayInRect: cellFrame];
