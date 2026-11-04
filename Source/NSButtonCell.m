@@ -971,6 +971,24 @@
     }
 }
 
+- (BOOL) hasDestructiveAction
+{
+  return _cell.has_destructive_action;
+}
+
+- (void) setHasDestructiveAction: (BOOL)flag
+{
+  _cell.has_destructive_action = flag ? 1 : 0;
+
+  if (_control_view)
+    {
+      if ([_control_view isKindOfClass: [NSControl class]])
+        {
+          [(NSControl*)_control_view updateCell: self];
+        }
+    }
+}
+
 - (GSThemeControlState) themeControlState
 {
   unsigned mask;
@@ -1718,6 +1736,12 @@
         {
           [aCoder encodeObject: _contentTintColor forKey: @"NSContentTintColor"];
         }
+      /* The key Interface Builder writes for this is not known, so this
+         is a GNUstep key.  */
+      if (_cell.has_destructive_action)
+        {
+          [aCoder encodeBool: YES forKey: @"GSHasDestructiveAction"];
+        }
 
       buttonCellFlags.useButtonImageSource = (([NSImage imageNamed: @"NSSwitch"] == image) ||
                                               ([NSImage imageNamed: @"NSRadioButton"] == image));
@@ -1878,6 +1902,8 @@
           [self setContentTintColor:
             [aDecoder decodeObjectForKey: @"NSContentTintColor"]];
         }
+      [self setHasDestructiveAction:
+        [aDecoder decodeBoolForKey: @"GSHasDestructiveAction"]];
       if ([aDecoder containsValueForKey: @"NSAlternateContents"])
         {
 	  id alternateContents = [aDecoder decodeObjectForKey: @"NSAlternateContents"];

@@ -1,3 +1,17 @@
+2026-11-04 Daniel Boyd <danieljboyd@icloud.com>
+
+	* Headers/AppKit/NSButton.h:
+	* Headers/AppKit/NSButtonCell.h:
+	* Headers/AppKit/NSCell.h:
+	* Source/NSAlert.m:
+	* Source/NSButton.m:
+	* Source/NSButtonCell.m:
+	* Tests/gui/NSAlert/destructive.m:
+	* Tests/gui/NSButton/destructiveAction.m:
+	Add NSButton's hasDestructiveAction.  The flag is kept in a spare
+	NSCell bit, and NSAlert copies it to the panel's buttons, so a theme
+	can draw a destructive button differently.
+
 2026-10-12 Daniel Boyd <danieljboyd@icloud.com>
 
 	* Source/NSKeyValueBinding.m (+unbind:forObject:): Remove the

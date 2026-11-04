@@ -250,8 +250,8 @@ APPKIT_EXPORT_CLASS
     unsigned allows_undo: 1;
     unsigned line_break_mode: 3; // 6 values
 
-    // 23 bits for NSCell use, 4 bits for subclass use.
-    // 4 bits remain unused.
+    // 24 bits for NSCell use, 4 bits for subclass use.
+    // 3 bits remain unused.
     int state: 2; // 3 values but one negative
     unsigned mnemonic_location: 8;
     unsigned control_tint: 3;
@@ -269,6 +269,8 @@ APPKIT_EXPORT_CLASS
     unsigned uses_single_line_mode:1;
     unsigned background_style: 2; // 3 values
     unsigned right_to_left: 1; // user interface layout direction
+    // Set if the button cell's action is destructive.
+    unsigned has_destructive_action: 1;
   } _cell;
   NSUInteger _mouse_down_flags;
   NSUInteger _action_mask;
