@@ -28,6 +28,10 @@
 #import <Foundation/NSSet.h>
 #import <Foundation/NSString.h>
 
+#import "AppKit/NSButton.h"
+#import "AppKit/NSLayoutConstraint.h"
+#import "AppKit/NSStackView.h"
+#import "AppKit/NSTextField.h"
 #import "AppKit/NSUserInterfaceCompression.h"
 
 /* An options object is a set of option identifiers; combining options
@@ -209,3 +213,40 @@ identifiersOf(id opts)
 
 @end
 
+/* These controls can't compress their content yet, so no option is ever active
+ * and the smallest they can be is the size they want.
+ */
+static NSSize
+minimumSizeOfView(NSView *view)
+{
+  NSSize size = [view intrinsicContentSize];
+
+  if (size.width == NSViewNoIntrinsicMetric)
+    {
+      size.width = [view frame].size.width;
+    }
+  if (size.height == NSViewNoIntrinsicMetric)
+    {
+      size.height = [view frame].size.height;
+    }
+  return size;
+}
+
+#define GS_NO_COMPRESSION(CLASS) \
+@implementation CLASS (NSUserInterfaceCompression) \
+- (void) compressWithPrioritizedCompressionOptions: (NSArray *)options \
+{ \
+} \
+- (NSSize) minimumSizeWithPrioritizedCompressionOptions: (NSArray *)options \
+{ \
+  return minimumSizeOfView(self); \
+} \
+- (NSUserInterfaceCompressionOptions *) activeCompressionOptions \
+{ \
+  return AUTORELEASE([[NSUserInterfaceCompressionOptions alloc] init]); \
+} \
+@end
+
+GS_NO_COMPRESSION(NSButton)
+GS_NO_COMPRESSION(NSStackView)
+GS_NO_COMPRESSION(NSTextField)

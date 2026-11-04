@@ -168,4 +168,10 @@ APPKIT_EXPORT_CLASS
 
 @end
 
+#if OS_API_VERSION(MAC_OS_X_VERSION_10_13, GS_API_LATEST)
+#import <AppKit/NSUserInterfaceCompression.h>
+@interface NSTextField (NSUserInterfaceCompression) <NSUserInterfaceCompression>
+@end
+#endif
+
 #endif // _GNUstep_H_NSTextField
