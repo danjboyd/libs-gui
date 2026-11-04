@@ -1,5 +1,13 @@
 2026-11-04 Daniel Boyd <danieljboyd@icloud.com>
 
+	* Source/NSPopUpButtonCell.m (-copyWithZone:): New method.  Give a
+	copy its own menu, as a menu has one owner.
+	(-setMenu:): Clear the old menu's owner only if it is the receiver.
+	* Source/NSTableView.m (-_trackCellAtColumn:row:withEvent:): Write to
+	the data source only if tracking changed the cell's value.
+	* Tests/gui/NSPopUpButtonCell/copy.m:
+	* Tests/gui/NSTableView/trackCellValue.m:
+	Test these.
 	* Headers/AppKit/NSButton.h:
 	* Headers/AppKit/NSButtonCell.h:
 	* Headers/AppKit/NSCell.h:

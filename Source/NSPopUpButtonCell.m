@@ -162,6 +162,25 @@ static NSImage *_pbc_image[5];
   [super dealloc];
 }
 
+- (id) copyWithZone: (NSZone*)zone
+{
+  NSPopUpButtonCell *c = [super copyWithZone: zone];
+  NSMenu *menu = [_menu copyWithZone: zone];
+  NSInteger index = [self indexOfSelectedItem];
+
+  /* A menu has one owner, so the copy gets a menu of its own.  What it
+   * shares with the receiver at this point is only the reference it got
+   * from NSCell, which -setMenu: releases.
+   */
+  [menu setDelegate: [_menu delegate]];
+  c->_selectedItem = nil;
+  [c setMenu: menu];
+  RELEASE(menu);
+  [c selectItemAtIndex: index];
+
+  return c;
+}
+
 // Getters and setters.
 /**
  * Set the menu for the popup.
@@ -177,7 +196,11 @@ static NSImage *_pbc_image[5];
 
   if (_menu != nil)
     {
-      [_menu _setOwnedByPopUp: nil];
+      /* The menu may have been given to another cell since. */
+      if ([_menu _owningPopUp] == self)
+        {
+          [_menu _setOwnedByPopUp: nil];
+        }
       [nc removeObserver: self
                     name: nil
                   object: _menu];
