@@ -32,6 +32,7 @@
 #import <AppKit/AppKitDefines.h>
 
 #import <AppKit/NSGraphicsContext.h>
+#import <GNUstepBase/GSBlocks.h>
 #import <Foundation/NSBundle.h>
 #import <AppKit/NSBitmapImageRep.h>
 
@@ -124,6 +125,10 @@ APPKIT_EXTERN NSString *const NSImageNameFolder;
 #endif
 
 APPKIT_EXPORT_CLASS
+#if OS_API_VERSION(MAC_OS_X_VERSION_10_8, GS_API_LATEST)
+DEFINE_BLOCK_TYPE(GSImageDrawingHandler, BOOL, NSRect);
+#endif
+
 @interface NSImage : NSObject <NSCoding, NSCopying>
 {
   // Attributes
@@ -196,6 +201,17 @@ APPKIT_EXPORT_CLASS
  *  </list>
  */
 - (id) initWithSize: (NSSize)aSize;
+
+#if OS_API_VERSION(MAC_OS_X_VERSION_10_8, GS_API_LATEST)
+/**
+ * Initialises an image that calls the handler to draw itself whenever it is
+ * drawn, in the image's own coordinates.  If flipped is YES, those coordinates
+ * have their origin at the top left.  The handler returns NO if it failed.
+ */
+- (id) initWithSize: (NSSize)aSize
+            flipped: (BOOL)flipped
+     drawingHandler: (GSImageDrawingHandler)drawingHandler;
+#endif
 
 #if OS_API_VERSION(GS_API_MACOSX, GS_API_LATEST)
 - (id)initWithBitmapHandle:(void *)bitmap;

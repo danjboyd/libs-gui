@@ -435,6 +435,71 @@ repd_for_rep(NSArray *_reps, NSImageRep *rep)
 - (NSCachedImageRep*) _doImageCache: (NSImageRep *)rep;
 @end
 
+/* Draws an image by calling its drawing handler. */
+@interface GSDrawingHandlerImageRep : NSImageRep
+{
+  GSImageDrawingHandler _handler;
+  BOOL _handlerFlipped;
+}
+- (id) initWithSize: (NSSize)aSize
+            flipped: (BOOL)flipped
+            handler: (GSImageDrawingHandler)handler;
+@end
+
+@implementation GSDrawingHandlerImageRep
+
+- (id) initWithSize: (NSSize)aSize
+            flipped: (BOOL)flipped
+            handler: (GSImageDrawingHandler)handler
+{
+  if ((self = [super init]) != nil)
+    {
+      [self setSize: aSize];
+      _handlerFlipped = flipped;
+      _handler = Block_copy(handler);
+    }
+  return self;
+}
+
+- (void) dealloc
+{
+  Block_release(_handler);
+  [super dealloc];
+}
+
+- (id) copyWithZone: (NSZone *)zone
+{
+  GSDrawingHandlerImageRep *c = [super copyWithZone: zone];
+
+  c->_handler = Block_copy(_handler);
+  return c;
+}
+
+- (BOOL) draw
+{
+  NSSize size = [self size];
+  BOOL result;
+
+  if (_handlerFlipped)
+    {
+      NSAffineTransform *flip = [NSAffineTransform transform];
+
+      [NSGraphicsContext saveGraphicsState];
+      [flip translateXBy: 0.0 yBy: size.height];
+      [flip scaleXBy: 1.0 yBy: -1.0];
+      [flip concat];
+    }
+  result = CALL_BLOCK_RET(_handler, BOOL,
+    NSMakeRect(0.0, 0.0, size.width, size.height));
+  if (_handlerFlipped)
+    {
+      [NSGraphicsContext restoreGraphicsState];
+    }
+  return result;
+}
+
+@end
+
 @implementation NSImage
 
 + (void) initialize
@@ -523,6 +588,23 @@ repd_for_rep(NSArray *_reps, NSImageRep *rep)
 - (id) init
 {
   return [self initWithSize: NSMakeSize(0, 0)];
+}
+
+- (id) initWithSize: (NSSize)aSize
+            flipped: (BOOL)flipped
+     drawingHandler: (GSImageDrawingHandler)drawingHandler
+{
+  if ((self = [self initWithSize: aSize]) != nil)
+    {
+      GSDrawingHandlerImageRep *rep;
+
+      rep = [[GSDrawingHandlerImageRep alloc] initWithSize: aSize
+                                                   flipped: flipped
+                                                   handler: drawingHandler];
+      [self addRepresentation: rep];
+      RELEASE(rep);
+    }
+  return self;
 }
 
 - (id) initWithSize: (NSSize)aSize
