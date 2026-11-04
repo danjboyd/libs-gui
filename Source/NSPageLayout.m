@@ -96,6 +96,9 @@ enum {
 // This is the controller for NSPageLayout, it does most of the
 // work.  Implementation is near the end of the file
 //
+/* The space around the accessory view, above and below it, in the panel. */
+#define ACCESSORY_PAD 8.0
+
 @interface GSPageLayoutController : NSObject //<NSTableDataSource>
 {
   NSMutableDictionary *customPapers;  //a dictionary of dictionaries
@@ -139,6 +142,8 @@ enum {
   //What used to be NSPageLayout's ivars
   NSPrintInfo *_printInfo;
   NSView *_accessoryView;
+  float _accessoryAddedHeight;	// what the accessory view added to the panel
+  float _accessoryAddedWidth;
 }
 
 -(NSPageLayout*) panel;
@@ -715,7 +720,53 @@ enum {
 
 -(void) setAccessoryView:(NSView*)accessoryView
 {
+  NSView *content = [panel contentView];
+  NSSize size = [content frame].size;
+  NSSize newSize = (accessoryView == nil) ? NSZeroSize
+    : [accessoryView frame].size;
+  float base = size.width - _accessoryAddedWidth;
+  float oldAdded = _accessoryAddedHeight;
+  float newAdded = (accessoryView == nil) ? 0.0
+    : newSize.height + 2 * ACCESSORY_PAD;
+  float newWidth = MAX(base, newSize.width + 2 * ACCESSORY_PAD);
+  float dx = (newWidth - size.width) / 2.0;
+  NSEnumerator *e;
+  NSView *v;
+  BOOL autoresizes = [content autoresizesSubviews];
+
+  if (accessoryView == _accessoryView)
+    {
+      return;
+    }
+
+  [_accessoryView removeFromSuperview];
   ASSIGN(_accessoryView, accessoryView);
+
+  /* The panel's layout isn't resizable, so the room is made by hand: the
+   * panel grows and what is in it moves up and across.
+   */
+  [content setAutoresizesSubviews: NO];
+  [panel setContentSize:
+    NSMakeSize(newWidth, size.height - oldAdded + newAdded)];
+  e = [[content subviews] objectEnumerator];
+  while ((v = [e nextObject]) != nil)
+    {
+      NSPoint origin = [v frame].origin;
+
+      [v setFrameOrigin:
+        NSMakePoint(origin.x + dx, origin.y + newAdded - oldAdded)];
+    }
+  [content setAutoresizesSubviews: autoresizes];
+  _accessoryAddedHeight = newAdded;
+  _accessoryAddedWidth = newWidth - base;
+
+  if (accessoryView != nil)
+    {
+      [accessoryView setFrameOrigin:
+        NSMakePoint((newWidth - newSize.width) / 2.0, ACCESSORY_PAD)];
+      [content addSubview: accessoryView];
+    }
+  [content setNeedsDisplay: YES];
 }
 
 
