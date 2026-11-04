@@ -1260,6 +1260,8 @@ static NSColor *dtxtCol;
   NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
   NSMutableString *format = [[NSMutableString alloc] init];
 
+  /* The format below is the old style, which only this behaviour reads. */
+  [formatter setFormatterBehavior: NSNumberFormatterBehavior10_0];
   if (autoRange)
     {
       NSUInteger fieldWidth = leftDigits + rightDigits + 1;
