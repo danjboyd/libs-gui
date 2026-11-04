@@ -72,6 +72,8 @@
 #import "AppKit/NSScrollView.h"
 #import "AppKit/NSShadow.h"
 #import "AppKit/NSView.h"
+#import "AppKit/NSTrackingArea.h"
+#import "AppKit/NSAccessibilityConstants.h"
 #import "AppKit/NSWindow.h"
 #import "AppKit/NSWorkspace.h"
 #import "AppKit/NSAppearance.h"
@@ -156,6 +158,201 @@ const CGFloat NSViewNoIntrinsicMetric = -1;
   can also be overridden to handle user generated events.</p>
 */
   
+/* What a view keeps for tracking areas and accessibility.  Few views have any,
+ * so they are kept here rather than in an instance variable of every view.
+ */
+static NSMapTable *viewExtras = nil;
+
+static NSMutableDictionary *
+extrasForView(NSView *view, BOOL create)
+{
+  NSMutableDictionary *extras = nil;
+
+  if (viewExtras != nil)
+    {
+      extras = NSMapGet(viewExtras, view);
+    }
+  if (extras == nil && create)
+    {
+      if (viewExtras == nil)
+        {
+          viewExtras = NSCreateMapTable(NSNonOwnedPointerMapKeyCallBacks,
+            NSObjectMapValueCallBacks, 0);
+        }
+      extras = [NSMutableDictionary dictionary];
+      NSMapInsert(viewExtras, view, extras);
+    }
+  return extras;
+}
+
+@implementation NSView (Backing)
+
+- (CGFloat) _backingScale
+{
+  return (_window == nil) ? 1.0 : [_window userSpaceScaleFactor];
+}
+
+- (NSPoint) convertPointToBacking: (NSPoint)aPoint
+{
+  CGFloat scale = [self _backingScale];
+
+  return NSMakePoint(aPoint.x * scale, aPoint.y * scale);
+}
+
+- (NSPoint) convertPointFromBacking: (NSPoint)aPoint
+{
+  CGFloat scale = [self _backingScale];
+
+  return NSMakePoint(aPoint.x / scale, aPoint.y / scale);
+}
+
+- (NSSize) convertSizeToBacking: (NSSize)aSize
+{
+  CGFloat scale = [self _backingScale];
+
+  return NSMakeSize(aSize.width * scale, aSize.height * scale);
+}
+
+- (NSSize) convertSizeFromBacking: (NSSize)aSize
+{
+  CGFloat scale = [self _backingScale];
+
+  return NSMakeSize(aSize.width / scale, aSize.height / scale);
+}
+
+- (NSRect) convertRectToBacking: (NSRect)aRect
+{
+  NSRect r;
+
+  r.origin = [self convertPointToBacking: aRect.origin];
+  r.size = [self convertSizeToBacking: aRect.size];
+  return r;
+}
+
+- (NSRect) convertRectFromBacking: (NSRect)aRect
+{
+  NSRect r;
+
+  r.origin = [self convertPointFromBacking: aRect.origin];
+  r.size = [self convertSizeFromBacking: aRect.size];
+  return r;
+}
+
+@end
+
+@implementation NSView (TrackingAreas)
+
+- (void) addTrackingArea: (NSTrackingArea *)trackingArea
+{
+  NSMutableDictionary *extras = extrasForView(self, YES);
+  NSMutableArray *areas = [extras objectForKey: @"areas"];
+  NSMutableArray *tags = [extras objectForKey: @"tags"];
+  NSTrackingRectTag tag;
+
+  if (areas == nil)
+    {
+      areas = [NSMutableArray array];
+      tags = [NSMutableArray array];
+      [extras setObject: areas forKey: @"areas"];
+      [extras setObject: tags forKey: @"tags"];
+    }
+  if ([areas containsObject: trackingArea])
+    {
+      return;
+    }
+  tag = [self addTrackingRect: [trackingArea rect]
+                        owner: [trackingArea owner]
+                     userData: (void*)[trackingArea userInfo]
+                 assumeInside: ([trackingArea options]
+                                & NSTrackingAssumeInside) != 0];
+  [areas addObject: trackingArea];
+  [tags addObject: [NSNumber numberWithInteger: tag]];
+}
+
+- (void) removeTrackingArea: (NSTrackingArea *)trackingArea
+{
+  NSMutableDictionary *extras = extrasForView(self, NO);
+  NSMutableArray *areas = [extras objectForKey: @"areas"];
+  NSUInteger index = [areas indexOfObjectIdenticalTo: trackingArea];
+
+  if (areas != nil && index != NSNotFound)
+    {
+      NSMutableArray *tags = [extras objectForKey: @"tags"];
+
+      [self removeTrackingRect: [[tags objectAtIndex: index] integerValue]];
+      [tags removeObjectAtIndex: index];
+      [areas removeObjectAtIndex: index];
+    }
+}
+
+- (NSArray *) trackingAreas
+{
+  NSArray *areas = [extrasForView(self, NO) objectForKey: @"areas"];
+
+  return (areas == nil) ? [NSArray array] : AUTORELEASE([areas copy]);
+}
+
+- (void) updateTrackingAreas
+{
+}
+
+@end
+
+@implementation NSView (AccessibilityProperties)
+
+- (NSString *) accessibilityLabel
+{
+  return [extrasForView(self, NO) objectForKey: @"accessibilityLabel"];
+}
+
+- (void) setAccessibilityLabel: (NSString *)label
+{
+  NSMutableDictionary *extras = extrasForView(self, YES);
+
+  if (label == nil)
+    {
+      [extras removeObjectForKey: @"accessibilityLabel"];
+    }
+  else
+    {
+      [extras setObject: label forKey: @"accessibilityLabel"];
+    }
+}
+
+- (NSString *) accessibilityRole
+{
+  NSString *role = [extrasForView(self, NO) objectForKey: @"accessibilityRole"];
+
+  return (role == nil) ? NSAccessibilityUnknownRole : role;
+}
+
+- (void) setAccessibilityRole: (NSString *)role
+{
+  NSMutableDictionary *extras = extrasForView(self, YES);
+
+  if (role == nil)
+    {
+      [extras removeObjectForKey: @"accessibilityRole"];
+    }
+  else
+    {
+      [extras setObject: role forKey: @"accessibilityRole"];
+    }
+}
+
+- (BOOL) isAccessibilityElement
+{
+  return [[extrasForView(self, NO) objectForKey: @"accessibilityElement"] boolValue];
+}
+
+- (void) setAccessibilityElement: (BOOL)flag
+{
+  [extrasForView(self, YES) setObject: [NSNumber numberWithBool: flag]
+                               forKey: @"accessibilityElement"];
+}
+
+@end
+
 @implementation NSView
 
 /*
@@ -728,6 +925,11 @@ GSSetDragTypes(NSView* obj, NSArray *types)
 {
   NSView *tmp;
   NSUInteger count;
+
+  if (viewExtras != nil)
+    {
+      NSMapRemove(viewExtras, self);
+    }
 
   // Remove all key value bindings for this view.
   [GSKeyValueBinding unbindAllForObject: self];
@@ -1322,6 +1524,7 @@ static NSSize _computeScale(NSSize fs, NSSize bs)
         }
       [self resetCursorRects];
       [self resizeSubviewsWithOldSize: old_size];
+      [self updateTrackingAreas];
       if (GSAutoLayoutEngineExists)
         {
           [self _autoLayoutContentViewResized];
@@ -1420,6 +1623,7 @@ static NSSize _computeScale(NSSize fs, NSSize bs)
         }
       [self resetCursorRects];
       [self resizeSubviewsWithOldSize: old_size];
+      [self updateTrackingAreas];
       if (GSAutoLayoutEngineExists)
         {
           [self _autoLayoutContentViewResized];
