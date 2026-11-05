@@ -40,6 +40,7 @@
 #import "AppKit/NSStringDrawing.h"
 #import "AppKit/NSTextField.h"
 #import "AppKit/NSTextFieldCell.h"
+#import "GNUstepGUI/GSTheme.h"
 #import "AppKit/NSText.h"
 
 #import "GSBindingHelpers.h"
@@ -223,8 +224,17 @@
 - (void) _drawBorderAndBackgroundWithFrame: (NSRect)cellFrame
 				    inView: (NSView*)controlView
 {
-  // FIXME: Should use the bezel style if set.
-  [super _drawBorderAndBackgroundWithFrame: cellFrame inView: controlView];
+  if (_cell.is_bezeled && !_cell.is_bordered
+    && _bezelStyle != NSTextFieldSquareBezel)
+    {
+      [[GSTheme theme] drawTextFieldBezelStyle: _bezelStyle
+                                         frame: cellFrame
+                                          view: controlView];
+    }
+  else
+    {
+      [super _drawBorderAndBackgroundWithFrame: cellFrame inView: controlView];
+    }
   [self _drawBackgroundWithFrame: cellFrame inView: controlView];
 }
 

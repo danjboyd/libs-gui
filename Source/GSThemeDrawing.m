@@ -358,6 +358,36 @@
   NSRectFill (frame);
 }
 
+- (void) drawTextFieldBezelStyle: (NSTextFieldBezelStyle)style
+                           frame: (NSRect)frame
+                            view: (NSView*)view
+{
+  SEL	border = @selector(drawBorderType:frame:view:);
+
+  if (style != NSTextFieldRoundedBezel
+    || [self tilesNamed: GSStringFromBorderType(NSBezelBorder)
+                  state: GSThemeNormalState] != nil
+    || [self methodForSelector: border]
+      != [GSTheme instanceMethodForSelector: border])
+    {
+      [self drawBorderType: NSBezelBorder frame: frame view: view];
+    }
+  else
+    {
+      NSRect		inner = NSInsetRect(frame, 0.5, 0.5);
+      CGFloat		radius = MIN(NSHeight(inner) / 2.0, NSWidth(inner) / 2.0);
+      NSBezierPath	*path;
+
+      path = [NSBezierPath bezierPathWithRoundedRect: inner
+                                             xRadius: radius
+                                             yRadius: radius];
+      [[NSColor textBackgroundColor] set];
+      [path fill];
+      [[NSColor controlDarkShadowColor] set];
+      [path stroke];
+    }
+}
+
 - (void) drawBorderType: (NSBorderType)aType 
                   frame: (NSRect)frame 
                    view: (NSView*)view

@@ -1,5 +1,13 @@
 2026-11-05 Daniel Boyd <danieljboyd@icloud.com>
 
+	* Headers/Additions/GNUstepGUI/GSTheme.h:
+	* Source/GSThemeDrawing.m:
+	* Source/NSTextFieldCell.m:
+	* Tests/gui/NSTextFieldCell/bezelStyle.m:
+	Draw a text field's rounded bezel through a new GSTheme method.
+
+2026-11-05 Daniel Boyd <danieljboyd@icloud.com>
+
 	* Source/GSAutoLayoutEngine.m:
 	* Tests/gui/NSLayoutConstraint/constantRelayout.m:
 	Observe the constant of an installed constraint, so that a new one drives

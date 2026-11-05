@@ -223,6 +223,7 @@
 #import <Foundation/NSGeometry.h>
 #import <AppKit/NSBox.h>
 #import <AppKit/NSCell.h>
+#import <AppKit/NSTextFieldCell.h>
 // For gradient types
 #import <AppKit/NSButtonCell.h>
 // For image frame style
@@ -850,6 +851,15 @@ APPKIT_EXPORT_CLASS
 /**
  * Draw a border of the specified border type.
  */
+/**
+ * Draws the bezel of a text field whose bezel style is not the square one.
+ * The default draws the rounded look, unless the theme has its own border
+ * drawing, which it then uses so that a theme needs no change.
+ */
+- (void) drawTextFieldBezelStyle: (NSTextFieldBezelStyle)style
+                           frame: (NSRect)frame
+                            view: (NSView*)view;
+
 - (void) drawBorderType: (NSBorderType)aType 
                   frame: (NSRect)frame 
                    view: (NSView*)view;
