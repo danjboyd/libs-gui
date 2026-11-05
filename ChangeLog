@@ -1,5 +1,11 @@
 2026-11-05 Daniel Boyd <danieljboyd@icloud.com>
 
+	* Source/NSStackView.m:
+	* Tests/gui/NSStackView/gravity.m:
+	Keep the views of a stack view made in code by gravity.
+
+2026-11-05 Daniel Boyd <danieljboyd@icloud.com>
+
 	* Headers/Additions/GNUstepGUI/GSDisplayServer.h:
 	* Source/GSDisplayServer.m:
 	* Source/NSEvent.m:

@@ -164,6 +164,40 @@
 
 @implementation NSStackView
 
+/* A stack view made in code has no containers, so _views holds a list of views
+ * for each gravity, in the order of the gravity's values.
+ */
+- (NSMutableArray *) _newGravityLists
+{
+  NSMutableArray *lists = [[NSMutableArray alloc] init];
+  NSUInteger i;
+
+  for (i = 0; i < 3; i++)
+    {
+      [lists addObject: [NSMutableArray array]];
+    }
+  return lists;
+}
+
+- (void) _forgetGravityOfView: (NSView *)view
+{
+  FOR_IN(NSMutableArray*, list, _views)
+    {
+      [list removeObjectIdenticalTo: view];
+    }
+  END_FOR_IN(_views);
+}
+
+- (NSMutableArray *) _listForGravity: (NSStackViewGravity)gravity
+{
+  if (gravity < NSStackViewGravityTop || gravity > NSStackViewGravityBottom)
+    {
+      [NSException raise: NSInternalInconsistencyException
+                  format: @"Unknown stack view gravity %ld.", (long)gravity];
+    }
+  return [_views objectAtIndex: gravity - NSStackViewGravityTop];
+}
+
 - (void) _layoutViewsWithOrientation: (NSUserInterfaceLayoutOrientation)o
 {
   NSArray *sv = [self subviews];
@@ -450,7 +484,7 @@
 
       _arrangedSubviews = [[NSMutableArray alloc] init];
       _detachedViews = [[NSMutableArray alloc] init];
-      _views = [[NSMutableArray alloc] init];
+      _views = [self _newGravityLists];
       _customSpacingMap = RETAIN([NSMapTable weakToWeakObjectsMapTable]);
       _visiblePriorityMap = RETAIN([NSMapTable weakToWeakObjectsMapTable]);
 
@@ -481,10 +515,10 @@
 - (void) dealloc
 {
   /* Cleared, not released: -[super dealloc] removes the subviews and reaches
-     -willRemoveSubview:, which reads _arrangedSubviews. */
+     -willRemoveSubview:, which reads _arrangedSubviews and _views. */
   DESTROY(_arrangedSubviews);
   RELEASE(_detachedViews);
-  RELEASE(_views);
+  DESTROY(_views);
   RELEASE(_customSpacingMap);
   RELEASE(_visiblePriorityMap);
 
@@ -567,6 +601,7 @@
 - (void) willRemoveSubview: (NSView *)subview
 {
   [_arrangedSubviews removeObject: subview];
+  [self _forgetGravityOfView: subview];
   [super willRemoveSubview: subview];
 }
 
@@ -676,7 +711,12 @@
     }
   else
     {
+      NSMutableArray *list = [self _listForGravity: gravity];
+
+      /* A view that's already here leaves its gravity when it's added again. */
       [super addSubview: view];
+      [self _forgetGravityOfView: view];
+      [list addObject: view];
     }
   
   [self _refreshView];
@@ -684,6 +724,16 @@
 
 - (void)insertView: (NSView *)view atIndex: (NSUInteger)index inGravity: (NSStackViewGravity)gravity
 {
+  if (_beginningContainer == nil)
+    {
+      NSMutableArray *list = [self _listForGravity: gravity];
+
+      [super addSubview: view];
+      [self _forgetGravityOfView: view];
+      [list insertObject: view atIndex: index];
+      [self _refreshView];
+      return;
+    }
   switch (gravity)
     {
     case NSStackViewGravityTop:  // or leading...
@@ -732,6 +782,10 @@
           break;
         }
     }
+  else
+    {
+      [result addObjectsFromArray: [self _listForGravity: gravity]];
+    }
   
   return result;
 }
@@ -762,7 +816,21 @@
     }
   else
     {
+      NSMutableArray *list = [self _listForGravity: gravity];
+      NSArray *old = [NSArray arrayWithArray: list];
+
+      FOR_IN(NSView*, v, old)
+        {
+          [v removeFromSuperview];
+        }
+      END_FOR_IN(old);
       [super _addSubviews: views];
+      FOR_IN(NSView*, v, views)
+        {
+          [self _forgetGravityOfView: v];
+        }
+      END_FOR_IN(views);
+      [list setArray: views];
     }
   
   [self _refreshView];
@@ -849,7 +917,7 @@
     {
       _arrangedSubviews = [[NSMutableArray alloc] init];
       _detachedViews = [[NSMutableArray alloc] init];
-      _views = [[NSMutableArray alloc] init];
+      _views = [self _newGravityLists];
       _customSpacingMap = RETAIN([NSMapTable weakToWeakObjectsMapTable]);
       _visiblePriorityMap = RETAIN([NSMapTable weakToWeakObjectsMapTable]);
 
