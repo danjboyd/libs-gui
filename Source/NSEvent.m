@@ -1237,8 +1237,7 @@ static BOOL mouseCoalescingEnabled = YES;
 
 + (NSUInteger) pressedMouseButtons
 {
-  // FIXME
-  return 0;
+  return [GSCurrentServer() pressedMouseButtons];
 }
 
 + (NSTimeInterval) doubleClickInterval
