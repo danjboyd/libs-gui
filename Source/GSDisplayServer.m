@@ -846,6 +846,15 @@ GSCurrentServer(void)
   return NSZeroPoint;
 }
 
+/** Returns the mouse buttons held down now, as NSEvent's
+ * +pressedMouseButtons answers them: bit 0 for the left button, bit 1 for the
+ * right and bit 2 for the middle one.  A backend that can't tell answers 0.
+ */
+- (NSUInteger) pressedMouseButtons
+{
+  return 0;
+}
+
 /** Returns the current mouse location on aScreen. If the pointer is
  * not on aScreen, this method acts like -mouselocation. If aScreen is -1,
  * then the location of the mouse on any screen is returned. The

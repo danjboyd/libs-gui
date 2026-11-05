@@ -169,6 +169,7 @@ APPKIT_EXPORT_CLASS
 
 - (NSPoint) mouselocation;
 - (NSPoint) mouseLocationOnScreen: (int)aScreen window: (int *)win;
+- (NSUInteger) pressedMouseButtons;
 - (BOOL) capturemouse: (int)win;
 - (void) releasemouse;
 - (void) setMouseLocation: (NSPoint)mouseLocation onScreen: (int)aScreen;
