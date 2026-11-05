@@ -180,6 +180,20 @@
   object = [_arrangedObjects objectAtIndex: index];
   [self willChangeValueForKey: @"selectedIndex"];
   _selectedIndex = index;
+  if (_selectedViewController != nil && [self isViewLoaded])
+    {
+      NSView *old = [_selectedViewController view];
+
+      /* Without a view of its own, the controller's view is the old page. */
+      if (old == [self view])
+        {
+          [self setView: nil];
+        }
+      else if ([old superview] == [self view])
+        {
+          [old removeFromSuperview];
+        }
+    }
   ASSIGN(_selectedViewController, [self _viewControllerForObject: object]);
   [self didChangeValueForKey: @"selectedIndex"];
 
@@ -222,7 +236,17 @@
 {
   if (_selectedViewController != nil)
     {
-      [self setView: [_selectedViewController view]];
+      NSView *selected = [_selectedViewController view];
+
+      /* The page goes inside the controller's own view, if it has one. */
+      if (NO == [self isViewLoaded])
+        {
+          [self setView: selected];
+        }
+      else if (selected != [self view])
+        {
+          [[self view] addSubview: selected];
+        }
     }
 }
 
