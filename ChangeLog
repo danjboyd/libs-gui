@@ -1,5 +1,15 @@
 2026-11-05 Daniel Boyd <danieljboyd@icloud.com>
 
+	* Tests/gui/GSTheme/overrides.m:
+	* Tests/gui/NSDataLink/addLinkPreviouslyAt.m:
+	* Tests/gui/NSPasteboard/filteringFile.m:
+	* Tests/gui/NSPasteboard/objects.m:
+	* Tests/gui/NSStackView/gravity.m:
+	Skip these tests without a backend or a pasteboard server, instead of
+	failing or aborting.
+
+2026-11-05 Daniel Boyd <danieljboyd@icloud.com>
+
 	* Headers/Additions/GNUstepGUI/GSTheme.h:
 	* Source/GSThemeDrawing.m:
 	* Source/NSTextFieldCell.m:

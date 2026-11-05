@@ -21,6 +21,9 @@ view(void)
 int main()
 {
   CREATE_AUTORELEASE_POOL(arp);
+
+  START_SET("NSStackView gravity")
+
   NS_DURING
     {
       [NSApplication sharedApplication];
@@ -96,6 +99,7 @@ int main()
                  NSInternalInconsistencyException,
                  "for listing as well");
 
+  END_SET("NSStackView gravity")
   DESTROY(arp);
   return 0;
 }

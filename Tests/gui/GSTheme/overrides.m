@@ -36,7 +36,15 @@ int main(int argc, const char *argv[])
     NSActionCell	*base;
     MyCell 		*sub;
 
-    [NSApplication sharedApplication];
+    START_SET("GSTheme overrides")
+
+    NS_DURING
+      [NSApplication sharedApplication];
+    NS_HANDLER
+      if ([[localException name] isEqual: NSInternalInconsistencyException])
+        SKIP("It looks like GNUstep backend is not yet installed")
+    NS_ENDHANDLER
+
     [GSTheme setTheme: [[ReproTheme alloc] initWithBundle: nil]];
 
     base = AUTORELEASE([NSActionCell new]);
@@ -46,6 +54,7 @@ int main(int argc, const char *argv[])
 
     PASS(foundOriginal == 2, "subclass found original of overridden method")
 
+    END_SET("GSTheme overrides")
   LEAVE_POOL
   return 0;
 }
