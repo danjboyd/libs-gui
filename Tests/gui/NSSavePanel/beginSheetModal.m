@@ -12,6 +12,8 @@
 #import <AppKit/NSSavePanel.h>
 #import <AppKit/NSWindow.h>
 
+#if defined(__clang__)
+
 @interface PanelWatcher : NSObject
 {
 @public
@@ -91,3 +93,16 @@ main(int argc, const char **argv)
   [pool release];
   return 0;
 }
+
+#else /* GCC: GCC has no blocks */
+
+int
+main(int argc, char **argv)
+{
+  START_SET("NSSavePanel beginSheetModal")
+  SKIP("GCC has no blocks")
+  END_SET("NSSavePanel beginSheetModal")
+  return 0;
+}
+
+#endif

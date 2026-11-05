@@ -10,6 +10,8 @@
 #import <AppKit/NSEvent.h>
 #import <objc/runtime.h>
 
+#if defined(__clang__)
+
 int
 main(int argc, const char **argv)
 {
@@ -80,3 +82,16 @@ main(int argc, const char **argv)
   [arp release];
   return 0;
 }
+
+#else /* GCC: GCC cannot compile the dot syntax on a class */
+
+int
+main(int argc, char **argv)
+{
+  START_SET("NSEvent accessor properties")
+  SKIP("GCC cannot compile the dot syntax on a class")
+  END_SET("NSEvent accessor properties")
+  return 0;
+}
+
+#endif

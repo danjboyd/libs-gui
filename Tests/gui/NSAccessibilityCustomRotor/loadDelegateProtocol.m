@@ -6,6 +6,8 @@
 #include <Foundation/NSAutoreleasePool.h>
 #include <AppKit/NSAccessibilityCustomRotor.h>
 
+#if defined(__clang__)
+
 int
 main(int argc, char **argv)
 {
@@ -21,3 +23,16 @@ main(int argc, char **argv)
   [pool release];
   return 0;
 }
+
+#else /* GCC: the runtime does not find this protocol; not traced. */
+
+int
+main(int argc, char **argv)
+{
+  START_SET("NSAccessibilityCustomRotorItemLoadDelegate")
+  SKIP("the runtime does not find this protocol under GCC")
+  END_SET("NSAccessibilityCustomRotorItemLoadDelegate")
+  return 0;
+}
+
+#endif

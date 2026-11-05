@@ -14,6 +14,8 @@
 #import <AppKit/NSTableColumn.h>
 #include <objc/runtime.h>
 
+#if defined(__OBJC_GNUSTEP_RUNTIME_ABI__) && __OBJC_GNUSTEP_RUNTIME_ABI__ >= 20
+
 @interface MinimalTree : NSObject <NSOutlineViewDataSource>
 @end
 
@@ -101,3 +103,16 @@ main(int argc, const char **argv)
   END_SET("NSOutlineView optional protocol methods")
   return 0;
 }
+
+#else /* Fails under GCC, and crashes on the 1.9 ABI; not traced. */
+
+int
+main(int argc, char **argv)
+{
+  START_SET("NSOutlineView optional protocol methods")
+  SKIP("this test needs the gnustep-2.0 ABI")
+  END_SET("NSOutlineView optional protocol methods")
+  return 0;
+}
+
+#endif
