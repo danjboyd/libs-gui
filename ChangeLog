@@ -6,6 +6,11 @@
 	* Tests/gui/NSTextFieldCell/bezelStyle.m:
 	Draw a text field's rounded bezel through a new GSTheme method.
 
+	* Source/NSPageController.m:
+	* Tests/gui/NSPageController/selection.m:
+	Show the selected page inside a page controller's own view, instead of
+	replacing that view with it.
+
 2026-11-05 Daniel Boyd <danieljboyd@icloud.com>
 
 	* Source/GSAutoLayoutEngine.m:

@@ -171,6 +171,45 @@ main(int argc, char **argv)
       "the selected index stays at zero when navigating back");
   }
 
+  /* A controller with a view of its own keeps it, and shows the page in it. */
+  {
+    NSPageController	*own = AUTORELEASE([[NSPageController alloc] init]);
+    Delegate		*recorder = AUTORELEASE([[Delegate alloc] init]);
+    NSView		*container = AUTORELEASE([[NSView alloc]
+      initWithFrame: NSMakeRect(0, 0, 100, 100)]);
+    NSView		*first;
+
+    [own setDelegate: recorder];
+    [own setView: container];
+    [own setArrangedObjects: [NSArray arrayWithObjects: @"a", @"b", @"c", nil]];
+    [own setSelectedIndex: 1];
+    first = [[own selectedViewController] view];
+    PASS([own view] == container, "the controller keeps its own view");
+    PASS([first superview] == container, "the page is inside that view");
+    [own setSelectedIndex: 2];
+    PASS([own view] == container, "it keeps it after another transition");
+    PASS([first superview] == nil, "the old page has left");
+    PASS([[[own selectedViewController] view] superview] == container
+      && [[container subviews] count] == 1, "and the new page is there alone");
+  }
+
+  /* Without a view of its own, the controller's view is the page. */
+  {
+    NSPageController	*bare = AUTORELEASE([[NSPageController alloc] init]);
+    Delegate		*recorder = AUTORELEASE([[Delegate alloc] init]);
+    NSView		*first;
+
+    [bare setDelegate: recorder];
+    [bare setArrangedObjects: [NSArray arrayWithObjects: @"a", @"b", @"c", nil]];
+    [bare setSelectedIndex: 1];
+    first = [[bare selectedViewController] view];
+    PASS([bare view] == first, "the page becomes the controller's view");
+    [bare setSelectedIndex: 2];
+    PASS([bare view] == [[bare selectedViewController] view]
+      && [bare view] != first, "and the next page replaces it");
+    PASS([[first subviews] count] == 0, "not inside the old page");
+  }
+
   END_SET("selection")
 
   return 0;
