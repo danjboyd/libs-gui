@@ -1,5 +1,12 @@
 2026-11-05 Daniel Boyd <danieljboyd@icloud.com>
 
+	* Source/GSAutoLayoutEngine.m:
+	* Tests/gui/NSLayoutConstraint/constantRelayout.m:
+	Observe the constant of an installed constraint, so that a new one drives
+	the next layout pass.
+
+2026-11-05 Daniel Boyd <danieljboyd@icloud.com>
+
 	* Source/NSStackView.m:
 	* Tests/gui/NSStackView/gravity.m:
 	Keep the views of a stack view made in code by gravity.
