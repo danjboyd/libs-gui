@@ -305,6 +305,11 @@ BOOL GSAutoLayoutEngineExists = NO;
   GSCSConstraint *solverConstraint =
       [self solverConstraintForConstraint: constraint];
 
+  if ([self getExistingConstraintForAutolayoutConstraint: constraint] == nil)
+    {
+      [self addObserverToConstraint: constraint];
+    }
+
   [self mapLayoutConstraint: constraint toSolverConstraint: solverConstraint];
 
   [self addSupportingInternalConstraintsToView: [constraint firstItem]
@@ -337,6 +342,9 @@ BOOL GSAutoLayoutEngineExists = NO;
       return;
     }
 
+  [constraint removeObserver: self forKeyPath: @"constant"];
+  [_constraintsByAutoLayoutConstaintHash removeObjectForKey: constraint];
+  [_layoutConstraintsBySolverConstraint removeObjectForKey: solverConstraint];
   [self removeSolverConstraint: solverConstraint];
 
   NSArray *internalConstraints =
@@ -1034,11 +1042,22 @@ BOOL GSAutoLayoutEngineExists = NO;
 {
   GSCSConstraint *kConstraint =
     [self getExistingConstraintForAutolayoutConstraint: constraint];
+  NSArray *supporting =
+    [_supportingConstraintsByConstraint objectForKey: kConstraint];
+
   [self removeSolverConstraint: kConstraint];
 
   GSCSConstraint *newKConstraint =
     [self solverConstraintForConstraint: constraint];
+  [_layoutConstraintsBySolverConstraint removeObjectForKey: kConstraint];
   [self mapLayoutConstraint: constraint toSolverConstraint: newKConstraint];
+  if (supporting != nil)
+    {
+      /* The internal constraints go when this one does, so they follow it. */
+      [_supportingConstraintsByConstraint setObject: supporting
+                                             forKey: newKConstraint];
+      [_supportingConstraintsByConstraint removeObjectForKey: kConstraint];
+    }
   [self addSolverConstraint: newKConstraint];
 
   [self updateAlignmentRectsForTrackedViews];
@@ -1421,6 +1440,13 @@ BOOL GSAutoLayoutEngineExists = NO;
 
 - (void) dealloc
 {
+    NSEnumerator *observed = [_constraintsByAutoLayoutConstaintHash keyEnumerator];
+    NSLayoutConstraint *constraint;
+
+    while ((constraint = [observed nextObject]) != nil)
+      {
+        [constraint removeObserver: self forKeyPath: @"constant"];
+      }
     RELEASE(_contentView);
     RELEASE(_contentWidthConstraint);
     RELEASE(_contentHeightConstraint);
