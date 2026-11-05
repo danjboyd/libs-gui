@@ -1,5 +1,19 @@
 2026-11-05 Daniel Boyd <danieljboyd@icloud.com>
 
+	* Source/NSCollectionViewTransitionLayout.m:
+	Don't message nil for a double in -valueForAnimatedKey:, which isn't 0
+	on every runtime.
+	* Tests/gui/NSAccessibilityCustomRotor/loadDelegateProtocol.m:
+	* Tests/gui/NSCollectionView/batchUpdates.m:
+	* Tests/gui/NSEvent/accessorProperties.m:
+	* Tests/gui/NSImage/drawingHandler.m:
+	* Tests/gui/NSOutlineView/optionalProtocols.m:
+	* Tests/gui/NSSavePanel/beginSheetModal.m:
+	* Tests/gui/NSStoryboard/creator.m:
+	Skip these tests under compilers and ABIs that can't run them.
+
+2026-11-05 Daniel Boyd <danieljboyd@icloud.com>
+
 	* Tests/gui/GSTheme/overrides.m:
 	* Tests/gui/NSDataLink/addLinkPreviouslyAt.m:
 	* Tests/gui/NSPasteboard/filteringFile.m:

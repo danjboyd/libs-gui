@@ -13,6 +13,8 @@
 #import <AppKit/NSImage.h>
 #import <AppKit/NSView.h>
 
+#if defined(__clang__)
+
 /* Renders the image at the origin into a bitmap. */
 static NSBitmapImageRep *
 render(NSImage *image, NSSize size)
@@ -115,3 +117,16 @@ main(int argc, char **argv)
 
   return 0;
 }
+
+#else /* GCC: GCC has no blocks */
+
+int
+main(int argc, char **argv)
+{
+  START_SET("NSImage drawing handler")
+  SKIP("GCC has no blocks")
+  END_SET("NSImage drawing handler")
+  return 0;
+}
+
+#endif

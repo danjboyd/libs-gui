@@ -87,7 +87,9 @@
  */
 - (CGFloat) valueForAnimatedKey: (NSCollectionViewTransitionLayoutAnimatedKey)key
 {
-  return [[_animatedValues objectForKey: key] doubleValue];
+  NSNumber *value = [_animatedValues objectForKey: key];
+
+  return (value != nil) ? [value doubleValue] : 0.0;
 }
 
 @end

@@ -20,6 +20,8 @@
 #include <AppKit/NSView.h>
 #include <AppKit/NSViewController.h>
 
+#if defined(__clang__)
+
 @interface MainController : NSViewController
 @end
 @implementation MainController
@@ -89,3 +91,16 @@ main(int argc, char **argv)
   [pool release];
   return 0;
 }
+
+#else /* GCC: GCC has no blocks */
+
+int
+main(int argc, char **argv)
+{
+  START_SET("NSStoryboard creator")
+  SKIP("GCC has no blocks")
+  END_SET("NSStoryboard creator")
+  return 0;
+}
+
+#endif

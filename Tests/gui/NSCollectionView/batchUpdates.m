@@ -18,6 +18,8 @@
 #include <AppKit/NSCollectionViewItem.h>
 #include <AppKit/NSView.h>
 
+#if defined(__clang__)
+
 @interface Source : NSObject <NSCollectionViewDataSource>
 {
 @public
@@ -99,3 +101,16 @@ main(int argc, char **argv)
   [pool release];
   return 0;
 }
+
+#else /* GCC: GCC has no blocks */
+
+int
+main(int argc, char **argv)
+{
+  START_SET("NSCollectionView batch updates")
+  SKIP("GCC has no blocks")
+  END_SET("NSCollectionView batch updates")
+  return 0;
+}
+
+#endif
