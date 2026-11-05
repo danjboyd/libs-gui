@@ -18,6 +18,32 @@ selection(NSString *s)
     [s dataUsingEncoding: NSUTF8StringEncoding]];
 }
 
+/* Without the pasteboard server a pasteboard can be made, and writing to it
+ * raises nothing, but what's written can't be read back.
+ */
+static BOOL
+serverAnswers(void)
+{
+  BOOL	answers = NO;
+
+  NS_DURING
+    {
+      NSPasteboard	*probe = [NSPasteboard pasteboardWithUniqueName];
+
+      [probe declareTypes: [NSArray arrayWithObject: NSStringPboardType]
+		    owner: nil];
+      [probe setString: @"probe" forType: NSStringPboardType];
+      answers = [[probe stringForType: NSStringPboardType] isEqual: @"probe"];
+      [probe releaseGlobally];
+    }
+  NS_HANDLER
+    {
+      answers = NO;
+    }
+  NS_ENDHANDLER
+  return answers;
+}
+
 int
 main(int argc, const char **argv)
 {
@@ -38,6 +64,11 @@ main(int argc, const char **argv)
   destination = AUTORELEASE([[NSDataLinkManager alloc] initWithDelegate: doc]);
 
   pb = nil;
+  if (NO == serverAnswers())
+    {
+      SKIP("pasteboard server is not available")
+    }
+
   NS_DURING
     {
       pb = [NSPasteboard pasteboardWithUniqueName];

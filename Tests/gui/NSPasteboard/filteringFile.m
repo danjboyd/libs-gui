@@ -15,6 +15,32 @@
 #include <Foundation/NSString.h>
 #include <AppKit/NSPasteboard.h>
 
+/* Without the pasteboard server a pasteboard can be made, and writing to it
+ * raises nothing, but what's written can't be read back.
+ */
+static BOOL
+serverAnswers(void)
+{
+  BOOL	answers = NO;
+
+  NS_DURING
+    {
+      NSPasteboard	*probe = [NSPasteboard pasteboardWithUniqueName];
+
+      [probe declareTypes: [NSArray arrayWithObject: NSStringPboardType]
+		    owner: nil];
+      [probe setString: @"probe" forType: NSStringPboardType];
+      answers = [[probe stringForType: NSStringPboardType] isEqual: @"probe"];
+      [probe releaseGlobally];
+    }
+  NS_HANDLER
+    {
+      answers = NO;
+    }
+  NS_ENDHANDLER
+  return answers;
+}
+
 int
 main(int argc, char **argv)
 {
@@ -31,6 +57,12 @@ main(int argc, char **argv)
   [[@"text" dataUsingEncoding: NSUTF8StringEncoding]
     writeToFile: file atomically: NO];
   typed = NSCreateFilenamePboardType(@"txt");
+
+  if (NO == serverAnswers())
+    {
+      [[NSFileManager defaultManager] removeFileAtPath: file handler: nil];
+      SKIP("the pasteboard server is not available")
+    }
 
   NS_DURING
     {
