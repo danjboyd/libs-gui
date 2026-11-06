@@ -1615,8 +1615,12 @@ static float menuBarHeight = 0.0;
   
   // Ignore the first mouse up if menu is horizontal.
   if ([self isHorizontal] == YES ||
-      // Or if menu is transient and style is NSWindows95InterfaceStyle.
-      ([[self menu] isTransient] && style == NSWindows95InterfaceStyle) ||
+      /* Or if menu is transient and style is NSWindows95InterfaceStyle,
+	 and was opened by a press whose release is still to come: not a
+	 submenu of a transient menu, which the pointer reaches by moving
+	 into it, so that a click on the item it enters by isn't lost. */
+      ([[self menu] isTransient] && style == NSWindows95InterfaceStyle
+       && [[[self menu] supermenu] isTransient] == NO) ||
       /* Or to mimic Mac OS X behavior for pop up menus. If the user
 	 presses the mouse button over a pop up button and then drags the mouse
 	 over the menu, the menu is closed when the user releases the mouse. On
