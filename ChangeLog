@@ -1,5 +1,11 @@
 2026-11-06 Daniel Boyd <danieljboyd@icloud.com>
 
+	* Source/NSMenuView.m (-_trackWithEvent:startingMenuView:): In
+	NSWindows95InterfaceStyle, ignore the first mouse up only in a
+	transient menu opened by a press, not in a submenu of a transient
+	menu, which the pointer reaches by moving into it.  A click on the
+	item a submenu is entered by was ignored and needed a second.
+	* Tests/gui/NSMenuView/transientSubmenuRelease.m: New test.
 	* Source/NSControl.m (-setEnabled:): Do nothing when the state is
 	already flag.  NSToolbarItem's -validate calls this after every
 	event, so every toolbar button was marked for display after every
