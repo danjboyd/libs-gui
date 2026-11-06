@@ -1481,8 +1481,13 @@ static BOOL flip_hack;
           if (self)
             return self;
 
+          /* With no font at all there is nothing to decode into.  Other
+             fonts in the archive, and whatever uses them, carry on without. */
           self = [NSFont userFontOfSize: fontMatrix[0]];
-          NSAssert(self != nil, @"Couldn't find a valid font when decoding.");
+          if (nil == self)
+            {
+              NSLog(@"Couldn't find a valid font when decoding.");
+            }
           return RETAIN(self);
         }
       else
@@ -1549,8 +1554,12 @@ static BOOL flip_hack;
           if (new)
             return RETAIN(new);
 
+          /* self has gone, so this can't assert with it as the object. */
           new = [NSFont userFontOfSize: size];
-          NSAssert(new != nil, @"Couldn't find a valid font when decoding.");
+          if (nil == new)
+            {
+              NSLog(@"Couldn't find a valid font when decoding.");
+            }
           return RETAIN(new);
         }
     }

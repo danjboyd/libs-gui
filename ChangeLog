@@ -1,3 +1,11 @@
+2026-11-06 Daniel Boyd <danieljboyd@icloud.com>
+
+	* Source/NSFont.m (-initWithCoder:): With no font at all, log and
+	answer nil.  The assertion for this named a released self, which
+	crashed the assertion handler: an app with an archived font in its
+	model file segfaulted at launch on a system with no fonts.
+	* Tests/gui/NSFont/decodeNoFont.m: New test.
+
 2026-10-06 Daniel Boyd <danieljboyd@icloud.com>
 
 	* Source/GSTheme.m (GSThemePathForFileName): New function, the
