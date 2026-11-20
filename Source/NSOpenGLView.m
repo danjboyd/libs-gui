@@ -265,9 +265,11 @@ static NSOpenGLPixelFormatAttribute attrs[] =
 
 - (void) _frameChanged: (NSNotification *) aNot
 {
-  if (prepared)
+  /* Not while the view is out of a window: its context has no drawable then,
+   * and can't be made current.  */
+  if (prepared && glcontext != nil && [glcontext view] == self)
     {
-      [[self openGLContext] makeCurrentContext];
+      [glcontext makeCurrentContext];
       [self update];
       [self reshape];
     }
@@ -281,10 +283,21 @@ static NSOpenGLPixelFormatAttribute attrs[] =
   context = [self openGLContext];
 
   [super _lockFocusInContext: ctxt inRect: rect];
-  [context makeCurrentContext];
+  /* Attached before it is made current: a context whose drawable was
+   * cleared (the view left its window) can't be made current.  */
   if ([context view] != self)
     {
       [context setView:self];
+      [context makeCurrentContext];
+      if (prepared)
+        {
+          /* A new drawable, perhaps of another size.  */
+          [self reshape];
+        }
+    }
+  else
+    {
+      [context makeCurrentContext];
     }
   if (!prepared)
     {
@@ -296,12 +309,16 @@ static NSOpenGLPixelFormatAttribute attrs[] =
 
 -(void) _viewWillMoveToWindow: (NSWindow *) newWindow
 {
+  /* Compared before calling super, which sets the view's window to
+   * newWindow.  */
+  BOOL moving = ([self window] != newWindow);
+
   [super _viewWillMoveToWindow: newWindow];
 
-  if ([self window] != newWindow)
+  if (moving && glcontext != nil)
     {
       // the context will be recreated in the new window if needed
-      [[self openGLContext] clearDrawable];
+      [glcontext clearDrawable];
     }
 }
 
