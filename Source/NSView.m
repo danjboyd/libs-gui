@@ -313,7 +313,11 @@ GSSetDragTypes(NSView* obj, NSArray *types)
                   
                   if (sub->_coordinates_valid == YES)
                     {
-                      (*invalidateImp)(sub, invalidateSel);
+                      /* Sent, not called through invalidateImp, so that a
+                       * subclass overriding it (NSOpenGLView, which must move
+                       * its native child window) learns that an ancestor
+                       * moved, resized or scrolled.  */
+                      [sub _invalidateCoordinates];
                     }
                 }
             }

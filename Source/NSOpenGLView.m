@@ -29,6 +29,9 @@
 #import <Foundation/NSDebug.h>
 #import <Foundation/NSException.h>
 #import <Foundation/NSNotification.h>
+#import <Foundation/NSArray.h>
+#import <Foundation/NSRunLoop.h>
+#import "AppKit/NSApplication.h"
 #import "AppKit/NSOpenGL.h"
 #import "AppKit/NSOpenGLView.h"
 
@@ -36,6 +39,7 @@
 @interface NSView (Private)
 - (void) _lockFocusInContext: (NSGraphicsContext *)ctxt inRect: (NSRect)rect;
 - (void) _viewWillMoveToWindow: (NSWindow*)newWindow;
+- (void) _invalidateCoordinates;
 @end
 
 /**
@@ -208,6 +212,55 @@ static NSOpenGLPixelFormatAttribute attrs[] =
 - (BOOL) isOpaque
 {
   return YES;
+}
+
+/* The context's drawable is a native child window that the backend places
+ * over the view.  It has to follow the view: hidden while the view or an
+ * ancestor is hidden, moved when an ancestor moves or scrolls, and clipped
+ * to the visible rectangle.  The context's -update does that; these make
+ * sure it is called.  Several changes in one event coalesce into one update.
+ */
+- (void) _updateDrawable
+{
+  if (glcontext != nil && [glcontext view] == self)
+    {
+      [self update];
+    }
+}
+
+- (void) _setNeedsDrawableUpdate
+{
+  if (glcontext == nil)
+    {
+      return;
+    }
+  [NSObject cancelPreviousPerformRequestsWithTarget: self
+                                           selector: @selector(_updateDrawable)
+                                             object: nil];
+  [self performSelector: @selector(_updateDrawable)
+             withObject: nil
+             afterDelay: 0.0
+                inModes: [NSArray arrayWithObjects: NSDefaultRunLoopMode,
+                                  NSModalPanelRunLoopMode,
+                                  NSEventTrackingRunLoopMode, nil]];
+}
+
+- (void) _invalidateCoordinates
+{
+  [super _invalidateCoordinates];
+  [self _setNeedsDrawableUpdate];
+}
+
+- (void) viewDidHide
+{
+  [super viewDidHide];
+  [self _updateDrawable];
+}
+
+- (void) viewDidUnhide
+{
+  [super viewDidUnhide];
+  [self _updateDrawable];
 }
 
 - (void) _frameChanged: (NSNotification *) aNot
